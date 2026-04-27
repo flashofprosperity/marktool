@@ -7,7 +7,252 @@
        *    functions they affect.
        * 4. Coordinates stored on tags are normalized image coordinates: 0..1.
        * 5. Export/import JSON shape is the compatibility boundary. Change it with care.
-       */
+      */
+
+      const APP_TITLE = 'MES Core Data Designer';
+      const LANGUAGE_STORAGE_KEY = 'mes-core-data-designer-language';
+      const I18N = {
+        'zh-CN': {
+          'app.title': 'MES Core Data Designer',
+          'nav.projects': '项目列表',
+          'toolbar.currentType': '当前标记类型',
+          'toolbar.showText': '显示标记文本',
+          'toolbar.export': '导出 JSON',
+          'toolbar.import': '导入 JSON',
+          'toolbar.clearAll': '清空所有标签',
+          'toolbar.language': '语言',
+          'auth.logout': '退出',
+          'auth.loginTitle': '登录',
+          'auth.loginHelp': '请输入账号后继续使用标注工具。',
+          'auth.username': '用户名',
+          'auth.password': '密码',
+          'auth.loginButton': '登录',
+          'auth.notLoggedIn': '未登录',
+          'auth.loginRequired': '请登录',
+          'auth.admin': '管理员',
+          'auth.user': '普通用户',
+          'projects.title': '项目',
+          'projects.help': '选择一个服务端项目继续标注，或创建新的持久化项目。',
+          'projects.new': '新建项目',
+          'projects.noneAdmin': '暂无项目，点击“新建项目”开始。',
+          'projects.noneUser': '暂无项目，请联系管理员创建。',
+          'projects.loading': '正在加载项目...',
+          'projects.loadFailed': '项目加载失败：{message}',
+          'projects.updatedAt': '更新于 {time}',
+          'projects.open': '打开',
+          'projects.delete': '删除',
+          'projects.untitled': '该项目',
+          'projects.unopened': '未打开项目',
+          'projects.choose': '请选择项目',
+          'projects.promptName': '请输入项目名称',
+          'projects.promptImportName': '请输入导入后创建的项目名称',
+          'projects.confirmDelete': '确定删除“{title}”？此操作不可恢复。',
+          'projects.openFailed': '打开项目失败：{message}',
+          'projects.createFailed': '创建项目失败：{message}',
+          'projects.deleteFailed': '删除项目失败：{message}',
+          'projects.adminCreateOnly': '只有管理员可以新建项目',
+          'projects.adminDeleteOnly': '只有管理员可以删除项目',
+          'save.saved': '已保存',
+          'save.saving': '保存中',
+          'save.dirty': '未保存',
+          'save.failed': '保存失败',
+          'api.requestFailed': '请求失败',
+          'menu.createTag': '在此创建标签',
+          'menu.showText': '显示文本',
+          'menu.hideText': '隐藏文本',
+          'menu.editText': '修改文本',
+          'menu.changeType': '修改类型',
+          'menu.addChild': '添加子标签',
+          'menu.deleteTag': '删除标签',
+          'dialog.editTitle': '修改标签文本',
+          'dialog.editPlaceholder': '输入标签文本',
+          'common.cancel': '取消',
+          'common.confirm': '确认',
+          'workspace.upload': '上传图片',
+          'workspace.imageAlt': '标注图片',
+          'workspace.placeholder': '请上传一张图片开始标注',
+          'canvas.zoomOut': '缩小',
+          'canvas.zoomIn': '放大',
+          'canvas.reset': '重置',
+          'canvas.resetTitle': '重置视图',
+          'panel.toggle': '折叠/展开',
+          'panel.tags': '标签列表',
+          'panel.searchPlaceholder': '搜索标签、类型、坐标',
+          'panel.clearSearch': '清空搜索',
+          'panel.canvasDisplay': '画布显示',
+          'panel.treeMode': '树状结构',
+          'panel.typeMode': '按类型',
+          'panel.allNodes': '全部节点',
+          'panel.selectedNodes': '已选 {count} 个节点',
+          'panel.noNodes': '暂无节点',
+          'panel.noMatchingNodes': '无匹配节点',
+          'panel.selectAll': '全选',
+          'panel.covered': '（已由父节点显示）',
+          'panel.currentPrefix': '当前: ',
+          'tags.empty': '暂无标签，点击图片添加',
+          'tags.noMatch': '没有匹配的标签',
+          'tags.unnamed': '未命名标签',
+          'tags.children': '{count} 子',
+          'tags.materialCount': '物料 {count}',
+          'tags.parent': '父级: {name}',
+          'tags.rowTitle': '双击编辑标签文本，右键打开更多操作',
+          'tags.editTitle': '编辑文本',
+          'tags.addChildTitle': '添加子标签',
+          'tags.deleteTitle': '删除',
+          'tags.noChildType': '无法创建子标签：层级仅支持 Station > Location > Process。',
+          'materials.title': '物料管理',
+          'materials.empty': '暂无物料',
+          'materials.add': '+ 添加物料',
+          'materials.defaultName': '物料A',
+          'materials.defaultCategory': '原材料',
+          'materials.defaultType': 'a料',
+          'materials.newName': '新物料',
+          'materials.newAbbrev': 'NM',
+          'materials.namePlaceholder': '物料名称',
+          'materials.abbrev': '缩写',
+          'materials.category': '分类',
+          'materials.type': '类型',
+          'materials.delete': '删除',
+          'materials.linkedProcesses': '关联工序:',
+          'materials.processCount': '{count} 个',
+          'materials.noLinks': '暂无关联',
+          'materials.unnamedProcess': '未命名工序',
+          'materials.selectTitle': '关联物料，按住 Ctrl/Cmd 可多选',
+          'export.adminOnly': '只有管理员可以导出 JSON',
+          'export.defaultName': 'mes-core-data-designer',
+          'import.adminOnly': '只有管理员可以导入项目',
+          'import.invalidJson': '无效的JSON文件格式！',
+          'import.defaultProject': '导入项目',
+          'import.success': '导入成功，已创建新项目！',
+          'import.failed': '导入失败：{message}',
+          'import.parseFailed': 'JSON文件解析失败：{message}'
+        },
+        'en-US': {
+          'app.title': 'MES Core Data Designer',
+          'nav.projects': 'Projects',
+          'toolbar.currentType': 'Current label type',
+          'toolbar.showText': 'Show label text',
+          'toolbar.export': 'Export JSON',
+          'toolbar.import': 'Import JSON',
+          'toolbar.clearAll': 'Clear all labels',
+          'toolbar.language': 'Language',
+          'auth.logout': 'Log out',
+          'auth.loginTitle': 'Sign in',
+          'auth.loginHelp': 'Enter your account to continue designing core data.',
+          'auth.username': 'Username',
+          'auth.password': 'Password',
+          'auth.loginButton': 'Sign in',
+          'auth.notLoggedIn': 'Not signed in',
+          'auth.loginRequired': 'Please sign in',
+          'auth.admin': 'Admin',
+          'auth.user': 'User',
+          'projects.title': 'Projects',
+          'projects.help': 'Choose a server project to continue, or create a new persistent project.',
+          'projects.new': 'New project',
+          'projects.noneAdmin': 'No projects yet. Click "New project" to start.',
+          'projects.noneUser': 'No projects yet. Contact an admin to create one.',
+          'projects.loading': 'Loading projects...',
+          'projects.loadFailed': 'Project load failed: {message}',
+          'projects.updatedAt': 'Updated {time}',
+          'projects.open': 'Open',
+          'projects.delete': 'Delete',
+          'projects.untitled': 'this project',
+          'projects.unopened': 'No project open',
+          'projects.choose': 'Choose a project',
+          'projects.promptName': 'Enter a project name',
+          'projects.promptImportName': 'Enter the new project name for this import',
+          'projects.confirmDelete': 'Delete "{title}"? This cannot be undone.',
+          'projects.openFailed': 'Open project failed: {message}',
+          'projects.createFailed': 'Create project failed: {message}',
+          'projects.deleteFailed': 'Delete project failed: {message}',
+          'projects.adminCreateOnly': 'Only admins can create projects',
+          'projects.adminDeleteOnly': 'Only admins can delete projects',
+          'save.saved': 'Saved',
+          'save.saving': 'Saving',
+          'save.dirty': 'Unsaved',
+          'save.failed': 'Save failed',
+          'api.requestFailed': 'Request failed',
+          'menu.createTag': 'Create label here',
+          'menu.showText': 'Show text',
+          'menu.hideText': 'Hide text',
+          'menu.editText': 'Edit text',
+          'menu.changeType': 'Change type',
+          'menu.addChild': 'Add child label',
+          'menu.deleteTag': 'Delete label',
+          'dialog.editTitle': 'Edit label text',
+          'dialog.editPlaceholder': 'Enter label text',
+          'common.cancel': 'Cancel',
+          'common.confirm': 'Confirm',
+          'workspace.upload': 'Upload image',
+          'workspace.imageAlt': 'Annotated image',
+          'workspace.placeholder': 'Upload an image to start labeling',
+          'canvas.zoomOut': 'Zoom out',
+          'canvas.zoomIn': 'Zoom in',
+          'canvas.reset': 'Reset',
+          'canvas.resetTitle': 'Reset view',
+          'panel.toggle': 'Collapse/expand',
+          'panel.tags': 'Label list',
+          'panel.searchPlaceholder': 'Search labels, types, coordinates',
+          'panel.clearSearch': 'Clear search',
+          'panel.canvasDisplay': 'Canvas',
+          'panel.treeMode': 'Tree',
+          'panel.typeMode': 'By type',
+          'panel.allNodes': 'All nodes',
+          'panel.selectedNodes': '{count} nodes selected',
+          'panel.noNodes': 'No nodes',
+          'panel.noMatchingNodes': 'No matching nodes',
+          'panel.selectAll': 'Select all',
+          'panel.covered': ' (shown by parent)',
+          'panel.currentPrefix': 'Current: ',
+          'tags.empty': 'No labels. Click the image to add one.',
+          'tags.noMatch': 'No matching labels',
+          'tags.unnamed': 'Unnamed label',
+          'tags.children': '{count} child',
+          'tags.materialCount': '{count} material',
+          'tags.parent': 'Parent: {name}',
+          'tags.rowTitle': 'Double-click to edit text, right-click for more actions',
+          'tags.editTitle': 'Edit text',
+          'tags.addChildTitle': 'Add child label',
+          'tags.deleteTitle': 'Delete',
+          'tags.noChildType': 'Cannot create child label: the hierarchy only supports Station > Location > Process.',
+          'materials.title': 'Materials',
+          'materials.empty': 'No materials',
+          'materials.add': '+ Add material',
+          'materials.defaultName': 'Material A',
+          'materials.defaultCategory': 'Raw material',
+          'materials.defaultType': 'Type A',
+          'materials.newName': 'New material',
+          'materials.newAbbrev': 'NM',
+          'materials.namePlaceholder': 'Material name',
+          'materials.abbrev': 'Abbrev.',
+          'materials.category': 'Category',
+          'materials.type': 'Type',
+          'materials.delete': 'Delete',
+          'materials.linkedProcesses': 'Linked processes:',
+          'materials.processCount': '{count}',
+          'materials.noLinks': 'No links',
+          'materials.unnamedProcess': 'Unnamed process',
+          'materials.selectTitle': 'Link materials. Hold Ctrl/Cmd for multi-select',
+          'export.adminOnly': 'Only admins can export JSON',
+          'export.defaultName': 'mes-core-data-designer',
+          'import.adminOnly': 'Only admins can import projects',
+          'import.invalidJson': 'Invalid JSON file format.',
+          'import.defaultProject': 'Imported project',
+          'import.success': 'Import complete. A new project was created.',
+          'import.failed': 'Import failed: {message}',
+          'import.parseFailed': 'JSON parse failed: {message}'
+        }
+      };
+      let currentLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'zh-CN';
+      if (!I18N[currentLanguage]) currentLanguage = 'zh-CN';
+
+      function t(key, params = {}) {
+        const dictionary = I18N[currentLanguage] || I18N['zh-CN'];
+        const template = dictionary[key] || I18N['zh-CN'][key] || key;
+        return template.replace(/\{(\w+)\}/g, (_, name) => {
+          return Object.prototype.hasOwnProperty.call(params, name) ? params[name] : `{${name}}`;
+        });
+      }
 
       // ---------- 数据 ----------
       /*
@@ -21,18 +266,18 @@
       const tagTypes = [
         { 
           name: 'Station', 
-          color: '#E74C3C',
-          icon: './static/station.png' // 在此填写Station的图标路径，例如: './icons/station.png'
+          color: '#c92a2a',
+          icon: './static/icons/station.svg'
         },
         { 
           name: 'Location', 
-          color: '#3498DB',
-          icon: './static/location.png' // 在此填写Location的图标路径
+          color: '#005f99',
+          icon: './static/icons/location.svg'
         },
         { 
           name: 'Process (name&number)', 
-          color: '#2ECC71',
-          icon: './static/process.png' // 在此填写Process的图标路径
+          color: '#087f5b',
+          icon: './static/icons/process.svg'
 
         }
       ];
@@ -49,15 +294,13 @@
        */
       const materials = [
         {
-          name: '物料A',
+          name: t('materials.defaultName'),
           abbreviation: 'MA',
-          category: '原材料',
-          type: 'a料',
+          category: t('materials.defaultCategory'),
+          type: t('materials.defaultType'),
           processLinks: [] // 与process关联的ID数组
         },
       ];
-      let currentTypeIndex = 0;
-
       /*
        * tag item:
        * {
@@ -81,7 +324,6 @@
       // Keep DOM lookups centralized. The rest of the file should reuse these
       // references instead of calling getElementById again unless the element is
       // created dynamically.
-      const currentTypeSelect = document.getElementById('currentTypeSelect');
       const loginHome = document.getElementById('loginHome');
       const loginForm = document.getElementById('loginForm');
       const loginUsername = document.getElementById('loginUsername');
@@ -89,6 +331,7 @@
       const loginError = document.getElementById('loginError');
       const currentUserLabel = document.getElementById('currentUserLabel');
       const logoutBtn = document.getElementById('logoutBtn');
+      const languageSelect = document.getElementById('languageSelect');
       const projectHome = document.getElementById('projectHome');
       const appWorkspace = document.getElementById('appWorkspace');
       const projectList = document.getElementById('projectList');
@@ -160,6 +403,39 @@
       let suppressAutosave = false;
       let projectChangeVersion = 0;
       let currentUser = null;
+      let currentSaveStatusKey = 'projects.choose';
+
+      function applyStaticI18n() {
+        document.documentElement.lang = currentLanguage;
+        document.title = APP_TITLE;
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          el.textContent = t(el.dataset.i18n);
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+          el.setAttribute('placeholder', t(el.dataset.i18nPlaceholder));
+        });
+        document.querySelectorAll('[data-i18n-title]').forEach(el => {
+          el.setAttribute('title', t(el.dataset.i18nTitle));
+        });
+        document.querySelectorAll('[data-i18n-alt]').forEach(el => {
+          el.setAttribute('alt', t(el.dataset.i18nAlt));
+        });
+        if (languageSelect) languageSelect.value = currentLanguage;
+        setSaveStatus(saveStatus.className.replace('save-status ', '') || 'idle', t(currentSaveStatusKey));
+      }
+
+      function setProjectNameToFallback() {
+        currentProjectName.textContent = t('projects.unopened');
+      }
+
+      function refreshLanguage() {
+        applyStaticI18n();
+        if (!currentProjectId) setProjectNameToFallback();
+        updateAuthUi();
+        updateCanvasBranchFilterOptions();
+        renderTagList();
+        renderMaterialList();
+      }
 
       // ---------- Server-backed project persistence ----------
       async function apiRequest(url, options = {}) {
@@ -171,7 +447,7 @@
           ...options
         });
         if (!response.ok) {
-          let message = '请求失败';
+          let message = t('api.requestFailed');
           try {
             const body = await response.json();
             if (body.error) message = body.error;
@@ -195,6 +471,11 @@
         saveStatus.textContent = text;
       }
 
+      function setSaveStatusKey(state, key) {
+        currentSaveStatusKey = key;
+        setSaveStatus(state, t(key));
+      }
+
       function setWorkspaceVisible(isVisible) {
         loginHome.classList.add('is-hidden');
         projectHome.classList.toggle('is-hidden', isVisible);
@@ -208,8 +489,8 @@
 
       function updateAuthUi() {
         currentUserLabel.textContent = currentUser
-          ? `${currentUser.username} · ${currentUser.role === 'admin' ? '管理员' : '普通用户'}`
-          : '未登录';
+          ? `${currentUser.username} · ${currentUser.role === 'admin' ? t('auth.admin') : t('auth.user')}`
+          : t('auth.notLoggedIn');
         logoutBtn.classList.toggle('is-hidden', !currentUser);
         newProjectBtn.classList.toggle('is-hidden', !isAdmin());
         importBtn.classList.toggle('is-hidden', !isAdmin());
@@ -221,8 +502,8 @@
         currentUser = null;
         currentProjectId = null;
         currentProjectTitle = '';
-        currentProjectName.textContent = '未打开项目';
-        setSaveStatus('idle', '请登录');
+        setProjectNameToFallback();
+        setSaveStatusKey('idle', 'auth.loginRequired');
         resetProjectData();
         loginHome.classList.remove('is-hidden');
         projectHome.classList.add('is-hidden');
@@ -276,14 +557,13 @@
         tagTypes.push(...baseTagTypes.map(type => ({ ...type })));
         materials.length = 0;
         materials.push({
-          name: '物料A',
+          name: t('materials.defaultName'),
           abbreviation: 'MA',
-          category: '原材料',
-          type: 'a料',
+          category: t('materials.defaultCategory'),
+          type: t('materials.defaultType'),
           processLinks: []
         });
         tags = [];
-        currentTypeIndex = 0;
         canvasBranchFilterIds = [];
         tagSearchQuery = '';
         tagSearchInput.value = '';
@@ -293,12 +573,20 @@
         placeholder.style.display = '';
       }
 
+      function getPreferredTypeIcon(type, index) {
+        const name = type && type.name ? type.name : '';
+        if (name.includes('Station')) return './static/icons/station.svg';
+        if (name.includes('Location')) return './static/icons/location.svg';
+        if (name.includes('Process')) return './static/icons/process.svg';
+        return type.icon || baseTagTypes[index]?.icon || '';
+      }
+
       function applyProjectData(data) {
         const importedTypes = Array.isArray(data.tagTypes) ? data.tagTypes : baseTagTypes;
         tagTypes.length = 0;
         tagTypes.push(...importedTypes.map((type, index) => ({
           ...type,
-          icon: type.icon || baseTagTypes[index]?.icon
+          icon: getPreferredTypeIcon(type, index)
         })));
         if (tagTypes.length === 0) {
           tagTypes.push(...baseTagTypes.map(type => ({ ...type })));
@@ -309,7 +597,6 @@
         if (Array.isArray(data.materials)) {
           materials.push(...data.materials);
         }
-        currentTypeIndex = 0;
         canvasBranchFilterIds = [];
         tagSearchQuery = '';
         tagSearchInput.value = '';
@@ -341,7 +628,7 @@
       function renderProjectList(projects) {
         projectList.innerHTML = '';
         if (projects.length === 0) {
-          projectList.innerHTML = `<div class="project-empty">${isAdmin() ? '暂无项目，点击“新建项目”开始。' : '暂无项目，请联系管理员创建。'}</div>`;
+          projectList.innerHTML = `<div class="project-empty">${isAdmin() ? t('projects.noneAdmin') : t('projects.noneUser')}</div>`;
           return;
         }
         projects.forEach(project => {
@@ -349,10 +636,10 @@
           card.className = 'project-card';
           card.innerHTML = `
             <div class="project-card-title">${escapeHtml(project.name)}</div>
-            <div class="project-card-meta">更新于 ${escapeHtml(formatDateTime(project.updatedAt))}</div>
+            <div class="project-card-meta">${escapeHtml(t('projects.updatedAt', { time: formatDateTime(project.updatedAt) }))}</div>
             <div class="project-card-actions">
-              <button class="btn open-project-btn" type="button" data-id="${project.id}">打开</button>
-              ${isAdmin() ? `<button class="btn btn-danger delete-project-btn" type="button" data-id="${project.id}">删除</button>` : ''}
+              <button class="btn open-project-btn" type="button" data-id="${project.id}">${escapeHtml(t('projects.open'))}</button>
+              ${isAdmin() ? `<button class="btn btn-danger delete-project-btn" type="button" data-id="${project.id}">${escapeHtml(t('projects.delete'))}</button>` : ''}
             </div>
           `;
           projectList.appendChild(card);
@@ -367,12 +654,12 @@
       }
 
       async function loadProjectList() {
-        projectList.innerHTML = '<div class="project-empty">正在加载项目...</div>';
+        projectList.innerHTML = `<div class="project-empty">${escapeHtml(t('projects.loading'))}</div>`;
         try {
           const body = await apiRequest('/api/projects');
           renderProjectList(body.projects || []);
         } catch (error) {
-          projectList.innerHTML = `<div class="project-empty">项目加载失败：${escapeHtml(error.message)}</div>`;
+          projectList.innerHTML = `<div class="project-empty">${escapeHtml(t('projects.loadFailed', { message: error.message }))}</div>`;
         }
       }
 
@@ -387,18 +674,18 @@
           applyProjectData(project.data || {});
           hasUnsavedProjectChanges = false;
           projectChangeVersion = 0;
-          setSaveStatus('saved', '已保存');
+          setSaveStatusKey('saved', 'save.saved');
           setWorkspaceVisible(true);
           suppressAutosave = false;
         } catch (error) {
           suppressAutosave = false;
-          alert('打开项目失败：' + error.message);
+          alert(t('projects.openFailed', { message: error.message }));
         }
       }
 
       async function createProject(name) {
         if (!isAdmin()) {
-          alert('只有管理员可以新建项目');
+          alert(t('projects.adminCreateOnly'));
           return;
         }
         const body = await apiRequest('/api/projects', {
@@ -411,7 +698,7 @@
 
       async function deleteProject(projectId) {
         if (!isAdmin()) {
-          alert('只有管理员可以删除项目');
+          alert(t('projects.adminDeleteOnly'));
           return;
         }
         await apiRequest(`/api/projects/${projectId}`, { method: 'DELETE' });
@@ -420,9 +707,9 @@
           currentProjectTitle = '';
           hasUnsavedProjectChanges = false;
           projectChangeVersion = 0;
-          currentProjectName.textContent = '未打开项目';
+          setProjectNameToFallback();
           resetProjectData();
-          setSaveStatus('idle', '请选择项目');
+          setSaveStatusKey('idle', 'projects.choose');
           setWorkspaceVisible(false);
         }
         await loadProjectList();
@@ -432,7 +719,7 @@
         if (suppressAutosave || !currentProjectId) return;
         hasUnsavedProjectChanges = true;
         projectChangeVersion += 1;
-        setSaveStatus('dirty', '未保存');
+        setSaveStatusKey('dirty', 'save.dirty');
         if (saveTimer) clearTimeout(saveTimer);
         saveTimer = setTimeout(saveCurrentProject, 500);
       }
@@ -446,7 +733,7 @@
         }
         const savingVersion = projectChangeVersion;
         isSavingProject = true;
-        setSaveStatus('saving', '保存中');
+        setSaveStatusKey('saving', 'save.saving');
         try {
           await apiRequest(`/api/projects/${currentProjectId}`, {
             method: 'PUT',
@@ -457,15 +744,15 @@
           });
           if (projectChangeVersion === savingVersion) {
             hasUnsavedProjectChanges = false;
-            setSaveStatus('saved', '已保存');
+            setSaveStatusKey('saved', 'save.saved');
           } else {
-            setSaveStatus('dirty', '未保存');
+            setSaveStatusKey('dirty', 'save.dirty');
             if (saveTimer) clearTimeout(saveTimer);
             saveTimer = setTimeout(saveCurrentProject, 500);
           }
           loadProjectList();
         } catch (error) {
-          setSaveStatus('error', '保存失败');
+          setSaveStatusKey('error', 'save.failed');
         } finally {
           isSavingProject = false;
         }
@@ -473,7 +760,7 @@
 
       async function importProjectFromJson(data, name) {
         if (!isAdmin()) {
-          alert('只有管理员可以导入项目');
+          alert(t('import.adminOnly'));
           return;
         }
         const body = await apiRequest('/api/projects/import', {
@@ -492,7 +779,7 @@
             showLoginView();
             return;
           }
-          setSaveStatus('idle', '请选择项目');
+          setSaveStatusKey('idle', 'projects.choose');
           showProjectHome();
           await loadProjectList();
         } catch (error) {
@@ -514,7 +801,7 @@
           });
           currentUser = body.user;
           loginPassword.value = '';
-          setSaveStatus('idle', '请选择项目');
+          setSaveStatusKey('idle', 'projects.choose');
           showProjectHome();
           await loadProjectList();
         } catch (error) {
@@ -531,14 +818,20 @@
         showLoginView();
       });
 
+      languageSelect.addEventListener('change', (e) => {
+        currentLanguage = I18N[e.target.value] ? e.target.value : 'zh-CN';
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, currentLanguage);
+        refreshLanguage();
+      });
+
       newProjectBtn.addEventListener('click', async () => {
         if (!isAdmin()) return;
-        const name = prompt('请输入项目名称');
+        const name = prompt(t('projects.promptName'));
         if (!name || !name.trim()) return;
         try {
           await createProject(name.trim());
         } catch (error) {
-          alert('创建项目失败：' + error.message);
+          alert(t('projects.createFailed', { message: error.message }));
         }
       });
 
@@ -562,12 +855,12 @@
           if (!isAdmin()) return;
           const id = parseInt(deleteBtn.dataset.id);
           const card = deleteBtn.closest('.project-card');
-          const title = card ? card.querySelector('.project-card-title')?.textContent : '该项目';
-          if (!confirm(`确定删除“${title}”？此操作不可恢复。`)) return;
+          const title = card ? card.querySelector('.project-card-title')?.textContent : t('projects.untitled');
+          if (!confirm(t('projects.confirmDelete', { title }))) return;
           try {
             await deleteProject(id);
           } catch (error) {
-            alert('删除项目失败：' + error.message);
+            alert(t('projects.deleteFailed', { message: error.message }));
           }
         }
       });
@@ -596,15 +889,16 @@
         if (tagId) {
           // 如果是针对现有标签的右键菜单
           const tag = findTagById(tagId);
+          const canAddChild = tag ? canAddChildTag(tag) : false;
           if (tag) {
             // 检查当前节点及其子节点是否全部隐藏文本
             const allHidden = checkAllTextHidden(tag);
-            toggleTextItem.textContent = allHidden ? '显示文本' : '隐藏文本';
+            toggleTextItem.textContent = allHidden ? t('menu.showText') : t('menu.hideText');
           }
           toggleTextItem.style.display = 'block';
           editTextItem.style.display = 'block';
-          changeTypeItem.style.display = 'block';
-          addChildItem.style.display = 'block';
+          changeTypeItem.style.display = 'none';
+          addChildItem.style.display = canAddChild ? 'block' : 'none';
           deleteTagItem.style.display = 'block';
           dividers.forEach(div => div.style.display = 'block');
         } else {
@@ -816,17 +1110,6 @@
        * - After changing tags/materials/type/filter state, call renderAll() unless
        *   only one narrow UI area needs refreshing.
        */
-      function updateCurrentTypeSelect() {
-        currentTypeSelect.innerHTML = '';
-        tagTypes.forEach((type, idx) => {
-          const option = document.createElement('option');
-          option.value = idx;
-          option.textContent = type.name;
-          if (idx === currentTypeIndex) option.selected = true;
-          currentTypeSelect.appendChild(option);
-        });
-      }
-
       function getAllTagsFlattened(tagList = tags, parentId = null) {
         let result = [];
         tagList.forEach(tag => {
@@ -869,7 +1152,7 @@
           const bulk = document.createElement('div');
           bulk.className = 'canvas-filter-bulk';
           bulk.innerHTML = `
-            <span><input type="checkbox" ${allVisibleSelected ? 'checked' : ''}> Select all</span>
+            <span><input type="checkbox" ${allVisibleSelected ? 'checked' : ''}> ${escapeHtml(t('panel.selectAll'))}</span>
             <span>${visibleIds.length}</span>
           `;
           bulk.addEventListener('click', (e) => {
@@ -891,7 +1174,7 @@
         if (optionTags.length === 0 && missingSelectedTags.length === 0) {
           const empty = document.createElement('div');
           empty.className = 'canvas-filter-empty';
-          empty.textContent = tags.length === 0 ? '暂无节点' : '无匹配节点';
+          empty.textContent = tags.length === 0 ? t('panel.noNodes') : t('panel.noMatchingNodes');
           canvasBranchFilterMenu.appendChild(empty);
         }
 
@@ -908,7 +1191,7 @@
           if (isCovered) label.classList.add('covered');
           label.innerHTML = `
             <input type="checkbox" value="${id}" ${selectedIds.has(id) ? 'checked' : ''}>
-            <span>${escapeHtml(`${prefix}${getTypeAbbreviation(type ? type.name : 'Tag')} · ${getTagDisplayName(tag)}${isCovered ? '（已由父节点显示）' : ''}`)}</span>
+            <span>${escapeHtml(`${prefix}${getTypeAbbreviation(type ? type.name : 'Tag')} · ${getTagDisplayName(tag)}${isCovered ? t('panel.covered') : ''}`)}</span>
           `;
           const checkbox = label.querySelector('input');
           checkbox.addEventListener('change', () => {
@@ -924,7 +1207,7 @@
           canvasBranchFilterMenu.appendChild(label);
         }
 
-        missingSelectedTags.forEach(tag => appendOption(tag, '当前: '));
+        missingSelectedTags.forEach(tag => appendOption(tag, t('panel.currentPrefix')));
         optionTags.forEach(tag => {
           if (!missingSelectedTags.some(selectedTag => selectedTag.id === tag.id)) {
             appendOption(tag);
@@ -933,11 +1216,11 @@
 
         const selectedTags = canvasBranchFilterIds.map(id => findTagById(parseInt(id))).filter(Boolean);
         if (selectedTags.length === 0) {
-          canvasBranchFilterLabel.textContent = '全部节点';
+          canvasBranchFilterLabel.textContent = t('panel.allNodes');
         } else if (selectedTags.length === 1) {
           canvasBranchFilterLabel.textContent = getTagDisplayName(selectedTags[0]);
         } else {
-          canvasBranchFilterLabel.textContent = `已选 ${selectedTags.length} 个节点`;
+          canvasBranchFilterLabel.textContent = t('panel.selectedNodes', { count: selectedTags.length });
         }
       }
 
@@ -1061,16 +1344,15 @@
             const parent = markerPositions[tag._parentId];
             const child = markerPositions[tag._id];
             
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('x1', parent.x);
-            line.setAttribute('y1', parent.y);
-            line.setAttribute('x2', child.x);
-            line.setAttribute('y2', child.y);
-            line.setAttribute('stroke', '#999');
-            line.setAttribute('stroke-width', '1.5');
-            line.setAttribute('stroke-dasharray', '4,3');
-            line.setAttribute('opacity', '0.6');
-            svg.appendChild(line);
+            ['connection-line-halo', 'connection-line'].forEach(className => {
+              const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+              line.setAttribute('x1', parent.x);
+              line.setAttribute('y1', parent.y);
+              line.setAttribute('x2', child.x);
+              line.setAttribute('y2', child.y);
+              line.setAttribute('class', className);
+              svg.appendChild(line);
+            });
           }
         });
 
@@ -1083,6 +1365,27 @@
         if (typeName.includes('Location')) return 'LC';
         if (typeName.includes('Process')) return 'PC';
         return typeName.substring(0, 2).toUpperCase();
+      }
+
+      function getTypeIndexByName(namePart) {
+        return tagTypes.findIndex(type => type.name.includes(namePart));
+      }
+
+      function getRootTagTypeIndex() {
+        const stationIndex = getTypeIndexByName('Station');
+        return stationIndex === -1 ? 0 : stationIndex;
+      }
+
+      function getChildTypeIndexForParent(parentTag) {
+        const parentType = tagTypes[parentTag.typeIndex];
+        if (!parentType) return -1;
+        if (parentType.name.includes('Station')) return getTypeIndexByName('Location');
+        if (parentType.name.includes('Location')) return getTypeIndexByName('Process');
+        return -1;
+      }
+
+      function canAddChildTag(tag) {
+        return getChildTypeIndexForParent(tag) !== -1;
       }
 
       function getTagSearchText(tag) {
@@ -1113,7 +1416,7 @@
         tagSearchInput.value = tagSearchQuery;
 
         if (tags.length === 0) {
-          tagListContainer.innerHTML = '<div class="no-tags">暂无标签，点击图片添加</div>';
+          tagListContainer.innerHTML = `<div class="no-tags">${escapeHtml(t('tags.empty'))}</div>`;
           return;
         }
 
@@ -1126,7 +1429,7 @@
             }
           });
           if (renderedCount === 0) {
-            tagListContainer.innerHTML = '<div class="no-tags">没有匹配的标签</div>';
+            tagListContainer.innerHTML = `<div class="no-tags">${escapeHtml(t('tags.noMatch'))}</div>`;
           }
           return;
         }
@@ -1188,7 +1491,7 @@
           });
         });
         if (renderedGroups === 0) {
-          tagListContainer.innerHTML = '<div class="no-tags">没有匹配的标签</div>';
+          tagListContainer.innerHTML = `<div class="no-tags">${escapeHtml(t('tags.noMatch'))}</div>`;
         }
       }
 
@@ -1210,25 +1513,27 @@
           row.classList.add('canvas-filter-root');
         }
         row.setAttribute('data-tag-id', tag.id);
-        row.title = '双击编辑标签文本，右键打开更多操作';
+        row.title = t('tags.rowTitle');
 
         const childCount = hasChildren ? tag.children.length : 0;
-        const displayText = tag.text && tag.text.trim() ? tag.text.trim() : '未命名标签';
+        const displayText = tag.text && tag.text.trim() ? tag.text.trim() : t('tags.unnamed');
         const parentTag = parentId ? findTagById(parentId) : null;
-        const parentMeta = parentTag ? ` · 父级: ${parentTag.text || getTypeAbbreviation(tagTypes[parentTag.typeIndex]?.name || 'Tag')}` : '';
-        const materialCount = tag.materialLinks && tag.materialLinks.length ? ` · 物料 ${tag.materialLinks.length}` : '';
+        const parentMeta = parentTag ? ` · ${t('tags.parent', { name: parentTag.text || getTypeAbbreviation(tagTypes[parentTag.typeIndex]?.name || 'Tag') })}` : '';
+        const materialCount = tag.materialLinks && tag.materialLinks.length ? ` · ${t('tags.materialCount', { count: tag.materialLinks.length })}` : '';
+        const childMeta = childCount ? ` · ${t('tags.children', { count: childCount })}` : '';
+        const canAddChild = canAddChildTag(tag);
 
         row.innerHTML = `
           <button class="tag-node-toggle ${hasChildren && includeChildren ? '' : 'empty'}" type="button">${hasChildren && includeChildren ? '▼' : ''}</button>
           <div class="tag-node-main">
             <span class="tag-node-dot" style="background:${type ? type.color : '#999'}"></span>
             <span class="tag-node-text">${escapeHtml(displayText)}</span>
-            <span class="tag-node-meta">${escapeHtml(`${getTypeAbbreviation(type ? type.name : 'Tag')}${childCount ? ` · ${childCount} 子` : ''}${materialCount}${parentMeta}`)}</span>
+            <span class="tag-node-meta">${escapeHtml(`${getTypeAbbreviation(type ? type.name : 'Tag')}${childMeta}${materialCount}${parentMeta}`)}</span>
           </div>
           <div class="tag-node-actions">
-            <button class="tag-node-action edit-tag-btn" type="button" title="编辑文本">✎</button>
-            <button class="tag-node-action add-child-node-btn" type="button" title="添加子标签">+</button>
-            <button class="tag-node-action danger delete-tag-btn" type="button" title="删除">×</button>
+            <button class="tag-node-action edit-tag-btn" type="button" title="${escapeHtml(t('tags.editTitle'))}">✎</button>
+            ${canAddChild ? `<button class="tag-node-action add-child-node-btn" type="button" title="${escapeHtml(t('tags.addChildTitle'))}">+</button>` : ''}
+            <button class="tag-node-action danger delete-tag-btn" type="button" title="${escapeHtml(t('tags.deleteTitle'))}">×</button>
           </div>
         `;
 
@@ -1253,17 +1558,20 @@
           deleteTagById(tag.id);
         });
 
-        row.querySelector('.add-child-node-btn').addEventListener('click', (e) => {
-          e.stopPropagation();
-          addChildToTag(tag.id);
-        });
+        const addChildBtn = row.querySelector('.add-child-node-btn');
+        if (addChildBtn) {
+          addChildBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            addChildToTag(tag.id);
+          });
+        }
 
         if (type && type.name.includes('Process')) {
           if (!tag.materialLinks) tag.materialLinks = [];
           const materialsDiv = document.createElement('div');
           materialsDiv.className = 'tag-node-materials';
           materialsDiv.innerHTML = `
-            <select class="material-select" multiple size="${Math.min(4, Math.max(2, materials.length || 2))}" title="关联物料，按住 Ctrl/Cmd 可多选">
+            <select class="material-select" multiple size="${Math.min(4, Math.max(2, materials.length || 2))}" title="${escapeHtml(t('materials.selectTitle'))}">
               ${materials.map((m, i) => `<option value="${i}" ${tag.materialLinks.includes(i) ? 'selected' : ''}>${escapeHtml(m.name)} (${escapeHtml(m.abbreviation)})</option>`).join('')}
             </select>
           `;
@@ -1376,12 +1684,10 @@
         if (newX > 0.95) newX = 0.95;
         if (newY > 0.95) newY = 0.95;
 
-        const childTypeIndex = currentTypeIndex === parentTag.typeIndex
-          ? tagTypes.findIndex((_, idx) => idx !== parentTag.typeIndex)
-          : currentTypeIndex;
+        const childTypeIndex = getChildTypeIndexForParent(parentTag);
 
         if (childTypeIndex === -1) {
-          alert('无法创建子标签：没有可用的不同类型。');
+          alert(t('tags.noChildType'));
           return;
         }
 
@@ -1402,7 +1708,6 @@
       // ★ 核心修复：renderAll 现在包含类型面板的刷新
       function renderAll() {
         // Central refresh after broad state changes.
-        updateCurrentTypeSelect();
         updateCanvasBranchFilterOptions();
         renderMarkers();
         renderTagList();
@@ -1431,7 +1736,7 @@
       function renderMaterialList() {
         materialListContainer.innerHTML = '';
         if (materials.length === 0) {
-          materialListContainer.innerHTML = '<div class="no-materials">暂无物料</div>';
+          materialListContainer.innerHTML = `<div class="no-materials">${escapeHtml(t('materials.empty'))}</div>`;
           return;
         }
 
@@ -1441,44 +1746,44 @@
           materialDiv.innerHTML = `
             <div class="material-header">
               <div style="flex:1;">
-                <input type="text" class="material-name-input" data-index="${index}" value="${escapeHtml(material.name)}" placeholder="物料名称" style="width:100%; font-weight:600;">
+                <input type="text" class="material-name-input" data-index="${index}" value="${escapeHtml(material.name)}" placeholder="${escapeHtml(t('materials.namePlaceholder'))}" style="width:100%; font-weight:600;">
               </div>
-              <button class="btn btn-danger btn-sm delete-material-btn" data-index="${index}">删除</button>
+              <button class="btn btn-danger btn-sm delete-material-btn" data-index="${index}">${escapeHtml(t('materials.delete'))}</button>
             </div>
             
             <div class="material-edit-row">
               <div class="material-field-group">
-                <label>缩写</label>
-                <input type="text" class="material-abbrev-input" data-index="${index}" value="${escapeHtml(material.abbreviation)}" placeholder="缩写" maxlength="10">
+                <label>${escapeHtml(t('materials.abbrev'))}</label>
+                <input type="text" class="material-abbrev-input" data-index="${index}" value="${escapeHtml(material.abbreviation)}" placeholder="${escapeHtml(t('materials.abbrev'))}" maxlength="10">
               </div>
               <div class="material-field-group">
-                <label>分类</label>
-                <input type="text" class="material-category-input" data-index="${index}" value="${escapeHtml(material.category)}" placeholder="分类">
+                <label>${escapeHtml(t('materials.category'))}</label>
+                <input type="text" class="material-category-input" data-index="${index}" value="${escapeHtml(material.category)}" placeholder="${escapeHtml(t('materials.category'))}">
               </div>
             </div>
             
             <div class="material-edit-row full">
               <div class="material-field-group">
-                <label>类型</label>
-                <input type="text" class="material-type-input" data-index="${index}" value="${escapeHtml(material.type)}" placeholder="类型">
+                <label>${escapeHtml(t('materials.type'))}</label>
+                <input type="text" class="material-type-input" data-index="${index}" value="${escapeHtml(material.type)}" placeholder="${escapeHtml(t('materials.type'))}">
               </div>
             </div>
             
             <div class="material-details">
               <div style="margin-bottom:4px;">
-                <strong>关联工序:</strong> ${material.processLinks.length} 个
+                <strong>${escapeHtml(t('materials.linkedProcesses'))}</strong> ${escapeHtml(t('materials.processCount', { count: material.processLinks.length }))}
               </div>
               ${material.processLinks.length > 0 ? `
                 <div class="linked-processes" style="max-height:60px; overflow-y:auto; font-size:11px; color:#666;">
                   ${material.processLinks.map(pid => {
                     const processTag = findTagById(pid);
                     if (processTag) {
-                      return `<div class="process-link-item" data-tag-id="${pid}" style="cursor:pointer; padding:2px 4px; border-radius:3px; transition:background 0.2s;" onmouseover="this.style.background='#f0f2f5'" onmouseout="this.style.background='transparent'">• ${escapeHtml(processTag.text || '未命名工序')}</div>`;
+                      return `<div class="process-link-item" data-tag-id="${pid}" style="cursor:pointer; padding:2px 4px; border-radius:3px; transition:background 0.2s;" onmouseover="this.style.background='#f0f2f5'" onmouseout="this.style.background='transparent'">• ${escapeHtml(processTag.text || t('materials.unnamedProcess'))}</div>`;
                     }
                     return '';
                   }).join('')}
                 </div>
-              ` : '<div style="color:#999; font-style:italic;">暂无关联</div>'}
+              ` : `<div style="color:#999; font-style:italic;">${escapeHtml(t('materials.noLinks'))}</div>`}
             </div>
           `;
           materialListContainer.appendChild(materialDiv);
@@ -1585,7 +1890,7 @@
         // x/y are normalized image coordinates, not pixels.
         const newTag = {
           id: Date.now(),
-          typeIndex: currentTypeIndex,
+          typeIndex: getRootTagTypeIndex(),
           text: '',
           x: x,
           y: y,
@@ -1990,18 +2295,13 @@
         renderMarkers();
       });
 
-      // ---------- 当前类型选择 ----------
-      currentTypeSelect.addEventListener('change', (e) => {
-        currentTypeIndex = parseInt(e.target.value);
-      });
-
       // ---------- 添加物料 ----------
       addMaterialBtn.addEventListener('click', () => {
         const newMaterial = {
-          name: '新物料',
-          abbreviation: 'NM',
-          category: '原材料',
-          type: 'a料',
+          name: t('materials.newName'),
+          abbreviation: t('materials.newAbbrev'),
+          category: t('materials.defaultCategory'),
+          type: t('materials.defaultType'),
           processLinks: []
         };
         materials.push(newMaterial);
@@ -2020,7 +2320,7 @@
       // ---------- 导出 JSON ----------
       exportBtn.addEventListener('click', () => {
         if (!isAdmin()) {
-          alert('只有管理员可以导出 JSON');
+          alert(t('export.adminOnly'));
           return;
         }
         const data = serializeProjectData();
@@ -2028,7 +2328,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${currentProjectTitle || 'image-annotation-advanced'}.json`;
+        a.download = `${currentProjectTitle || t('export.defaultName')}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -2038,7 +2338,7 @@
       // ---------- 导入 JSON ----------
       importBtn.addEventListener('click', () => {
         if (!isAdmin()) {
-          alert('只有管理员可以导入 JSON');
+          alert(t('import.adminOnly'));
           return;
         }
         importFileInput.click();
@@ -2053,17 +2353,17 @@
           try {
             const data = JSON.parse(ev.target.result);
             if (!data.tagTypes || !data.tags) {
-              alert('无效的JSON文件格式！');
+              alert(t('import.invalidJson'));
               return;
             }
-            const defaultName = file.name.replace(/\.json$/i, '') || '导入项目';
-            const name = prompt('请输入导入后创建的项目名称', defaultName);
+            const defaultName = file.name.replace(/\.json$/i, '') || t('import.defaultProject');
+            const name = prompt(t('projects.promptImportName'), defaultName);
             if (!name || !name.trim()) return;
             importProjectFromJson(data, name.trim())
-              .then(() => alert('导入成功，已创建新项目！'))
-              .catch(error => alert('导入失败：' + error.message));
+              .then(() => alert(t('import.success')))
+              .catch(error => alert(t('import.failed', { message: error.message })));
           } catch (error) {
-            alert('JSON文件解析失败：' + error.message);
+            alert(t('import.parseFailed', { message: error.message }));
           }
         };
         reader.readAsText(file);
@@ -2075,6 +2375,7 @@
       // ---------- 初始化 ----------
       // Initial render assumes there is no loaded image yet. Upload/import flows
       // call resetView() and renderAll() again after image dimensions are known.
+      applyStaticI18n();
       resetProjectData();
       renderAll();
       updateTextVisibility();

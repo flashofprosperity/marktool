@@ -3,31 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>图片标注工具</title>
+  <title>MES Core Data Designer</title>
+  <link rel="icon" href="./static/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./static/css/style.css">
 </head>
 <body>
   <div class="toolbar">
-    <h1>📷 图片标注工具 </h1>
-    <button class="btn" id="backToProjectsBtn" type="button">项目列表</button>
+    <h1 id="appTitle">MES Core Data Designer</h1>
+    <button class="btn" id="backToProjectsBtn" type="button" data-i18n="nav.projects">项目列表</button>
     <div class="project-status">
       <span class="project-name" id="currentProjectName">未打开项目</span>
       <span class="save-status idle" id="saveStatus">请选择项目</span>
     </div>
-    <div class="current-type-selector">
-      <label for="currentTypeSelect">当前标记类型</label>
-      <select id="currentTypeSelect"></select>
-    </div>
     <label class="global-options">
       <input type="checkbox" id="showTextCheckbox" checked>
-      <span>显示标记文本</span>
+      <span data-i18n="toolbar.showText">显示标记文本</span>
     </label>
-    <button class="btn btn-primary" id="exportBtn">导出 JSON</button>
-    <button class="btn btn-primary" id="importBtn">导入 JSON</button>
-    <button class="btn" id="clearAllBtn">清空所有标签</button>
+    <button class="btn btn-primary" id="exportBtn" data-i18n="toolbar.export">导出 JSON</button>
+    <button class="btn btn-primary" id="importBtn" data-i18n="toolbar.import">导入 JSON</button>
+    <button class="btn" id="clearAllBtn" data-i18n="toolbar.clearAll">清空所有标签</button>
+    <div class="language-switcher">
+      <label for="languageSelect" data-i18n="toolbar.language">语言</label>
+      <select id="languageSelect" aria-label="Language">
+        <option value="zh-CN">中文</option>
+        <option value="en-US">EN</option>
+      </select>
+    </div>
     <div class="auth-status">
       <span id="currentUserLabel">未登录</span>
-      <button class="btn" id="logoutBtn" type="button">退出</button>
+      <button class="btn" id="logoutBtn" type="button" data-i18n="auth.logout">退出</button>
     </div>
   </div>
 
@@ -35,18 +39,18 @@
 
   <main class="login-home" id="loginHome">
     <form class="login-panel" id="loginForm">
-      <h2>登录</h2>
-      <p>请输入账号后继续使用标注工具。</p>
+      <h2 data-i18n="auth.loginTitle">登录</h2>
+      <p data-i18n="auth.loginHelp">请输入账号后继续使用标注工具。</p>
       <label>
-        <span>用户名</span>
+        <span data-i18n="auth.username">用户名</span>
         <input type="text" id="loginUsername" autocomplete="username" required>
       </label>
       <label>
-        <span>密码</span>
+        <span data-i18n="auth.password">密码</span>
         <input type="password" id="loginPassword" autocomplete="current-password" required>
       </label>
       <div class="login-error" id="loginError"></div>
-      <button class="btn btn-primary btn-full" type="submit">登录</button>
+      <button class="btn btn-primary btn-full" type="submit" data-i18n="auth.loginButton">登录</button>
     </form>
   </main>
 
@@ -54,10 +58,10 @@
     <section class="project-shell">
       <div class="project-header">
         <div>
-          <h2>项目</h2>
-          <p>选择一个服务端项目继续标注，或创建新的持久化项目。</p>
+          <h2 data-i18n="projects.title">项目</h2>
+          <p data-i18n="projects.help">选择一个服务端项目继续标注，或创建新的持久化项目。</p>
         </div>
-        <button class="btn btn-primary" id="newProjectBtn" type="button">新建项目</button>
+        <button class="btn btn-primary" id="newProjectBtn" type="button" data-i18n="projects.new">新建项目</button>
       </div>
       <div class="project-list" id="projectList">
         <div class="project-empty">正在加载项目...</div>
@@ -67,17 +71,17 @@
 
   <!-- 右键菜单 -->
   <div class="context-menu" id="contextMenu">
-    <div class="context-menu-item" id="createTagMenuItem">在此创建标签</div>
+    <div class="context-menu-item" id="createTagMenuItem" data-i18n="menu.createTag">在此创建标签</div>
     <div class="context-menu-divider"></div>
     <div class="context-menu-item" id="toggleTextMenuItem">隐藏文本</div>
     <div class="context-menu-divider"></div>
-    <div class="context-menu-item" id="editTextMenuItem">修改文本</div>
+    <div class="context-menu-item" id="editTextMenuItem" data-i18n="menu.editText">修改文本</div>
     <div class="context-menu-divider"></div>
-    <div class="context-menu-item" id="changeTypeMenuItem">修改类型</div>
+    <div class="context-menu-item" id="changeTypeMenuItem" data-i18n="menu.changeType">修改类型</div>
     <div class="context-menu-divider"></div>
-    <div class="context-menu-item" id="addChildMenuItem">添加子标签</div>
+    <div class="context-menu-item" id="addChildMenuItem" data-i18n="menu.addChild">添加子标签</div>
     <div class="context-menu-divider"></div>
-    <div class="context-menu-item" id="deleteTagMenuItem">删除标签</div>
+    <div class="context-menu-item" id="deleteTagMenuItem" data-i18n="menu.deleteTag">删除标签</div>
   </div>
   
   <!-- 类型选择子菜单 -->
@@ -87,11 +91,11 @@
   <!-- 文本编辑对话框 -->
   <div id="textEditDialog" class="text-edit-dialog" style="display:none;">
     <div class="text-edit-panel">
-      <h3 class="text-edit-title">修改标签文本</h3>
-      <input type="text" id="textEditInput" class="text-edit-input" placeholder="输入标签文本">
+      <h3 class="text-edit-title" data-i18n="dialog.editTitle">修改标签文本</h3>
+      <input type="text" id="textEditInput" class="text-edit-input" placeholder="输入标签文本" data-i18n-placeholder="dialog.editPlaceholder">
       <div class="text-edit-actions">
-        <button class="btn" id="textEditCancel">取消</button>
-        <button class="btn btn-primary" id="textEditConfirm">确认</button>
+        <button class="btn" id="textEditCancel" data-i18n="common.cancel">取消</button>
+        <button class="btn btn-primary" id="textEditConfirm" data-i18n="common.confirm">确认</button>
       </div>
     </div>
   </div>
@@ -101,41 +105,41 @@
     <div class="panel-center">
       <div class="upload-zone">
         <input type="file" id="fileInput" accept="image/*" style="display:none;">
-        <button class="btn btn-primary" id="uploadBtn">📁 上传图片</button>
+        <button class="btn btn-primary" id="uploadBtn" data-i18n="workspace.upload">📁 上传图片</button>
       </div>
       <div id="imageWrapper" class="image-container show-text" style="display:none;">
         <div id="annotationCanvas" class="annotation-canvas">
-          <img id="annotateImage" class="annotate-image" src="" alt="标注图片" draggable="false">
+          <img id="annotateImage" class="annotate-image" src="" alt="标注图片" draggable="false" data-i18n-alt="workspace.imageAlt">
         </div>
         <div class="canvas-controls">
-          <button class="canvas-control-btn" id="zoomOutBtn" type="button" title="缩小">-</button>
+          <button class="canvas-control-btn" id="zoomOutBtn" type="button" title="缩小" data-i18n-title="canvas.zoomOut">-</button>
           <span class="zoom-readout" id="zoomReadout">100%</span>
-          <button class="canvas-control-btn" id="zoomInBtn" type="button" title="放大">+</button>
-          <button class="canvas-control-btn" id="zoomResetBtn" type="button" title="重置视图">重置</button>
+          <button class="canvas-control-btn" id="zoomInBtn" type="button" title="放大" data-i18n-title="canvas.zoomIn">+</button>
+          <button class="canvas-control-btn" id="zoomResetBtn" type="button" title="重置视图" data-i18n="canvas.reset" data-i18n-title="canvas.resetTitle">重置</button>
         </div>
       </div>
-      <div id="placeholder" class="placeholder">请上传一张图片开始标注</div>
+      <div id="placeholder" class="placeholder" data-i18n="workspace.placeholder">请上传一张图片开始标注</div>
     </div>
 
     <!-- 右侧：标签列表编辑 -->
     <div class="panel-right" id="panelRight">
-      <button class="panel-toggle-btn" id="toggleRightBtn" title="折叠/展开">
+      <button class="panel-toggle-btn" id="toggleRightBtn" title="折叠/展开" data-i18n-title="panel.toggle">
         <span class="toggle-icon">▶</span>
       </button>
       <!-- 标签列表折叠区 -->
       <div class="collapse-section" id="tagsCollapseSection">
         <div class="collapse-header" id="tagsCollapseHeader">
-          <span>标签列表</span>
+          <span data-i18n="panel.tags">标签列表</span>
           <span class="collapse-icon">▼</span>
         </div>
         <div class="collapse-content" id="tagsCollapseContent">
           <div class="tag-list-tools">
             <div class="tag-search-row">
-              <input class="tag-search-input" id="tagSearchInput" type="search" placeholder="搜索标签、类型、坐标">
-              <button class="tag-search-clear" id="tagSearchClearBtn" type="button" title="清空搜索">×</button>
+              <input class="tag-search-input" id="tagSearchInput" type="search" placeholder="搜索标签、类型、坐标" data-i18n-placeholder="panel.searchPlaceholder">
+              <button class="tag-search-clear" id="tagSearchClearBtn" type="button" title="清空搜索" data-i18n-title="panel.clearSearch">×</button>
             </div>
             <div class="canvas-filter-row">
-              <label>画布显示</label>
+              <label data-i18n="panel.canvasDisplay">画布显示</label>
               <div class="canvas-filter-wrap">
                 <button class="canvas-filter-trigger" id="canvasBranchFilterBtn" type="button">
                   <span class="canvas-filter-label" id="canvasBranchFilterLabel">全部节点</span>
@@ -145,12 +149,12 @@
               </div>
             </div>
             <div class="tag-mode-row">
-              <button class="tag-mode-btn active" id="tagTreeModeBtn" type="button">树状结构</button>
-              <button class="tag-mode-btn" id="tagTypeModeBtn" type="button">按类型</button>
+              <button class="tag-mode-btn active" id="tagTreeModeBtn" type="button" data-i18n="panel.treeMode">树状结构</button>
+              <button class="tag-mode-btn" id="tagTypeModeBtn" type="button" data-i18n="panel.typeMode">按类型</button>
             </div>
           </div>
           <div id="tagListContainer">
-            <div class="no-tags">暂无标签，点击图片添加</div>
+            <div class="no-tags" data-i18n="tags.empty">暂无标签，点击图片添加</div>
           </div>
         </div>
       </div>
@@ -158,16 +162,16 @@
       <!-- 物料管理折叠区 -->
       <div class="collapse-section" id="materialsCollapseSection">
         <div class="collapse-header" id="materialsCollapseHeader">
-          <span>物料管理</span>
+          <span data-i18n="materials.title">物料管理</span>
           <span class="collapse-icon">▼</span>
         </div>
         <div class="collapse-content" id="materialsCollapseContent">
           <div id="materialListContainer">
-            <div class="no-materials">暂无物料</div>
+            <div class="no-materials" data-i18n="materials.empty">暂无物料</div>
           </div>
         </div>
         <div class="material-actions">
-          <button class="btn btn-full" id="addMaterialBtn">+ 添加物料</button>
+          <button class="btn btn-full" id="addMaterialBtn" data-i18n="materials.add">+ 添加物料</button>
         </div>
       </div>
     </div>

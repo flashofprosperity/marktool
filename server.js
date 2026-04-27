@@ -48,9 +48,9 @@ const builtInUsers = [
 const emptyProjectData = {
   image: '',
   tagTypes: [
-    { name: 'Station', color: '#E74C3C', icon: './static/station.png' },
-    { name: 'Location', color: '#3498DB', icon: './static/location.png' },
-    { name: 'Process (name&number)', color: '#2ECC71', icon: './static/process.png' }
+    { name: 'Station', color: '#c92a2a', icon: './static/icons/station.svg' },
+    { name: 'Location', color: '#005f99', icon: './static/icons/location.svg' },
+    { name: 'Process (name&number)', color: '#087f5b', icon: './static/icons/process.svg' }
   ],
   tags: [],
   materials: [
