@@ -1,0 +1,14 @@
+{
+  "name": "image-annotation-workshop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Server-backed image annotation tool with SQLite persistence.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "package": "node scripts/package.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

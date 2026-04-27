@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片标注工具</title>
+  <link rel="stylesheet" href="./static/css/style.css">
+</head>
+<body>
+  <div class="toolbar">
+    <h1>📷 图片标注工具 </h1>
+    <button class="btn" id="backToProjectsBtn" type="button">项目列表</button>
+    <div class="project-status">
+      <span class="project-name" id="currentProjectName">未打开项目</span>
+      <span class="save-status idle" id="saveStatus">请选择项目</span>
+    </div>
+    <div class="current-type-selector">
+      <label for="currentTypeSelect">当前标记类型</label>
+      <select id="currentTypeSelect"></select>
+    </div>
+    <label class="global-options">
+      <input type="checkbox" id="showTextCheckbox" checked>
+      <span>显示标记文本</span>
+    </label>
+    <button class="btn btn-primary" id="exportBtn">导出 JSON</button>
+    <button class="btn btn-primary" id="importBtn">导入 JSON</button>
+    <button class="btn" id="clearAllBtn">清空所有标签</button>
+  </div>
+
+  <input type="file" id="importFileInput" accept=".json" style="display:none;">
+
+  <main class="project-home" id="projectHome">
+    <section class="project-shell">
+      <div class="project-header">
+        <div>
+          <h2>项目</h2>
+          <p>选择一个服务端项目继续标注，或创建新的持久化项目。</p>
+        </div>
+        <button class="btn btn-primary" id="newProjectBtn" type="button">新建项目</button>
+      </div>
+      <div class="project-list" id="projectList">
+        <div class="project-empty">正在加载项目...</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 右键菜单 -->
+  <div class="context-menu" id="contextMenu">
+    <div class="context-menu-item" id="createTagMenuItem">在此创建标签</div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" id="toggleTextMenuItem">隐藏文本</div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" id="editTextMenuItem">修改文本</div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" id="changeTypeMenuItem">修改类型</div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" id="addChildMenuItem">添加子标签</div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" id="deleteTagMenuItem">删除标签</div>
+  </div>
+  
+  <!-- 类型选择子菜单 -->
+  <div class="context-menu" id="typeSubMenu">
+  </div>
+  
+  <!-- 文本编辑对话框 -->
+  <div id="textEditDialog" class="text-edit-dialog" style="display:none;">
+    <div class="text-edit-panel">
+      <h3 class="text-edit-title">修改标签文本</h3>
+      <input type="text" id="textEditInput" class="text-edit-input" placeholder="输入标签文本">
+      <div class="text-edit-actions">
+        <button class="btn" id="textEditCancel">取消</button>
+        <button class="btn btn-primary" id="textEditConfirm">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container app-workspace is-hidden" id="appWorkspace">
+    <!-- 中间：图片与标注 -->
+    <div class="panel-center">
+      <div class="upload-zone">
+        <input type="file" id="fileInput" accept="image/*" style="display:none;">
+        <button class="btn btn-primary" id="uploadBtn">📁 上传图片</button>
+      </div>
+      <div id="imageWrapper" class="image-container show-text" style="display:none;">
+        <div id="annotationCanvas" class="annotation-canvas">
+          <img id="annotateImage" class="annotate-image" src="" alt="标注图片" draggable="false">
+        </div>
+        <div class="canvas-controls">
+          <button class="canvas-control-btn" id="zoomOutBtn" type="button" title="缩小">-</button>
+          <span class="zoom-readout" id="zoomReadout">100%</span>
+          <button class="canvas-control-btn" id="zoomInBtn" type="button" title="放大">+</button>
+          <button class="canvas-control-btn" id="zoomResetBtn" type="button" title="重置视图">重置</button>
+        </div>
+      </div>
+      <div id="placeholder" class="placeholder">请上传一张图片开始标注</div>
+    </div>
+
+    <!-- 右侧：标签列表编辑 -->
+    <div class="panel-right" id="panelRight">
+      <button class="panel-toggle-btn" id="toggleRightBtn" title="折叠/展开">
+        <span class="toggle-icon">▶</span>
+      </button>
+      <!-- 标签列表折叠区 -->
+      <div class="collapse-section" id="tagsCollapseSection">
+        <div class="collapse-header" id="tagsCollapseHeader">
+          <span>标签列表</span>
+          <span class="collapse-icon">▼</span>
+        </div>
+        <div class="collapse-content" id="tagsCollapseContent">
+          <div class="tag-list-tools">
+            <div class="tag-search-row">
+              <input class="tag-search-input" id="tagSearchInput" type="search" placeholder="搜索标签、类型、坐标">
+              <button class="tag-search-clear" id="tagSearchClearBtn" type="button" title="清空搜索">×</button>
+            </div>
+            <div class="canvas-filter-row">
+              <label>画布显示</label>
+              <div class="canvas-filter-wrap">
+                <button class="canvas-filter-trigger" id="canvasBranchFilterBtn" type="button">
+                  <span class="canvas-filter-label" id="canvasBranchFilterLabel">全部节点</span>
+                  <span>▼</span>
+                </button>
+                <div class="canvas-filter-menu" id="canvasBranchFilterMenu"></div>
+              </div>
+            </div>
+            <div class="tag-mode-row">
+              <button class="tag-mode-btn active" id="tagTreeModeBtn" type="button">树状结构</button>
+              <button class="tag-mode-btn" id="tagTypeModeBtn" type="button">按类型</button>
+            </div>
+          </div>
+          <div id="tagListContainer">
+            <div class="no-tags">暂无标签，点击图片添加</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 物料管理折叠区 -->
+      <div class="collapse-section" id="materialsCollapseSection">
+        <div class="collapse-header" id="materialsCollapseHeader">
+          <span>物料管理</span>
+          <span class="collapse-icon">▼</span>
+        </div>
+        <div class="collapse-content" id="materialsCollapseContent">
+          <div id="materialListContainer">
+            <div class="no-materials">暂无物料</div>
+          </div>
+        </div>
+        <div class="material-actions">
+          <button class="btn btn-full" id="addMaterialBtn">+ 添加物料</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <script src="./static/js/app.js"></script>
+</body>
+</html>
