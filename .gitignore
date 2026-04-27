@@ -1,3 +1,5 @@
 node_modules/
 data/
+.chrome-pan-test/
+release/
 *.log

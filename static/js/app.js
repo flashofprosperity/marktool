@@ -82,6 +82,13 @@
       // references instead of calling getElementById again unless the element is
       // created dynamically.
       const currentTypeSelect = document.getElementById('currentTypeSelect');
+      const loginHome = document.getElementById('loginHome');
+      const loginForm = document.getElementById('loginForm');
+      const loginUsername = document.getElementById('loginUsername');
+      const loginPassword = document.getElementById('loginPassword');
+      const loginError = document.getElementById('loginError');
+      const currentUserLabel = document.getElementById('currentUserLabel');
+      const logoutBtn = document.getElementById('logoutBtn');
       const projectHome = document.getElementById('projectHome');
       const appWorkspace = document.getElementById('appWorkspace');
       const projectList = document.getElementById('projectList');
@@ -152,6 +159,7 @@
       let hasUnsavedProjectChanges = false;
       let suppressAutosave = false;
       let projectChangeVersion = 0;
+      let currentUser = null;
 
       // ---------- Server-backed project persistence ----------
       async function apiRequest(url, options = {}) {
@@ -170,6 +178,12 @@
           } catch (error) {
             message = response.statusText || message;
           }
+          if (response.status === 401) {
+            showLoginView();
+          }
+          if (response.status === 403) {
+            alert(message);
+          }
           throw new Error(message);
         }
         if (response.status === 204) return null;
@@ -182,9 +196,47 @@
       }
 
       function setWorkspaceVisible(isVisible) {
+        loginHome.classList.add('is-hidden');
         projectHome.classList.toggle('is-hidden', isVisible);
         appWorkspace.classList.toggle('is-hidden', !isVisible);
         panelRight.classList.toggle('is-hidden', !isVisible);
+      }
+
+      function isAdmin() {
+        return currentUser && currentUser.role === 'admin';
+      }
+
+      function updateAuthUi() {
+        currentUserLabel.textContent = currentUser
+          ? `${currentUser.username} · ${currentUser.role === 'admin' ? '管理员' : '普通用户'}`
+          : '未登录';
+        logoutBtn.classList.toggle('is-hidden', !currentUser);
+        newProjectBtn.classList.toggle('is-hidden', !isAdmin());
+        importBtn.classList.toggle('is-hidden', !isAdmin());
+        exportBtn.classList.toggle('is-hidden', !isAdmin());
+        document.body.classList.toggle('is-admin', !!isAdmin());
+      }
+
+      function showLoginView() {
+        currentUser = null;
+        currentProjectId = null;
+        currentProjectTitle = '';
+        currentProjectName.textContent = '未打开项目';
+        setSaveStatus('idle', '请登录');
+        resetProjectData();
+        loginHome.classList.remove('is-hidden');
+        projectHome.classList.add('is-hidden');
+        appWorkspace.classList.add('is-hidden');
+        panelRight.classList.add('is-hidden');
+        updateAuthUi();
+      }
+
+      function showProjectHome() {
+        loginHome.classList.add('is-hidden');
+        projectHome.classList.remove('is-hidden');
+        appWorkspace.classList.add('is-hidden');
+        panelRight.classList.add('is-hidden');
+        updateAuthUi();
       }
 
       function cleanTagForPersistence(tag) {
@@ -289,7 +341,7 @@
       function renderProjectList(projects) {
         projectList.innerHTML = '';
         if (projects.length === 0) {
-          projectList.innerHTML = '<div class="project-empty">暂无项目，点击“新建项目”开始。</div>';
+          projectList.innerHTML = `<div class="project-empty">${isAdmin() ? '暂无项目，点击“新建项目”开始。' : '暂无项目，请联系管理员创建。'}</div>`;
           return;
         }
         projects.forEach(project => {
@@ -300,7 +352,7 @@
             <div class="project-card-meta">更新于 ${escapeHtml(formatDateTime(project.updatedAt))}</div>
             <div class="project-card-actions">
               <button class="btn open-project-btn" type="button" data-id="${project.id}">打开</button>
-              <button class="btn btn-danger delete-project-btn" type="button" data-id="${project.id}">删除</button>
+              ${isAdmin() ? `<button class="btn btn-danger delete-project-btn" type="button" data-id="${project.id}">删除</button>` : ''}
             </div>
           `;
           projectList.appendChild(card);
@@ -345,6 +397,10 @@
       }
 
       async function createProject(name) {
+        if (!isAdmin()) {
+          alert('只有管理员可以新建项目');
+          return;
+        }
         const body = await apiRequest('/api/projects', {
           method: 'POST',
           body: JSON.stringify({ name })
@@ -354,6 +410,10 @@
       }
 
       async function deleteProject(projectId) {
+        if (!isAdmin()) {
+          alert('只有管理员可以删除项目');
+          return;
+        }
         await apiRequest(`/api/projects/${projectId}`, { method: 'DELETE' });
         if (currentProjectId === projectId) {
           currentProjectId = null;
@@ -412,6 +472,10 @@
       }
 
       async function importProjectFromJson(data, name) {
+        if (!isAdmin()) {
+          alert('只有管理员可以导入项目');
+          return;
+        }
         const body = await apiRequest('/api/projects/import', {
           method: 'POST',
           body: JSON.stringify({ name, data })
@@ -420,8 +484,55 @@
         await openProject(body.project.id);
       }
 
+      async function checkCurrentSession() {
+        try {
+          const body = await apiRequest('/api/me');
+          currentUser = body.user || null;
+          if (!currentUser) {
+            showLoginView();
+            return;
+          }
+          setSaveStatus('idle', '请选择项目');
+          showProjectHome();
+          await loadProjectList();
+        } catch (error) {
+          showLoginView();
+        }
+      }
+
       // ---------- Top-level event bindings ----------
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        loginError.textContent = '';
+        try {
+          const body = await apiRequest('/api/login', {
+            method: 'POST',
+            body: JSON.stringify({
+              username: loginUsername.value.trim(),
+              password: loginPassword.value
+            })
+          });
+          currentUser = body.user;
+          loginPassword.value = '';
+          setSaveStatus('idle', '请选择项目');
+          showProjectHome();
+          await loadProjectList();
+        } catch (error) {
+          loginError.textContent = error.message;
+        }
+      });
+
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          await apiRequest('/api/logout', { method: 'POST' });
+        } catch (error) {
+          // Local state should still be cleared even if the server session was gone.
+        }
+        showLoginView();
+      });
+
       newProjectBtn.addEventListener('click', async () => {
+        if (!isAdmin()) return;
         const name = prompt('请输入项目名称');
         if (!name || !name.trim()) return;
         try {
@@ -448,6 +559,7 @@
           return;
         }
         if (deleteBtn) {
+          if (!isAdmin()) return;
           const id = parseInt(deleteBtn.dataset.id);
           const card = deleteBtn.closest('.project-card');
           const title = card ? card.querySelector('.project-card-title')?.textContent : '该项目';
@@ -1907,6 +2019,10 @@
 
       // ---------- 导出 JSON ----------
       exportBtn.addEventListener('click', () => {
+        if (!isAdmin()) {
+          alert('只有管理员可以导出 JSON');
+          return;
+        }
         const data = serializeProjectData();
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -1921,6 +2037,10 @@
 
       // ---------- 导入 JSON ----------
       importBtn.addEventListener('click', () => {
+        if (!isAdmin()) {
+          alert('只有管理员可以导入 JSON');
+          return;
+        }
         importFileInput.click();
       });
 
@@ -1958,6 +2078,6 @@
       resetProjectData();
       renderAll();
       updateTextVisibility();
-      setWorkspaceVisible(false);
-      loadProjectList();
+      showLoginView();
+      checkCurrentSession();
     })();

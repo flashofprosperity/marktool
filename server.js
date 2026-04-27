@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const express = require('express');
 const { DatabaseSync } = require('node:sqlite');
 
@@ -8,6 +9,9 @@ const port = Number(process.env.PORT || 9092);
 const rootDir = __dirname;
 const dataDir = path.join(rootDir, 'data');
 const dbPath = path.join(dataDir, 'projects.db');
+const credentialsPath = path.join(dataDir, 'user-credentials.txt');
+const sessionCookieName = 'marktool_session';
+const sessionSecret = process.env.SESSION_SECRET || 'marktool-local-session-secret';
 
 fs.mkdirSync(dataDir, { recursive: true });
 
@@ -24,9 +28,22 @@ db.exec(`
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    password_salt TEXT NOT NULL,
+    role TEXT NOT NULL CHECK (role IN ('user', 'admin')),
+    created_at TEXT NOT NULL
+  );
 `);
 
 let dbWriteQueue = Promise.resolve();
+const sessions = new Map();
+const builtInUsers = [
+  { username: 'mes', password: 'mesedit', role: 'user' },
+  { username: 'admin', password: 'mesmanager', role: 'admin' }
+];
 
 const emptyProjectData = {
   image: '',
@@ -49,6 +66,9 @@ const emptyProjectData = {
 
 app.use(express.json({ limit: '100mb' }));
 app.use(express.static(rootDir));
+
+initializeUsers();
+ensureCredentialReminder();
 
 function nowIso() {
   return new Date().toISOString();
@@ -93,6 +113,140 @@ function validateProjectData(data) {
   return data;
 }
 
+function hashPassword(password, salt) {
+  return crypto.scryptSync(password, salt, 64).toString('hex');
+}
+
+function createPasswordRecord(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  return {
+    salt,
+    hash: hashPassword(password, salt)
+  };
+}
+
+function verifyPassword(password, user) {
+  const expected = Buffer.from(user.password_hash, 'hex');
+  const actual = Buffer.from(hashPassword(password, user.password_salt), 'hex');
+  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+}
+
+function initializeUsers() {
+  const existing = db.prepare('SELECT username FROM users WHERE username = ?');
+  const insert = db.prepare(`
+    INSERT INTO users (username, password_hash, password_salt, role, created_at)
+    VALUES (?, ?, ?, ?, ?)
+  `);
+  builtInUsers.forEach(user => {
+    if (existing.get(user.username)) return;
+    const record = createPasswordRecord(user.password);
+    insert.run(user.username, record.hash, record.salt, user.role, nowIso());
+  });
+}
+
+function ensureCredentialReminder() {
+  if (fs.existsSync(credentialsPath)) return;
+  const content = [
+    'Mark Tool built-in accounts',
+    '',
+    'username: mes',
+    'password: mesedit',
+    'role: user',
+    '',
+    'username: admin',
+    'password: mesmanager',
+    'role: admin',
+    ''
+  ].join('\n');
+  fs.writeFileSync(credentialsPath, content, { mode: 0o600 });
+}
+
+function parseCookies(req) {
+  const header = req.headers.cookie || '';
+  return header.split(';').reduce((cookies, part) => {
+    const index = part.indexOf('=');
+    if (index === -1) return cookies;
+    const key = part.slice(0, index).trim();
+    const value = part.slice(index + 1).trim();
+    if (key) cookies[key] = decodeURIComponent(value);
+    return cookies;
+  }, {});
+}
+
+function publicUser(user) {
+  if (!user) return null;
+  return {
+    id: user.id,
+    username: user.username,
+    role: user.role
+  };
+}
+
+function signSessionId(sessionId) {
+  return crypto.createHmac('sha256', sessionSecret).update(sessionId).digest('base64url');
+}
+
+function encodeSessionToken(sessionId) {
+  return `${sessionId}.${signSessionId(sessionId)}`;
+}
+
+function decodeSessionToken(token) {
+  const parts = String(token || '').split('.');
+  if (parts.length !== 2) return null;
+  const [sessionId, signature] = parts;
+  const expected = signSessionId(sessionId);
+  const actualBuffer = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expected);
+  if (actualBuffer.length !== expectedBuffer.length) return null;
+  return crypto.timingSafeEqual(actualBuffer, expectedBuffer) ? sessionId : null;
+}
+
+function createSession(user) {
+  const sessionId = crypto.randomBytes(32).toString('base64url');
+  sessions.set(sessionId, {
+    user: publicUser(user),
+    createdAt: Date.now()
+  });
+  return encodeSessionToken(sessionId);
+}
+
+function setSessionCookie(res, token) {
+  res.setHeader('Set-Cookie', `${sessionCookieName}=${encodeURIComponent(token)}; HttpOnly; SameSite=Lax; Path=/`);
+}
+
+function clearSessionCookie(res) {
+  res.setHeader('Set-Cookie', `${sessionCookieName}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0`);
+}
+
+function attachUser(req, res, next) {
+  const token = parseCookies(req)[sessionCookieName];
+  const sessionId = decodeSessionToken(token);
+  const session = sessionId ? sessions.get(sessionId) : null;
+  req.sessionToken = sessionId || null;
+  req.user = session ? session.user : null;
+  next();
+}
+
+function requireAuth(req, res, next) {
+  if (!req.user) {
+    res.status(401).json({ error: '请先登录' });
+    return;
+  }
+  next();
+}
+
+function requireAdmin(req, res, next) {
+  if (!req.user) {
+    res.status(401).json({ error: '请先登录' });
+    return;
+  }
+  if (req.user.role !== 'admin') {
+    res.status(403).json({ error: '权限不足' });
+    return;
+  }
+  next();
+}
+
 function enqueueDbWrite(operation) {
   const run = dbWriteQueue.then(operation, operation);
   dbWriteQueue = run.catch(() => {});
@@ -115,7 +269,32 @@ function runWriteTransaction(operation) {
   }
 }
 
-app.get('/api/projects', (req, res) => {
+app.use(attachUser);
+
+app.post('/api/login', (req, res) => {
+  const username = String(req.body && req.body.username || '').trim();
+  const password = String(req.body && req.body.password || '');
+  const user = username ? db.prepare('SELECT * FROM users WHERE username = ?').get(username) : null;
+  if (!user || !verifyPassword(password, user)) {
+    res.status(401).json({ error: '用户名或密码错误' });
+    return;
+  }
+  const token = createSession(user);
+  setSessionCookie(res, token);
+  res.json({ user: publicUser(user) });
+});
+
+app.post('/api/logout', (req, res) => {
+  if (req.sessionToken) sessions.delete(req.sessionToken);
+  clearSessionCookie(res);
+  res.json({ ok: true });
+});
+
+app.get('/api/me', (req, res) => {
+  res.json({ user: req.user || null });
+});
+
+app.get('/api/projects', requireAuth, (req, res) => {
   const rows = db.prepare(`
     SELECT id, name, created_at, updated_at
     FROM projects
@@ -124,7 +303,7 @@ app.get('/api/projects', (req, res) => {
   res.json({ projects: rows.map(projectSummary) });
 });
 
-app.post('/api/projects', async (req, res, next) => {
+app.post('/api/projects', requireAdmin, async (req, res, next) => {
   try {
     const name = validateName(req.body && req.body.name);
     const row = await enqueueDbWrite(() => runWriteTransaction(() => {
@@ -141,7 +320,7 @@ app.post('/api/projects', async (req, res, next) => {
   }
 });
 
-app.post('/api/projects/import', async (req, res, next) => {
+app.post('/api/projects/import', requireAdmin, async (req, res, next) => {
   try {
     const name = validateName(req.body && req.body.name);
     const data = validateProjectData(req.body && req.body.data);
@@ -159,7 +338,7 @@ app.post('/api/projects/import', async (req, res, next) => {
   }
 });
 
-app.get('/api/projects/:id', (req, res) => {
+app.get('/api/projects/:id', requireAuth, (req, res) => {
   const row = db.prepare('SELECT * FROM projects WHERE id = ?').get(req.params.id);
   if (!row) {
     res.status(404).json({ error: '项目不存在' });
@@ -168,7 +347,7 @@ app.get('/api/projects/:id', (req, res) => {
   res.json({ project: parseProjectRow(row) });
 });
 
-app.put('/api/projects/:id', async (req, res, next) => {
+app.put('/api/projects/:id', requireAuth, async (req, res, next) => {
   try {
     const data = validateProjectData(req.body && req.body.data);
     const name = req.body && req.body.name ? validateName(req.body.name) : null;
@@ -194,7 +373,7 @@ app.put('/api/projects/:id', async (req, res, next) => {
   }
 });
 
-app.delete('/api/projects/:id', async (req, res, next) => {
+app.delete('/api/projects/:id', requireAdmin, async (req, res, next) => {
   try {
     await enqueueDbWrite(() => runWriteTransaction(() => {
       const result = db.prepare('DELETE FROM projects WHERE id = ?').run(req.params.id);
