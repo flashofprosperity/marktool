@@ -18,7 +18,10 @@
           'toolbar.currentType': '当前标记类型',
           'toolbar.showText': '显示标记文本',
           'toolbar.export': '导出 JSON',
-          'toolbar.import': '导入 JSON',
+          'toolbar.import': '导入',
+          'toolbar.importType': '导入类型',
+          'toolbar.importJson': 'JSON',
+          'toolbar.importCsv': 'CSV',
           'toolbar.clearAll': '清空所有标签',
           'toolbar.language': '语言',
           'auth.logout': '退出',
@@ -88,6 +91,7 @@
           'panel.canvasDisplay': '画布显示',
           'panel.treeMode': '树状结构',
           'panel.typeMode': '按类型',
+          'panel.collapseAll': '全部折叠',
           'panel.allNodes': '全部节点',
           'panel.selectedNodes': '已选 {count} 个节点',
           'panel.noNodes': '暂无节点',
@@ -105,6 +109,8 @@
           'tags.editTitle': '编辑文本',
           'tags.addChildTitle': '添加子标签',
           'tags.deleteTitle': '删除',
+          'tags.assignCoordinateTitle': '定位',
+          'tags.unassignedCoordinate': '未定位',
           'tags.noChildType': '无法创建子标签：层级仅支持设备 Location > Event，或工序 Location > Process > Event。',
           'tags.locationCategory': 'Location 分类',
           'tags.locationEquipment': '设备',
@@ -149,7 +155,15 @@
           'import.defaultProject': '导入项目',
           'import.success': '导入成功，已创建新项目！',
           'import.failed': '导入失败：{message}',
-          'import.parseFailed': 'JSON文件解析失败：{message}'
+          'import.parseFailed': 'JSON文件解析失败：{message}',
+          'csv.importFailed': 'CSV导入失败：{message}',
+          'csv.importSuccess': 'CSV导入完成：新增 {stations} 个 Station，新增 {locations} 个 Location，跳过 {skipped} 行。',
+          'csv.missingColumns': 'CSV缺少必要列：Station No. 或 LocationID。',
+          'csv.empty': 'CSV没有可导入的数据。',
+          'csv.noProject': '请先打开项目再导入 CSV。',
+          'csv.noImage': '请先上传图片再分配坐标。',
+          'csv.assignHint': '请在图片上点击，为 {name} 分配坐标。',
+          'csv.assignButtonTitle': '点击后在图片上定位该 Station'
         },
         'en-US': {
           'app.title': 'MES Core Data Designer',
@@ -157,7 +171,10 @@
           'toolbar.currentType': 'Current label type',
           'toolbar.showText': 'Show label text',
           'toolbar.export': 'Export JSON',
-          'toolbar.import': 'Import JSON',
+          'toolbar.import': 'Import',
+          'toolbar.importType': 'Import type',
+          'toolbar.importJson': 'JSON',
+          'toolbar.importCsv': 'CSV',
           'toolbar.clearAll': 'Clear all labels',
           'toolbar.language': 'Language',
           'auth.logout': 'Log out',
@@ -227,6 +244,7 @@
           'panel.canvasDisplay': 'Canvas',
           'panel.treeMode': 'Tree',
           'panel.typeMode': 'By type',
+          'panel.collapseAll': 'Collapse all',
           'panel.allNodes': 'All nodes',
           'panel.selectedNodes': '{count} nodes selected',
           'panel.noNodes': 'No nodes',
@@ -244,6 +262,8 @@
           'tags.editTitle': 'Edit text',
           'tags.addChildTitle': 'Add child label',
           'tags.deleteTitle': 'Delete',
+          'tags.assignCoordinateTitle': 'Locate',
+          'tags.unassignedCoordinate': 'Unlocated',
           'tags.noChildType': 'Cannot create child label: equipment Location > Event, or process Location > Process > Event.',
           'tags.locationCategory': 'Location category',
           'tags.locationEquipment': 'Equipment',
@@ -288,7 +308,15 @@
           'import.defaultProject': 'Imported project',
           'import.success': 'Import complete. A new project was created.',
           'import.failed': 'Import failed: {message}',
-          'import.parseFailed': 'JSON parse failed: {message}'
+          'import.parseFailed': 'JSON parse failed: {message}',
+          'csv.importFailed': 'CSV import failed: {message}',
+          'csv.importSuccess': 'CSV import complete: {stations} Station(s), {locations} Location(s), {skipped} row(s) skipped.',
+          'csv.missingColumns': 'CSV is missing required columns: Station No. or LocationID.',
+          'csv.empty': 'CSV has no importable rows.',
+          'csv.noProject': 'Open a project before importing CSV.',
+          'csv.noImage': 'Upload an image before assigning coordinates.',
+          'csv.assignHint': 'Click the image to locate {name}.',
+          'csv.assignButtonTitle': 'Click, then locate this Station on the image'
         }
       };
       let currentLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'zh-CN';
@@ -413,7 +441,9 @@
       const canvasBranchFilterMenu = document.getElementById('canvasBranchFilterMenu');
       const tagTreeModeBtn = document.getElementById('tagTreeModeBtn');
       const tagTypeModeBtn = document.getElementById('tagTypeModeBtn');
+      const collapseAllTagsBtn = document.getElementById('collapseAllTagsBtn');
       const exportBtn = document.getElementById('exportBtn');
+      const importTypeSelect = document.getElementById('importTypeSelect');
       const importBtn = document.getElementById('importBtn');
       const importFileInput = document.getElementById('importFileInput');
       const clearAllBtn = document.getElementById('clearAllBtn');
@@ -564,9 +594,16 @@
           : t('auth.notLoggedIn');
         logoutBtn.classList.toggle('is-hidden', !currentUser);
         newProjectBtn.classList.toggle('is-hidden', !isAdmin());
-        importBtn.classList.toggle('is-hidden', !isAdmin());
         exportBtn.classList.toggle('is-hidden', !isAdmin());
         document.body.classList.toggle('is-admin', !!isAdmin());
+        updateImportUi();
+      }
+
+      function updateImportUi() {
+        if (!importTypeSelect || !importBtn) return;
+        const isJsonImport = importTypeSelect.value !== 'csv';
+        importBtn.disabled = isJsonImport && !isAdmin();
+        importBtn.title = importBtn.disabled ? t('import.adminOnly') : '';
       }
 
       function showLoginView() {
@@ -592,12 +629,13 @@
       }
 
       function cleanTagForPersistence(tag) {
+        const hasCoordinates = hasAssignedCoordinates(tag);
         const newTag = {
           id: tag.id,
           typeIndex: tag.typeIndex,
           text: tag.text,
-          x: +tag.x.toFixed(4),
-          y: +tag.y.toFixed(4)
+          x: hasCoordinates ? +Number(tag.x).toFixed(4) : null,
+          y: hasCoordinates ? +Number(tag.y).toFixed(4) : null
         };
         if (tag.locationCategory) newTag.locationCategory = tag.locationCategory;
         if (tag.eventRecordId) newTag.eventRecordId = tag.eventRecordId;
@@ -608,6 +646,18 @@
           ? tag.children.map(cleanTagForPersistence)
           : [];
         return newTag;
+      }
+
+      function hasAssignedCoordinates(tag) {
+        return tag
+          && tag.x !== null
+          && tag.x !== undefined
+          && tag.x !== ''
+          && tag.y !== null
+          && tag.y !== undefined
+          && tag.y !== ''
+          && Number.isFinite(Number(tag.x))
+          && Number.isFinite(Number(tag.y));
       }
 
       function serializeProjectData() {
@@ -725,6 +775,8 @@
       function normalizeImportedTags(tagList) {
         tagList.forEach(tag => {
           if (!Array.isArray(tag.children)) tag.children = [];
+          tag.x = hasAssignedCoordinates(tag) ? Number(tag.x) : null;
+          tag.y = hasAssignedCoordinates(tag) ? Number(tag.y) : null;
           const type = tagTypes[tag.typeIndex];
           if (type && type.name.includes('Location') && !tag.locationCategory) {
             tag.locationCategory = tag.children.some(child => isEventTag(child)) ? 'equipment' : 'process';
@@ -1500,6 +1552,8 @@
         tagListMode = 'type';
         renderTagList();
       });
+      collapseAllTagsBtn.addEventListener('click', collapseAllTags);
+      importTypeSelect.addEventListener('change', updateImportUi);
       tagSearchInput.addEventListener('input', (e) => {
         tagSearchQuery = e.target.value.trim().toLowerCase();
         updateCanvasBranchFilterOptions();
@@ -1540,6 +1594,21 @@
           }
         });
         return result;
+      }
+
+      function collapseAllTags() {
+        const flattenedTags = getAllTagsFlattened();
+        collapsedTagIds = new Set(
+          flattenedTags
+            .filter(tag => tag.children && tag.children.length > 0)
+            .map(tag => String(tag._id))
+        );
+        collapsedTypeGroupIds = new Set(
+          tagTypes
+            .map((type, index) => flattenedTags.some(tag => tag.typeIndex === index) ? String(index) : null)
+            .filter(Boolean)
+        );
+        renderTagList();
       }
 
       // Canvas branch filtering works with real tag objects, but the tree is
@@ -1795,7 +1864,7 @@
         
         const visibleMarkerTags = allTags.filter(tag => {
           const type = tagTypes[tag.typeIndex];
-          return !(type && type.name.includes('Event'));
+          return hasAssignedCoordinates(tag) && !(type && type.name.includes('Event'));
         });
 
         visibleMarkerTags.forEach(tag => {
@@ -1938,8 +2007,8 @@
           eventRecord ? `${normalizeEventSwitch(eventRecord.eventSwitch)}` : '',
           eventRecord ? normalizeProcessSteps(eventRecord.processSteps).map(step => Object.values(step).join(' ')).join(' ') : '',
           getTypeAbbreviation(type ? type.name : 'Tag'),
-          `${(tag.x * 100).toFixed(1)}`,
-          `${(tag.y * 100).toFixed(1)}`
+          hasAssignedCoordinates(tag) ? `${(tag.x * 100).toFixed(1)}` : t('tags.unassignedCoordinate'),
+          hasAssignedCoordinates(tag) ? `${(tag.y * 100).toFixed(1)}` : ''
         ].join(' ').toLowerCase();
       }
 
@@ -2062,6 +2131,7 @@
         if (isCanvasBranchHiddenBySelfOrAncestor(tag)) {
           row.classList.add('canvas-filter-hidden');
         }
+        if (!hasAssignedCoordinates(tag)) row.classList.add('coordinate-unassigned');
         row.setAttribute('data-tag-id', tag.id);
         row.title = t('tags.rowTitle');
 
@@ -2076,7 +2146,9 @@
         const childMeta = childCount ? ` · ${t('tags.children', { count: childCount })}` : '';
         const locationMeta = isLocationTag(tag) ? ` · ${tag.locationCategory === 'equipment' ? t('tags.locationEquipment') : t('tags.locationProcess')}` : '';
         const eventMeta = eventRecord ? ` · es: ${normalizeEventSwitch(eventRecord.eventSwitch)}` : '';
+        const unassignedMeta = !hasAssignedCoordinates(tag) ? ` · ${t('tags.unassignedCoordinate')}` : '';
         const canAddChild = canAddChildTag(tag);
+        const canAssignCoordinate = type && type.name.includes('Station') && !hasAssignedCoordinates(tag);
         const isCollapsed = hasChildren && includeChildren && collapsedTagIds.has(String(tag.id));
 
         row.innerHTML = `
@@ -2084,9 +2156,10 @@
           <div class="tag-node-main">
             <span class="tag-node-dot" style="background:${type ? type.color : '#999'}"></span>
             <span class="tag-node-text">${escapeHtml(displayText)}</span>
-            <span class="tag-node-meta">${escapeHtml(`${getTypeAbbreviation(type ? type.name : 'Tag')}${locationMeta}${eventMeta}${childMeta}${materialCount}${parentMeta}`)}</span>
+            <span class="tag-node-meta">${escapeHtml(`${getTypeAbbreviation(type ? type.name : 'Tag')}${locationMeta}${eventMeta}${unassignedMeta}${childMeta}${materialCount}${parentMeta}`)}</span>
           </div>
           <div class="tag-node-actions">
+            ${canAssignCoordinate ? `<button class="tag-node-action assign-coordinate-btn" type="button" title="${escapeHtml(t('csv.assignButtonTitle'))}">⌖</button>` : ''}
             <button class="tag-node-action edit-tag-btn" type="button" title="${escapeHtml(t('tags.editTitle'))}">✎</button>
             ${eventRecord ? `<button class="tag-node-action edit-event-btn" type="button" title="${escapeHtml(t('menu.editEvent'))}">!</button>` : ''}
             ${canAddChild ? `<button class="tag-node-action add-child-node-btn" type="button" title="${escapeHtml(t('tags.addChildTitle'))}">+</button>` : ''}
@@ -2108,6 +2181,16 @@
         row.addEventListener('contextmenu', (e) => {
           showContextMenu(e, tag.id);
         });
+
+        const assignCoordinateBtn = row.querySelector('.assign-coordinate-btn');
+        if (assignCoordinateBtn) {
+          assignCoordinateBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (window.MESCsvImport && typeof window.MESCsvImport.startCoordinateAssignment === 'function') {
+              window.MESCsvImport.startCoordinateAssignment(tag.id);
+            }
+          });
+        }
 
         row.querySelector('.edit-tag-btn').addEventListener('click', (e) => {
           e.stopPropagation();
@@ -3008,6 +3091,12 @@
 
       // ---------- 导入 JSON ----------
       importBtn.addEventListener('click', () => {
+        if (importTypeSelect.value === 'csv') {
+          if (window.MESCsvImport && typeof window.MESCsvImport.openFilePicker === 'function') {
+            window.MESCsvImport.openFilePicker();
+          }
+          return;
+        }
         if (!isAdmin()) {
           alert(t('import.adminOnly'));
           return;
@@ -3042,6 +3131,22 @@
         // 清空文件输入框，允许重复导入同一文件
         importFileInput.value = '';
       });
+
+      window.MESDesignerApi = {
+        t,
+        getTags: () => tags,
+        getTagTypes: () => tagTypes,
+        getTypeIndexByName,
+        findTagById,
+        hasAssignedCoordinates,
+        getCanvasPointFromEvent,
+        getAnnotationCanvas: () => annotationCanvas,
+        getImageWrapper: () => imageWrapper,
+        hasOpenProject: () => !!currentProjectId,
+        hasImage: () => !!annotateImage.src,
+        renderAll,
+        markProjectDirty
+      };
 
       // ---------- 初始化 ----------
       // Initial render assumes there is no loaded image yet. Upload/import flows

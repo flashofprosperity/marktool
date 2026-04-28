@@ -20,7 +20,13 @@
       <span data-i18n="toolbar.showText">显示标记文本</span>
     </label>
     <button class="btn btn-primary" id="exportBtn" data-i18n="toolbar.export">导出 JSON</button>
-    <button class="btn btn-primary" id="importBtn" data-i18n="toolbar.import">导入 JSON</button>
+    <div class="import-switcher">
+      <select id="importTypeSelect" aria-label="Import type" data-i18n-title="toolbar.importType">
+        <option value="json" data-i18n="toolbar.importJson">JSON</option>
+        <option value="csv" data-i18n="toolbar.importCsv">CSV</option>
+      </select>
+      <button class="btn btn-primary" id="importBtn" data-i18n="toolbar.import">导入</button>
+    </div>
     <button class="btn" id="clearAllBtn" data-i18n="toolbar.clearAll">清空所有标签</button>
     <div class="language-switcher">
       <label for="languageSelect" data-i18n="toolbar.language">语言</label>
@@ -36,6 +42,7 @@
   </div>
 
   <input type="file" id="importFileInput" accept=".json" style="display:none;">
+  <input type="file" id="csvImportFileInput" accept=".csv,text/csv" style="display:none;">
 
   <main class="login-home" id="loginHome">
     <form class="login-panel" id="loginForm">
@@ -222,6 +229,7 @@
             <div class="tag-mode-row">
               <button class="tag-mode-btn active" id="tagTreeModeBtn" type="button" data-i18n="panel.treeMode">树状结构</button>
               <button class="tag-mode-btn" id="tagTypeModeBtn" type="button" data-i18n="panel.typeMode">按类型</button>
+              <button class="tag-mode-btn tag-collapse-all-btn" id="collapseAllTagsBtn" type="button" data-i18n="panel.collapseAll">全部折叠</button>
             </div>
           </div>
           <div id="tagListContainer">
@@ -241,5 +249,6 @@
   </div>
 
     <script src="./static/js/app.js"></script>
+    <script src="./static/js/csv-import-module.js"></script>
 </body>
 </html>
