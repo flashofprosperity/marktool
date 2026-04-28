@@ -114,12 +114,33 @@
       </label>
       <label class="event-field">
         <span data-i18n="event.switch">Event switch</span>
-        <input type="number" step="1" id="eventSwitchInput" class="text-edit-input event-switch-input" placeholder="0" data-i18n-placeholder="event.switch">
+        <input type="text" id="eventSwitchInput" class="text-edit-input event-switch-input" placeholder="es" data-i18n-placeholder="event.switchShort">
       </label>
       <label class="event-field">
         <span data-i18n="event.switchFunction">Event switch function</span>
         <textarea id="eventSwitchFunctionInput" class="event-textarea" rows="4" placeholder="Event switch function" data-i18n-placeholder="event.switchFunction"></textarea>
       </label>
+      <div class="event-steps-section">
+        <div class="event-steps-header">
+          <span data-i18n="event.processSteps">Process steps</span>
+          <button class="btn btn-sm" id="addEventStepBtn" type="button" data-i18n="event.addStep">+ Add step</button>
+        </div>
+        <div class="event-steps-table-wrap">
+          <table class="event-steps-table">
+            <thead>
+              <tr>
+                <th data-i18n="event.processStep">Process step</th>
+                <th data-i18n="event.processStepName">Process step name</th>
+                <th data-i18n="event.constraint">Constraint</th>
+                <th data-i18n="event.command">Command</th>
+                <th data-i18n="event.commandTemplateName">Command template name</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="eventStepsBody"></tbody>
+          </table>
+        </div>
+      </div>
       <div class="event-path-preview" id="eventPathPreview"></div>
       <div class="text-edit-actions">
         <button class="btn" id="eventEditCancel" data-i18n="common.cancel">取消</button>
@@ -174,13 +195,15 @@
       <button class="panel-toggle-btn" id="toggleRightBtn" title="折叠/展开" data-i18n-title="panel.toggle">
         <span class="toggle-icon">▶</span>
       </button>
-      <!-- 标签列表折叠区 -->
-      <div class="collapse-section" id="tagsCollapseSection">
-        <div class="collapse-header" id="tagsCollapseHeader">
-          <span data-i18n="panel.tags">标签列表</span>
-          <span class="collapse-icon">▼</span>
+      <div class="side-panel-shell">
+        <div class="side-panel-switcher">
+          <label for="sidePanelSelect" data-i18n="panel.view">视图</label>
+          <select id="sidePanelSelect" class="side-panel-select">
+            <option value="tags" data-i18n="panel.tags">标签列表</option>
+            <option value="materials" data-i18n="materials.title">物料管理</option>
+          </select>
         </div>
-        <div class="collapse-content" id="tagsCollapseContent">
+        <section class="side-panel-view" id="tagsPanelView">
           <div class="tag-list-tools">
             <div class="tag-search-row">
               <input class="tag-search-input" id="tagSearchInput" type="search" placeholder="搜索标签、类型、坐标" data-i18n-placeholder="panel.searchPlaceholder">
@@ -204,23 +227,15 @@
           <div id="tagListContainer">
             <div class="no-tags" data-i18n="tags.empty">暂无标签，点击图片添加</div>
           </div>
-        </div>
-      </div>
-      
-      <!-- 物料管理折叠区 -->
-      <div class="collapse-section" id="materialsCollapseSection">
-        <div class="collapse-header" id="materialsCollapseHeader">
-          <span data-i18n="materials.title">物料管理</span>
-          <span class="collapse-icon">▼</span>
-        </div>
-        <div class="collapse-content" id="materialsCollapseContent">
+        </section>
+        <section class="side-panel-view is-hidden" id="materialsPanelView">
           <div id="materialListContainer">
             <div class="no-materials" data-i18n="materials.empty">暂无物料</div>
           </div>
-        </div>
-        <div class="material-actions">
-          <button class="btn btn-full" id="addMaterialBtn" data-i18n="materials.add">+ 添加物料</button>
-        </div>
+          <div class="material-actions">
+            <button class="btn btn-full" id="addMaterialBtn" data-i18n="materials.add">+ 添加物料</button>
+          </div>
+        </section>
       </div>
     </div>
   </div>

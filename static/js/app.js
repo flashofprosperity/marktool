@@ -81,6 +81,7 @@
           'canvas.reset': '重置',
           'canvas.resetTitle': '重置视图',
           'panel.toggle': '折叠/展开',
+          'panel.view': '视图',
           'panel.tags': '标签列表',
           'panel.searchPlaceholder': '搜索标签、类型、坐标',
           'panel.clearSearch': '清空搜索',
@@ -92,7 +93,7 @@
           'panel.noNodes': '暂无节点',
           'panel.noMatchingNodes': '无匹配节点',
           'panel.selectAll': '全选',
-          'panel.covered': '（已由父节点显示）',
+          'panel.covered': '（已由父节点隐藏）',
           'panel.currentPrefix': '当前: ',
           'tags.empty': '暂无标签，点击图片添加',
           'tags.noMatch': '没有匹配的标签',
@@ -111,9 +112,18 @@
           'tags.chooseLocationCategory': '请选择 Location 分类',
           'event.name': 'Event',
           'event.switch': 'Event switch',
+          'event.switchShort': 'es',
           'event.switchFunction': 'Event switch function',
           'event.unnamed': '未命名事件',
           'event.listTitle': '关联事件',
+          'event.processSteps': '加工步骤',
+          'event.addStep': '+ 添加步骤',
+          'event.processStep': 'Process step',
+          'event.processStepName': 'Process step name',
+          'event.constraint': 'Constraint',
+          'event.command': 'Command',
+          'event.commandTemplateName': 'Command template name',
+          'event.deleteStep': '删除步骤',
           'materials.title': '物料管理',
           'materials.empty': '暂无物料',
           'materials.add': '+ 添加物料',
@@ -210,6 +220,7 @@
           'canvas.reset': 'Reset',
           'canvas.resetTitle': 'Reset view',
           'panel.toggle': 'Collapse/expand',
+          'panel.view': 'View',
           'panel.tags': 'Label list',
           'panel.searchPlaceholder': 'Search labels, types, coordinates',
           'panel.clearSearch': 'Clear search',
@@ -221,7 +232,7 @@
           'panel.noNodes': 'No nodes',
           'panel.noMatchingNodes': 'No matching nodes',
           'panel.selectAll': 'Select all',
-          'panel.covered': ' (shown by parent)',
+          'panel.covered': ' (hidden by parent)',
           'panel.currentPrefix': 'Current: ',
           'tags.empty': 'No labels. Click the image to add one.',
           'tags.noMatch': 'No matching labels',
@@ -240,9 +251,18 @@
           'tags.chooseLocationCategory': 'Choose Location category',
           'event.name': 'Event',
           'event.switch': 'Event switch',
+          'event.switchShort': 'es',
           'event.switchFunction': 'Event switch function',
           'event.unnamed': 'Unnamed event',
           'event.listTitle': 'Events',
+          'event.processSteps': 'Process steps',
+          'event.addStep': '+ Add step',
+          'event.processStep': 'Process step',
+          'event.processStepName': 'Process step name',
+          'event.constraint': 'Constraint',
+          'event.command': 'Command',
+          'event.commandTemplateName': 'Command template name',
+          'event.deleteStep': 'Delete step',
           'materials.title': 'Materials',
           'materials.empty': 'No materials',
           'materials.add': '+ Add material',
@@ -383,6 +403,9 @@
       const zoomReadout = document.getElementById('zoomReadout');
       const placeholder = document.getElementById('placeholder');
       const tagListContainer = document.getElementById('tagListContainer');
+      const sidePanelSelect = document.getElementById('sidePanelSelect');
+      const tagsPanelView = document.getElementById('tagsPanelView');
+      const materialsPanelView = document.getElementById('materialsPanelView');
       const tagSearchInput = document.getElementById('tagSearchInput');
       const tagSearchClearBtn = document.getElementById('tagSearchClearBtn');
       const canvasBranchFilterBtn = document.getElementById('canvasBranchFilterBtn');
@@ -397,12 +420,6 @@
       const showTextCheckbox = document.getElementById('showTextCheckbox');
       const materialListContainer = document.getElementById('materialListContainer');
       const addMaterialBtn = document.getElementById('addMaterialBtn');
-
-      // 折叠区域元素
-      const tagsCollapseHeader = document.getElementById('tagsCollapseHeader');
-      const tagsCollapseContent = document.getElementById('tagsCollapseContent');
-      const materialsCollapseHeader = document.getElementById('materialsCollapseHeader');
-      const materialsCollapseContent = document.getElementById('materialsCollapseContent');
 
       const panelRight = document.getElementById('panelRight');
       const toggleRightBtn = document.getElementById('toggleRightBtn');
@@ -428,6 +445,8 @@
       const eventNameInput = document.getElementById('eventNameInput');
       const eventSwitchInput = document.getElementById('eventSwitchInput');
       const eventSwitchFunctionInput = document.getElementById('eventSwitchFunctionInput');
+      const addEventStepBtn = document.getElementById('addEventStepBtn');
+      const eventStepsBody = document.getElementById('eventStepsBody');
       const eventPathPreview = document.getElementById('eventPathPreview');
       const eventEditConfirm = document.getElementById('eventEditConfirm');
       const eventEditCancel = document.getElementById('eventEditCancel');
@@ -436,9 +455,12 @@
       
       let contextMenuTagId = null;
       let contextMenuPosition = null; // 存储右键点击的位置
+      let sidePanelView = 'tags';
       let tagListMode = 'tree';
       let tagSearchQuery = '';
-      let canvasBranchFilterIds = [];
+      let canvasHiddenBranchIds = [];
+      let collapsedTagIds = new Set();
+      let collapsedTypeGroupIds = new Set();
       let currentProjectId = null;
       let currentProjectTitle = '';
       let saveTimer = null;
@@ -452,6 +474,7 @@
       let hoveredTagId = null;
       let isDraggingTag = false;
       let pendingLocationCategoryResolve = null;
+      let lastContextMenuOpenedAt = 0;
 
       function applyStaticI18n() {
         document.documentElement.lang = currentLanguage;
@@ -618,7 +641,9 @@
         eventRecords = [];
         displayedEventParentIds.clear();
         hoveredTagId = null;
-        canvasBranchFilterIds = [];
+        canvasHiddenBranchIds = [];
+        collapsedTagIds.clear();
+        collapsedTypeGroupIds.clear();
         tagSearchQuery = '';
         tagSearchInput.value = '';
         annotateImage.removeAttribute('src');
@@ -642,10 +667,21 @@
       }
 
       function normalizeEventSwitch(value) {
-        if (value === true) return 1;
-        if (value === false || value === null || value === undefined || value === '') return 0;
-        const parsed = parseInt(value, 10);
-        return Number.isFinite(parsed) ? parsed : 0;
+        if (value === true) return 'true';
+        if (value === false) return 'false';
+        if (value === null || value === undefined) return '';
+        return String(value);
+      }
+
+      function normalizeProcessSteps(value) {
+        if (!Array.isArray(value)) return [];
+        return value.map(step => ({
+          processStep: step && step.processStep !== undefined && step.processStep !== null ? String(step.processStep) : '',
+          processStepName: step && step.processStepName !== undefined && step.processStepName !== null ? String(step.processStepName) : '',
+          constraint: step && step.constraint !== undefined && step.constraint !== null ? String(step.constraint) : '',
+          command: step && step.command !== undefined && step.command !== null ? String(step.command) : '',
+          commandTemplateName: step && step.commandTemplateName !== undefined && step.commandTemplateName !== null ? String(step.commandTemplateName) : ''
+        }));
       }
 
       function cleanEventRecordForPersistence(record) {
@@ -658,7 +694,8 @@
           process: record && record.process ? String(record.process) : '',
           event: record && record.event ? String(record.event) : '',
           eventSwitch: normalizeEventSwitch(record && record.eventSwitch),
-          eventSwitchFunction: record && record.eventSwitchFunction ? String(record.eventSwitchFunction) : ''
+          eventSwitchFunction: record && record.eventSwitchFunction ? String(record.eventSwitchFunction) : '',
+          processSteps: normalizeProcessSteps(record && record.processSteps)
         };
       }
 
@@ -724,8 +761,9 @@
           locationCategory: path.locationCategory,
           process: path.process,
           event: tag.text || '',
-          eventSwitch: 0,
-          eventSwitchFunction: ''
+          eventSwitch: '',
+          eventSwitchFunction: '',
+          processSteps: []
         });
       }
 
@@ -772,7 +810,9 @@
         if (Array.isArray(data.materials)) {
           materials.push(...data.materials);
         }
-        canvasBranchFilterIds = [];
+        canvasHiddenBranchIds = [];
+        collapsedTagIds.clear();
+        collapsedTypeGroupIds.clear();
         displayedEventParentIds.clear();
         hoveredTagId = null;
         tagSearchQuery = '';
@@ -1048,22 +1088,53 @@
       });
 
       // 右键菜单功能
+      function setMenuItemVisible(item, visible) {
+        if (!item) return;
+        item.style.display = visible ? 'block' : 'none';
+      }
+
+      function refreshContextMenuDividers(menu) {
+        menu.querySelectorAll('.context-menu-divider').forEach(divider => {
+          let previous = divider.previousElementSibling;
+          let next = divider.nextElementSibling;
+          while (previous && previous.classList.contains('context-menu-divider')) previous = previous.previousElementSibling;
+          while (next && next.classList.contains('context-menu-divider')) next = next.nextElementSibling;
+          const hasVisiblePrevious = previous && previous.classList.contains('context-menu-item') && previous.style.display !== 'none';
+          const hasVisibleNext = next && next.classList.contains('context-menu-item') && next.style.display !== 'none';
+          divider.style.display = hasVisiblePrevious && hasVisibleNext ? 'block' : 'none';
+        });
+      }
+
+      function positionMenuInViewport(menu, x, y) {
+        const viewportPadding = 8;
+        menu.classList.remove('show');
+        menu.style.maxHeight = `${Math.max(120, window.innerHeight - viewportPadding * 2)}px`;
+        menu.style.overflowY = 'auto';
+        menu.style.left = '0px';
+        menu.style.top = '0px';
+        menu.classList.add('show');
+        requestAnimationFrame(() => {
+          const rect = menu.getBoundingClientRect();
+          const maxLeft = Math.max(viewportPadding, window.innerWidth - rect.width - viewportPadding);
+          const maxTop = Math.max(viewportPadding, window.innerHeight - rect.height - viewportPadding);
+          const left = Math.min(Math.max(viewportPadding, x), maxLeft);
+          const top = Math.min(Math.max(viewportPadding, y), maxTop);
+          menu.style.left = `${left}px`;
+          menu.style.top = `${top}px`;
+        });
+      }
+
       function showContextMenu(e, tagId = null, position = null) {
         e.preventDefault();
         e.stopPropagation();
         
         contextMenuTagId = tagId;
         contextMenuPosition = position;
+        lastContextMenuOpenedAt = Date.now();
+        typeSubMenu.classList.remove('show');
         
         // 根据是否有标签ID来决定显示哪些菜单项
-        const toggleTextItem = document.getElementById('toggleTextMenuItem');
-        const editTextItem = document.getElementById('editTextMenuItem');
-        const editEventItem = document.getElementById('editEventMenuItem');
-        const showEventsItem = document.getElementById('showEventsMenuItem');
-        const changeTypeItem = document.getElementById('changeTypeMenuItem');
-        const addChildItem = document.getElementById('addChildMenuItem');
-        const deleteTagItem = document.getElementById('deleteTagMenuItem');
-        const dividers = contextMenu.querySelectorAll('.context-menu-divider');
+        const createTagItem = document.getElementById('createTagMenuItem');
         
         if (tagId) {
           // 如果是针对现有标签的右键菜单
@@ -1071,35 +1142,35 @@
           const canAddChild = tag ? canAddChildTag(tag) : false;
           const isEvent = tag ? isEventTag(tag) : false;
           const canShowEvents = tag ? getDirectEventChildren(tag).length > 0 : false;
-          if (tag) {
+          const canToggleText = !!tag && !isEvent;
+          if (canToggleText) {
             // 检查当前节点及其子节点是否全部隐藏文本
             const allHidden = checkAllTextHidden(tag);
-            toggleTextItem.textContent = allHidden ? t('menu.showText') : t('menu.hideText');
+            toggleTextMenuItem.textContent = allHidden ? t('menu.showText') : t('menu.hideText');
           }
-          toggleTextItem.style.display = 'block';
-          editTextItem.style.display = 'block';
-          editEventItem.style.display = isEvent ? 'block' : 'none';
-          showEventsItem.textContent = displayedEventParentIds.has(tagId) ? t('menu.hideEvents') : t('menu.showEvents');
-          showEventsItem.style.display = canShowEvents ? 'block' : 'none';
-          changeTypeItem.style.display = 'none';
-          addChildItem.style.display = canAddChild ? 'block' : 'none';
-          deleteTagItem.style.display = 'block';
-          dividers.forEach(div => div.style.display = 'block');
+          setMenuItemVisible(createTagItem, false);
+          setMenuItemVisible(toggleTextMenuItem, canToggleText);
+          setMenuItemVisible(editTextMenuItem, !isEvent);
+          setMenuItemVisible(editEventMenuItem, isEvent);
+          showEventsMenuItem.textContent = displayedEventParentIds.has(tagId) ? t('menu.hideEvents') : t('menu.showEvents');
+          setMenuItemVisible(showEventsMenuItem, canShowEvents);
+          setMenuItemVisible(changeTypeMenuItem, false);
+          setMenuItemVisible(addChildMenuItem, canAddChild);
+          setMenuItemVisible(deleteTagMenuItem, !!tag);
         } else {
           // 如果是在图片空白处右键，只显示创建标签
-          toggleTextItem.style.display = 'none';
-          editTextItem.style.display = 'none';
-          editEventItem.style.display = 'none';
-          showEventsItem.style.display = 'none';
-          changeTypeItem.style.display = 'none';
-          addChildItem.style.display = 'none';
-          deleteTagItem.style.display = 'none';
-          dividers.forEach(div => div.style.display = 'none');
+          setMenuItemVisible(createTagItem, true);
+          setMenuItemVisible(toggleTextMenuItem, false);
+          setMenuItemVisible(editTextMenuItem, false);
+          setMenuItemVisible(editEventMenuItem, false);
+          setMenuItemVisible(showEventsMenuItem, false);
+          setMenuItemVisible(changeTypeMenuItem, false);
+          setMenuItemVisible(addChildMenuItem, false);
+          setMenuItemVisible(deleteTagMenuItem, false);
         }
         
-        contextMenu.style.left = e.pageX + 'px';
-        contextMenu.style.top = e.pageY + 'px';
-        contextMenu.classList.add('show');
+        refreshContextMenuDividers(contextMenu);
+        positionMenuInViewport(contextMenu, e.clientX, e.clientY);
       }
 
       function hideContextMenu() {
@@ -1111,6 +1182,9 @@
 
       // 点击其他地方关闭菜单
       document.addEventListener('click', (e) => {
+        if (e.button !== 0) return;
+        if (Date.now() - lastContextMenuOpenedAt < 250) return;
+        if (e.target.closest('#contextMenu') || e.target.closest('#typeSubMenu')) return;
         // 如果点击的不是文本编辑对话框，则关闭菜单
         if (!e.target.closest('#textEditDialog') && !e.target.closest('#eventEditDialog') && !e.target.closest('#locationCategoryDialog')) {
           hideContextMenu();
@@ -1260,14 +1334,56 @@
         }
       });
 
+      function createEventStepRow(step = {}) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><input type="text" class="event-step-input" data-field="processStep" value="${escapeHtml(step.processStep || '')}"></td>
+          <td><input type="text" class="event-step-input" data-field="processStepName" value="${escapeHtml(step.processStepName || '')}"></td>
+          <td><input type="text" class="event-step-input" data-field="constraint" value="${escapeHtml(step.constraint || '')}"></td>
+          <td><input type="text" class="event-step-input" data-field="command" value="${escapeHtml(step.command || '')}"></td>
+          <td><input type="text" class="event-step-input" data-field="commandTemplateName" value="${escapeHtml(step.commandTemplateName || '')}"></td>
+          <td><button class="tag-node-action danger delete-event-step-btn" type="button" title="${escapeHtml(t('event.deleteStep'))}">×</button></td>
+        `;
+        row.querySelector('.delete-event-step-btn').addEventListener('click', () => {
+          row.remove();
+        });
+        return row;
+      }
+
+      function renderEventStepsEditor(steps = []) {
+        eventStepsBody.innerHTML = '';
+        normalizeProcessSteps(steps).forEach(step => {
+          eventStepsBody.appendChild(createEventStepRow(step));
+        });
+      }
+
+      function readEventStepsEditor() {
+        return Array.from(eventStepsBody.querySelectorAll('tr'))
+          .map(row => {
+            const step = {
+              processStep: '',
+              processStepName: '',
+              constraint: '',
+              command: '',
+              commandTemplateName: ''
+            };
+            row.querySelectorAll('.event-step-input').forEach(input => {
+              step[input.dataset.field] = input.value;
+            });
+            return step;
+          })
+          .filter(step => Object.values(step).some(value => value.trim() !== ''));
+      }
+
       function showEventEditDialog(tagId) {
         const tag = findTagById(tagId);
         if (!tag || !isEventTag(tag)) return;
         syncEventRecordPath(tag);
         const record = getEventRecordForTag(tag);
         eventNameInput.value = record.event || tag.text || '';
-        eventSwitchInput.value = String(normalizeEventSwitch(record.eventSwitch));
+        eventSwitchInput.value = normalizeEventSwitch(record.eventSwitch);
         eventSwitchFunctionInput.value = record.eventSwitchFunction || '';
+        renderEventStepsEditor(record.processSteps);
         const path = getTagBusinessPath(tag);
         eventPathPreview.textContent = [path.lineName, path.station, path.location, path.process].filter(Boolean).join(' / ');
         eventEditDialog.dataset.tagId = tagId;
@@ -1279,11 +1395,16 @@
       function hideEventEditDialog() {
         eventEditDialog.style.display = 'none';
         eventNameInput.value = '';
-        eventSwitchInput.value = '0';
+        eventSwitchInput.value = '';
         eventSwitchFunctionInput.value = '';
+        eventStepsBody.innerHTML = '';
         eventPathPreview.textContent = '';
         delete eventEditDialog.dataset.tagId;
       }
+
+      addEventStepBtn.addEventListener('click', () => {
+        eventStepsBody.appendChild(createEventStepRow());
+      });
 
       eventEditConfirm.addEventListener('click', () => {
         const tagId = parseInt(eventEditDialog.dataset.tagId);
@@ -1293,6 +1414,7 @@
           record.event = eventNameInput.value;
           record.eventSwitch = normalizeEventSwitch(eventSwitchInput.value);
           record.eventSwitchFunction = eventSwitchFunctionInput.value;
+          record.processSteps = readEventStepsEditor();
           syncEventRecordPath(tag);
           tag.text = record.event;
           renderAll();
@@ -1358,20 +1480,17 @@
       }
       showTextCheckbox.addEventListener('change', updateTextVisibility);
 
-      // 初始化折叠功能
-      function initCollapse(header, content) {
-        let isCollapsed = false;
-        const section = header.closest('.collapse-section');
-        header.addEventListener('click', () => {
-          isCollapsed = !isCollapsed;
-          content.classList.toggle('collapsed');
-          if (section) section.classList.toggle('section-collapsed', isCollapsed);
-          header.querySelector('.collapse-icon').classList.toggle('collapsed');
-        });
+      function renderSidePanelView() {
+        sidePanelSelect.value = sidePanelView;
+        tagsPanelView.classList.toggle('is-hidden', sidePanelView !== 'tags');
+        materialsPanelView.classList.toggle('is-hidden', sidePanelView !== 'materials');
       }
 
-      initCollapse(tagsCollapseHeader, tagsCollapseContent);
-      initCollapse(materialsCollapseHeader, materialsCollapseContent);
+      sidePanelSelect.addEventListener('change', (e) => {
+        sidePanelView = e.target.value === 'materials' ? 'materials' : 'tags';
+        renderSidePanelView();
+      });
+      renderSidePanelView();
 
       tagTreeModeBtn.addEventListener('click', () => {
         tagListMode = 'tree';
@@ -1438,10 +1557,11 @@
       }
 
       function updateCanvasBranchFilterOptions() {
-        const selectedIds = new Set(canvasBranchFilterIds);
         const optionTags = getCanvasBranchOptionTags();
+        canvasHiddenBranchIds = canvasHiddenBranchIds
+          .filter(id => findTagById(parseInt(id)));
         const optionIds = new Set(optionTags.map(tag => String(tag.id)));
-        const missingSelectedTags = canvasBranchFilterIds
+        const missingHiddenTags = canvasHiddenBranchIds
           .filter(id => !optionIds.has(id))
           .map(id => findTagById(parseInt(id)))
           .filter(Boolean);
@@ -1450,21 +1570,21 @@
 
         if (optionTags.length > 0) {
           const visibleIds = optionTags.map(tag => String(tag.id));
-          const allVisibleSelected = visibleIds.every(id => selectedIds.has(id));
+          const allVisibleChecked = optionTags.every(tag => !isCanvasBranchHiddenBySelfOrAncestor(tag));
           const bulk = document.createElement('div');
           bulk.className = 'canvas-filter-bulk';
           bulk.innerHTML = `
-            <span><input type="checkbox" ${allVisibleSelected ? 'checked' : ''}> ${escapeHtml(t('panel.selectAll'))}</span>
+            <span><input type="checkbox" ${allVisibleChecked ? 'checked' : ''}> ${escapeHtml(t('panel.selectAll'))}</span>
             <span>${visibleIds.length}</span>
           `;
           bulk.addEventListener('click', (e) => {
             e.preventDefault();
-            if (allVisibleSelected) {
-              canvasBranchFilterIds = canvasBranchFilterIds.filter(id => !visibleIds.includes(id));
-            } else {
-              const nextIds = new Set(canvasBranchFilterIds);
+            if (allVisibleChecked) {
+              const nextIds = new Set(canvasHiddenBranchIds);
               visibleIds.forEach(id => nextIds.add(id));
-              canvasBranchFilterIds = Array.from(nextIds);
+              canvasHiddenBranchIds = Array.from(nextIds);
+            } else {
+              canvasHiddenBranchIds = canvasHiddenBranchIds.filter(id => !visibleIds.includes(id));
             }
             updateCanvasBranchFilterOptions();
             renderMarkers();
@@ -1473,7 +1593,7 @@
           canvasBranchFilterMenu.appendChild(bulk);
         }
 
-        if (optionTags.length === 0 && missingSelectedTags.length === 0) {
+        if (optionTags.length === 0 && missingHiddenTags.length === 0) {
           const empty = document.createElement('div');
           empty.className = 'canvas-filter-empty';
           empty.textContent = tags.length === 0 ? t('panel.noNodes') : t('panel.noMatchingNodes');
@@ -1483,24 +1603,26 @@
         function appendOption(tag, prefix = '') {
           const id = String(tag.id);
           const type = tagTypes[tag.typeIndex];
-          const isCovered = selectedIds.has(id) && canvasBranchFilterIds.some(selectedId => {
-            if (selectedId === id) return false;
-            const selectedTag = findTagById(parseInt(selectedId));
-            return selectedTag && containsTagId(selectedTag, tag.id);
-          });
+          const isHidden = canvasHiddenBranchIds.includes(id);
+          const isCovered = isCanvasBranchHiddenByAncestor(tag);
+          const isChecked = !isHidden && !isCovered;
           const label = document.createElement('label');
           label.className = 'canvas-filter-option';
           if (isCovered) label.classList.add('covered');
           label.innerHTML = `
-            <input type="checkbox" value="${id}" ${selectedIds.has(id) ? 'checked' : ''}>
+            <input type="checkbox" value="${id}" ${isChecked ? 'checked' : ''} ${isCovered ? 'disabled' : ''}>
             <span>${escapeHtml(`${prefix}${getTypeAbbreviation(type ? type.name : 'Tag')} · ${getTagDisplayName(tag)}${isCovered ? t('panel.covered') : ''}`)}</span>
           `;
           const checkbox = label.querySelector('input');
           checkbox.addEventListener('change', () => {
             if (checkbox.checked) {
-              if (!canvasBranchFilterIds.includes(id)) canvasBranchFilterIds.push(id);
+              canvasHiddenBranchIds = canvasHiddenBranchIds.filter(hiddenId => hiddenId !== id);
             } else {
-              canvasBranchFilterIds = canvasBranchFilterIds.filter(selectedId => selectedId !== id);
+              if (!canvasHiddenBranchIds.includes(id)) canvasHiddenBranchIds.push(id);
+              canvasHiddenBranchIds = canvasHiddenBranchIds.filter(hiddenId => {
+                const hiddenTag = findTagById(parseInt(hiddenId));
+                return hiddenId === id || !(hiddenTag && containsTagId(tag, hiddenTag.id));
+              });
             }
             updateCanvasBranchFilterOptions();
             renderMarkers();
@@ -1509,41 +1631,43 @@
           canvasBranchFilterMenu.appendChild(label);
         }
 
-        missingSelectedTags.forEach(tag => appendOption(tag, t('panel.currentPrefix')));
+        missingHiddenTags.forEach(tag => appendOption(tag, t('panel.currentPrefix')));
         optionTags.forEach(tag => {
-          if (!missingSelectedTags.some(selectedTag => selectedTag.id === tag.id)) {
+          if (!missingHiddenTags.some(hiddenTag => hiddenTag.id === tag.id)) {
             appendOption(tag);
           }
         });
 
-        const selectedTags = canvasBranchFilterIds.map(id => findTagById(parseInt(id))).filter(Boolean);
-        if (selectedTags.length === 0) {
+        if (canvasHiddenBranchIds.length === 0) {
           canvasBranchFilterLabel.textContent = t('panel.allNodes');
-        } else if (selectedTags.length === 1) {
-          canvasBranchFilterLabel.textContent = getTagDisplayName(selectedTags[0]);
         } else {
-          canvasBranchFilterLabel.textContent = t('panel.selectedNodes', { count: selectedTags.length });
+          const visibleCount = getAllTagsFlattened(getCanvasVisibleRootTags()).length;
+          canvasBranchFilterLabel.textContent = t('panel.selectedNodes', { count: visibleCount });
         }
       }
 
       function getCanvasVisibleRootTags() {
-        if (canvasBranchFilterIds.length === 0) return tags;
-        const selectedNodes = canvasBranchFilterIds
-          .map(id => findTagById(parseInt(id)))
-          .filter(Boolean);
+        if (canvasHiddenBranchIds.length === 0) return tags;
+        const cloneVisible = tagList => tagList
+          .filter(tag => !canvasHiddenBranchIds.includes(String(tag.id)))
+          .map(tag => ({
+            ...tag,
+            children: tag.children && tag.children.length > 0 ? cloneVisible(tag.children) : []
+          }));
+        return cloneVisible(tags);
+      }
 
-        if (selectedNodes.length === 0) {
-          canvasBranchFilterIds = [];
-          updateCanvasBranchFilterOptions();
-          return tags;
+      function isCanvasBranchHiddenByAncestor(tag) {
+        let parent = findParentTag(tag.id);
+        while (parent) {
+          if (canvasHiddenBranchIds.includes(String(parent.id))) return true;
+          parent = findParentTag(parent.id);
         }
-        if (selectedNodes.length !== canvasBranchFilterIds.length) {
-          canvasBranchFilterIds = selectedNodes.map(tag => String(tag.id));
-          updateCanvasBranchFilterOptions();
-        }
-        return selectedNodes.filter(node => {
-          return !selectedNodes.some(otherNode => otherNode.id !== node.id && containsTagId(otherNode, node.id));
-        });
+        return false;
+      }
+
+      function isCanvasBranchHiddenBySelfOrAncestor(tag) {
+        return canvasHiddenBranchIds.includes(String(tag.id)) || isCanvasBranchHiddenByAncestor(tag);
       }
 
       function containsTagId(rootTag, targetId) {
@@ -1642,7 +1766,7 @@
           item.className = 'parent-event-item';
           item.innerHTML = `
             <img src="./static/icons/event.svg" alt="Event">
-            <span>${escapeHtml(`${record.event || eventTag.text || t('event.unnamed')}(${normalizeEventSwitch(record.eventSwitch)})`)}</span>
+            <span>${escapeHtml(`${record.event || eventTag.text || t('event.unnamed')}(es: ${normalizeEventSwitch(record.eventSwitch)})`)}</span>
           `;
           popover.appendChild(item);
         });
@@ -1680,6 +1804,9 @@
           const marker = document.createElement('div');
           marker.className = 'tag-marker';
           if (tag._isChild) marker.classList.add('child-marker');
+          if (originalTag && displayedEventParentIds.has(originalTag.id)) {
+            marker.classList.add('has-event-popover');
+          }
 
           marker.style.left = `${tag.x * 100}%`;
           marker.style.top = `${tag.y * 100}%`;
@@ -1809,6 +1936,7 @@
           eventRecord ? eventRecord.event : '',
           eventRecord ? eventRecord.eventSwitchFunction : '',
           eventRecord ? `${normalizeEventSwitch(eventRecord.eventSwitch)}` : '',
+          eventRecord ? normalizeProcessSteps(eventRecord.processSteps).map(step => Object.values(step).join(' ')).join(' ') : '',
           getTypeAbbreviation(type ? type.name : 'Tag'),
           `${(tag.x * 100).toFixed(1)}`,
           `${(tag.y * 100).toFixed(1)}`
@@ -1899,11 +2027,17 @@
           collapseDiv.appendChild(content);
           tagListContainer.appendChild(collapseDiv);
 
-          let isCollapsed = false;
+          const groupId = String(typeIndex);
+          const isCollapsed = collapsedTypeGroupIds.has(groupId);
+          content.classList.toggle('collapsed', isCollapsed);
+          header.querySelector('.collapse-icon').classList.toggle('collapsed', isCollapsed);
           header.addEventListener('click', () => {
-            isCollapsed = !isCollapsed;
-            content.classList.toggle('collapsed');
-            header.querySelector('.collapse-icon').classList.toggle('collapsed');
+            if (collapsedTypeGroupIds.has(groupId)) {
+              collapsedTypeGroupIds.delete(groupId);
+            } else {
+              collapsedTypeGroupIds.add(groupId);
+            }
+            renderTagList();
           });
         });
         if (renderedGroups === 0) {
@@ -1925,8 +2059,8 @@
         const row = document.createElement('div');
         row.className = 'tag-node-row';
         if (tagSearchQuery && doesTagMatchSearch(tag)) row.classList.add('search-hit');
-        if (canvasBranchFilterIds.includes(String(tag.id))) {
-          row.classList.add('canvas-filter-root');
+        if (isCanvasBranchHiddenBySelfOrAncestor(tag)) {
+          row.classList.add('canvas-filter-hidden');
         }
         row.setAttribute('data-tag-id', tag.id);
         row.title = t('tags.rowTitle');
@@ -1941,11 +2075,12 @@
         const materialCount = tag.materialLinks && tag.materialLinks.length ? ` · ${t('tags.materialCount', { count: tag.materialLinks.length })}` : '';
         const childMeta = childCount ? ` · ${t('tags.children', { count: childCount })}` : '';
         const locationMeta = isLocationTag(tag) ? ` · ${tag.locationCategory === 'equipment' ? t('tags.locationEquipment') : t('tags.locationProcess')}` : '';
-        const eventMeta = eventRecord ? ` · ${t('event.switch')}: ${normalizeEventSwitch(eventRecord.eventSwitch)}` : '';
+        const eventMeta = eventRecord ? ` · es: ${normalizeEventSwitch(eventRecord.eventSwitch)}` : '';
         const canAddChild = canAddChildTag(tag);
+        const isCollapsed = hasChildren && includeChildren && collapsedTagIds.has(String(tag.id));
 
         row.innerHTML = `
-          <button class="tag-node-toggle ${hasChildren && includeChildren ? '' : 'empty'}" type="button">${hasChildren && includeChildren ? '▼' : ''}</button>
+          <button class="tag-node-toggle ${hasChildren && includeChildren ? '' : 'empty'}" type="button">${hasChildren && includeChildren ? (isCollapsed ? '▶' : '▼') : ''}</button>
           <div class="tag-node-main">
             <span class="tag-node-dot" style="background:${type ? type.color : '#999'}"></span>
             <span class="tag-node-text">${escapeHtml(displayText)}</span>
@@ -2000,33 +2135,6 @@
           });
         }
 
-        if (isLocationTag(tag)) {
-          const categoryDiv = document.createElement('div');
-          categoryDiv.className = 'tag-node-location-category';
-          categoryDiv.innerHTML = `
-            <label>${escapeHtml(t('tags.locationCategory'))}</label>
-            <select class="location-category-select">
-              <option value="process" ${tag.locationCategory !== 'equipment' ? 'selected' : ''}>${escapeHtml(t('tags.locationProcess'))}</option>
-              <option value="equipment" ${tag.locationCategory === 'equipment' ? 'selected' : ''}>${escapeHtml(t('tags.locationEquipment'))}</option>
-            </select>
-          `;
-          node.appendChild(categoryDiv);
-          const categorySelect = categoryDiv.querySelector('.location-category-select');
-          categorySelect.addEventListener('change', (e) => {
-            updateLocationCategory(tag, e.target.value);
-          });
-        }
-
-        if (eventRecord) {
-          const eventDiv = document.createElement('div');
-          eventDiv.className = 'tag-node-event-summary';
-          eventDiv.innerHTML = `
-            <div><strong>${escapeHtml(t('event.switch'))}:</strong> ${escapeHtml(normalizeEventSwitch(eventRecord.eventSwitch))}</div>
-            ${eventRecord.eventSwitchFunction ? `<div>${escapeHtml(eventRecord.eventSwitchFunction)}</div>` : ''}
-          `;
-          node.appendChild(eventDiv);
-        }
-
         if (type && type.name.includes('Process')) {
           if (!tag.materialLinks) tag.materialLinks = [];
           const materialsDiv = document.createElement('div');
@@ -2053,14 +2161,18 @@
             }
           });
           node.appendChild(childrenContent);
+          if (isCollapsed) childrenContent.style.display = 'none';
 
           const toggleBtn = row.querySelector('.tag-node-toggle');
-          let isCollapsed = false;
           toggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            isCollapsed = !isCollapsed;
-            childrenContent.style.display = isCollapsed ? 'none' : '';
-            toggleBtn.textContent = isCollapsed ? '▶' : '▼';
+            const id = String(tag.id);
+            if (collapsedTagIds.has(id)) {
+              collapsedTagIds.delete(id);
+            } else {
+              collapsedTagIds.add(id);
+            }
+            renderTagList();
           });
         }
       }
@@ -2159,6 +2271,10 @@
           if (deletedEventRecordIds.length > 0) {
             eventRecords = eventRecords.filter(record => !deletedEventRecordIds.includes(record.id));
           }
+          canvasHiddenBranchIds = canvasHiddenBranchIds.filter(id => findTagById(parseInt(id)));
+          collapsedTagIds.forEach(id => {
+            if (!findTagById(parseInt(id))) collapsedTagIds.delete(id);
+          });
           displayedEventParentIds.delete(tagId);
           if (hoveredTagId === tagId) hoveredTagId = null;
           renderAll();
@@ -2231,6 +2347,7 @@
       // ★ 核心修复：renderAll 现在包含类型面板的刷新
       function renderAll() {
         // Central refresh after broad state changes.
+        renderSidePanelView();
         updateCanvasBranchFilterOptions();
         renderMarkers();
         renderTagList();
@@ -2400,6 +2517,9 @@
             setTimeout(() => {
               tags = [];
               eventRecords = [];
+              canvasHiddenBranchIds = [];
+              collapsedTagIds.clear();
+              collapsedTypeGroupIds.clear();
               displayedEventParentIds.clear();
               hoveredTagId = null;
               resetView();
@@ -2517,9 +2637,28 @@
         
         // 定位子菜单（在主菜单右侧）
         const menuRect = contextMenu.getBoundingClientRect();
-        typeSubMenu.style.left = (menuRect.right + 5) + 'px';
-        typeSubMenu.style.top = menuRect.top + 'px';
+        typeSubMenu.style.maxHeight = `${Math.max(120, window.innerHeight - 16)}px`;
+        typeSubMenu.style.overflowY = 'auto';
+        typeSubMenu.style.left = '0px';
+        typeSubMenu.style.top = '0px';
         typeSubMenu.classList.add('show');
+        const subMenuRect = typeSubMenu.getBoundingClientRect();
+        const viewportPadding = 8;
+        const rightSideLeft = menuRect.right + 5;
+        const leftSideLeft = menuRect.left - subMenuRect.width - 5;
+        const preferredLeft = rightSideLeft + subMenuRect.width + viewportPadding <= window.innerWidth
+          ? rightSideLeft
+          : leftSideLeft;
+        const left = Math.min(
+          Math.max(viewportPadding, preferredLeft),
+          Math.max(viewportPadding, window.innerWidth - subMenuRect.width - viewportPadding)
+        );
+        const top = Math.min(
+          Math.max(viewportPadding, menuRect.top),
+          Math.max(viewportPadding, window.innerHeight - subMenuRect.height - viewportPadding)
+        );
+        typeSubMenu.style.left = `${left}px`;
+        typeSubMenu.style.top = `${top}px`;
       }
 
       // 修改标签类型
@@ -2541,6 +2680,17 @@
 
       // 在右侧列表中高亮定位标签
       function highlightTagInList(tagId) {
+        sidePanelView = 'tags';
+        renderSidePanelView();
+        let parentTag = findParentTag(tagId);
+        while (parentTag) {
+          collapsedTagIds.delete(String(parentTag.id));
+          parentTag = findParentTag(parentTag.id);
+        }
+        const tag = findTagById(tagId);
+        if (tag) collapsedTypeGroupIds.delete(String(tag.typeIndex));
+        renderTagList();
+
         // 清除之前的高亮
         document.querySelectorAll('.tag-node-row.highlighted').forEach(el => {
           el.classList.remove('highlighted');
@@ -2550,26 +2700,6 @@
         const targetEditor = tagListContainer.querySelector(`.tag-node-row[data-tag-id="${tagId}"]`);
         
         if (targetEditor) {
-          // 展开所有父级折叠区域
-          let parent = targetEditor.parentElement;
-          while (parent && parent !== document.body) {
-            if (parent.classList.contains('tag-tree-children') && parent.style.display === 'none') {
-              parent.style.display = '';
-              const row = parent.previousElementSibling;
-              const toggle = row ? row.querySelector('.tag-node-toggle') : null;
-              if (toggle) toggle.textContent = '▼';
-            }
-            if (parent.classList.contains('tag-list-group-body') && parent.classList.contains('collapsed')) {
-              parent.classList.remove('collapsed');
-              const header = parent.previousElementSibling;
-              if (header && header.classList.contains('tag-list-group-header')) {
-                const icon = header.querySelector('.collapse-icon');
-                if (icon) icon.classList.remove('collapsed');
-              }
-            }
-            parent = parent.parentElement;
-          }
-          
           // 高亮显示
           targetEditor.classList.add('highlighted');
           
@@ -2587,16 +2717,6 @@
           }, 3000);
         }
       }
-
-      // 文本显示全局控制
-      function updateTextVisibility() {
-        if (showTextCheckbox.checked) {
-          imageWrapper.classList.add('show-text');
-        } else {
-          imageWrapper.classList.remove('show-text');
-        }
-      }
-      showTextCheckbox.addEventListener('change', updateTextVisibility);
 
       // ---------- Canvas interaction ----------
       // Right-click empty image space to create a new root tag.
@@ -2623,6 +2743,7 @@
       let dragStartPos = { x: 0, y: 0 };
 
       function startDrag(flatTag, e) {
+        if (e.button !== 0) return;
         // The list/canvas may pass flattened tags; always mutate the original
         // nested tag object so export/import and child relationships stay intact.
         e.preventDefault();
@@ -2767,6 +2888,7 @@
       }
 
       imageWrapper.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
         // 如果点击的是标记点，则不进行平移
         if (e.target.closest('.tag-marker')) return;
         if (e.target.closest('.canvas-controls')) return;
@@ -2856,6 +2978,9 @@
       clearAllBtn.addEventListener('click', () => {
         tags = [];
         eventRecords = [];
+        canvasHiddenBranchIds = [];
+        collapsedTagIds.clear();
+        collapsedTypeGroupIds.clear();
         displayedEventParentIds.clear();
         hoveredTagId = null;
         materials.forEach(m => m.processLinks = []); // 清空物料的工序关联

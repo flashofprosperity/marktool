@@ -46,8 +46,9 @@ db.exec(`
     location_category TEXT NOT NULL CHECK (location_category IN ('equipment', 'process')) DEFAULT 'process',
     process TEXT NOT NULL DEFAULT '',
     event TEXT NOT NULL DEFAULT '',
-    event_switch INTEGER NOT NULL DEFAULT 0,
+    event_switch TEXT NOT NULL DEFAULT '',
     event_switch_function TEXT NOT NULL DEFAULT '',
+    process_steps_json TEXT NOT NULL DEFAULT '[]',
     updated_at TEXT NOT NULL,
     UNIQUE (project_id, record_id),
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
@@ -90,6 +91,7 @@ app.use('/data', (req, res) => {
 });
 app.use(express.static(rootDir));
 
+ensureEventRecordTableShape();
 initializeUsers();
 ensureCredentialReminder();
 syncExistingProjectEventRecords();
@@ -137,11 +139,69 @@ function validateProjectData(data) {
   return data;
 }
 
+function ensureEventRecordTableShape() {
+  const columns = db.prepare('PRAGMA table_info(project_event_records)').all();
+  const eventSwitchColumn = columns.find(column => column.name === 'event_switch');
+  const hasProcessSteps = columns.some(column => column.name === 'process_steps_json');
+
+  if (!hasProcessSteps) {
+    db.exec("ALTER TABLE project_event_records ADD COLUMN process_steps_json TEXT NOT NULL DEFAULT '[]'");
+  }
+
+  if (eventSwitchColumn && String(eventSwitchColumn.type || '').toUpperCase() !== 'TEXT') {
+    db.exec(`
+      PRAGMA foreign_keys = OFF;
+      ALTER TABLE project_event_records RENAME TO project_event_records_old;
+      CREATE TABLE project_event_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        project_id INTEGER NOT NULL,
+        record_id TEXT NOT NULL,
+        line_name TEXT NOT NULL DEFAULT '',
+        station TEXT NOT NULL DEFAULT '',
+        location TEXT NOT NULL DEFAULT '',
+        location_category TEXT NOT NULL CHECK (location_category IN ('equipment', 'process')) DEFAULT 'process',
+        process TEXT NOT NULL DEFAULT '',
+        event TEXT NOT NULL DEFAULT '',
+        event_switch TEXT NOT NULL DEFAULT '',
+        event_switch_function TEXT NOT NULL DEFAULT '',
+        process_steps_json TEXT NOT NULL DEFAULT '[]',
+        updated_at TEXT NOT NULL,
+        UNIQUE (project_id, record_id),
+        FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+      );
+      INSERT INTO project_event_records (
+        id, project_id, record_id, line_name, station, location, location_category,
+        process, event, event_switch, event_switch_function, process_steps_json, updated_at
+      )
+      SELECT
+        id, project_id, record_id, line_name, station, location, location_category,
+        process, event, CAST(event_switch AS TEXT), event_switch_function,
+        COALESCE(process_steps_json, '[]'), updated_at
+      FROM project_event_records_old;
+      DROP TABLE project_event_records_old;
+      CREATE INDEX IF NOT EXISTS idx_project_event_records_project_id
+        ON project_event_records(project_id);
+      PRAGMA foreign_keys = ON;
+    `);
+  }
+}
+
 function normalizeEventSwitch(value) {
-  if (value === true) return 1;
-  if (value === false || value === null || value === undefined || value === '') return 0;
-  const parsed = parseInt(value, 10);
-  return Number.isFinite(parsed) ? parsed : 0;
+  if (value === true) return 'true';
+  if (value === false) return 'false';
+  if (value === null || value === undefined) return '';
+  return String(value);
+}
+
+function normalizeProcessSteps(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map(step => ({
+    processStep: step && step.processStep !== undefined && step.processStep !== null ? String(step.processStep) : '',
+    processStepName: step && step.processStepName !== undefined && step.processStepName !== null ? String(step.processStepName) : '',
+    constraint: step && step.constraint !== undefined && step.constraint !== null ? String(step.constraint) : '',
+    command: step && step.command !== undefined && step.command !== null ? String(step.command) : '',
+    commandTemplateName: step && step.commandTemplateName !== undefined && step.commandTemplateName !== null ? String(step.commandTemplateName) : ''
+  }));
 }
 
 function normalizeEventRecord(record) {
@@ -154,7 +214,8 @@ function normalizeEventRecord(record) {
     process: record && record.process ? String(record.process) : '',
     event: record && record.event ? String(record.event) : '',
     eventSwitch: normalizeEventSwitch(record && record.eventSwitch),
-    eventSwitchFunction: record && record.eventSwitchFunction ? String(record.eventSwitchFunction) : ''
+    eventSwitchFunction: record && record.eventSwitchFunction ? String(record.eventSwitchFunction) : '',
+    processSteps: normalizeProcessSteps(record && record.processSteps)
   };
 }
 
@@ -172,9 +233,9 @@ function syncProjectEventRecords(projectId, data, timestamp = nowIso()) {
   const insert = db.prepare(`
     INSERT INTO project_event_records (
       project_id, record_id, line_name, station, location, location_category,
-      process, event, event_switch, event_switch_function, updated_at
+      process, event, event_switch, event_switch_function, process_steps_json, updated_at
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   records.forEach(record => {
     insert.run(
@@ -188,6 +249,7 @@ function syncProjectEventRecords(projectId, data, timestamp = nowIso()) {
       record.event,
       record.eventSwitch,
       record.eventSwitchFunction,
+      JSON.stringify(record.processSteps),
       timestamp
     );
   });

@@ -587,6 +587,9 @@
         0 0 0 2px rgba(255,247,237,0.98),
         0 7px 18px rgba(146,64,14,0.24);
     }
+    .tag-marker.has-event-popover {
+      z-index: 320;
+    }
     .tag-marker.event-marker .dot {
       border-radius: 10px;
       box-shadow:
@@ -710,12 +713,49 @@
       right: calc(-1 * var(--right-panel-width));
     }
     .panel-right h3 { font-size: 15px; font-weight: 600; }
-    .panel-right .collapse-section {
-      margin-bottom: 0;
-      border-color: #dde5ef;
+    .side-panel-shell {
+      min-height: 0;
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #dde5ef;
       border-radius: 7px;
       background: #fff;
+      overflow: hidden;
       box-shadow: 0 1px 3px rgba(31,45,61,0.06);
+    }
+    .side-panel-switcher {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-bottom: 1px solid #e8ecf3;
+      background: #f7f9fc;
+      color: #606266;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+    .side-panel-select {
+      min-width: 0;
+      height: 30px;
+      border: 1px solid #dcdfe6;
+      border-radius: 5px;
+      background: #fff;
+      color: #303133;
+      font-size: 12px;
+      padding: 4px 7px;
+      outline: none;
+    }
+    .side-panel-select:focus {
+      border-color: #409eff;
+      box-shadow: 0 0 0 2px rgba(64,158,255,0.12);
+    }
+    .side-panel-view {
+      min-height: 0;
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
     }
     
     /* 标签列表容器 */
@@ -922,27 +962,6 @@
       background: #999;
     }
     
-    /* 物料列表容器 */
-    #materialsCollapseSection {
-      flex: 0 1 42%;
-      min-height: 240px;
-      display: flex;
-      flex-direction: column;
-    }
-    #materialsCollapseSection.section-collapsed {
-      flex: 0 0 auto;
-      min-height: 0;
-    }
-    #materialsCollapseSection.section-collapsed .material-actions {
-      display: none;
-    }
-    #materialsCollapseContent {
-      flex: 1 1 auto;
-      max-height: none;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-    }
     #materialListContainer {
       flex: 1 1 auto;
       overflow-y: auto;
@@ -1129,9 +1148,10 @@
       background: #fff7e6;
       box-shadow: inset 3px 0 0 #e6a23c;
     }
-    .tag-node-row.canvas-filter-root {
-      background: #f0f9eb;
-      box-shadow: inset 3px 0 0 #67c23a;
+    .tag-node-row.canvas-filter-hidden {
+      opacity: 0.58;
+      background: #f5f7fa;
+      box-shadow: inset 3px 0 0 #c0c4cc;
     }
     .tag-node-toggle {
       width: 16px;
@@ -1380,7 +1400,9 @@
     .event-edit-panel {
       display: grid;
       gap: 10px;
-      width: min(460px, calc(100vw - 32px));
+      width: min(900px, calc(100vw - 32px));
+      max-height: calc(100vh - 48px);
+      overflow: auto;
     }
     .event-field {
       display: grid;
@@ -1401,6 +1423,67 @@
       border-radius: 4px;
       font-size: 13px;
       font-family: inherit;
+    }
+    .event-steps-section {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+    .event-steps-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: #606266;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .event-steps-table-wrap {
+      overflow-x: auto;
+      border: 1px solid #e4e7ed;
+      border-radius: 5px;
+      background: #fff;
+    }
+    .event-steps-table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .event-steps-table th,
+    .event-steps-table td {
+      border-bottom: 1px solid #eef1f6;
+      padding: 5px;
+      vertical-align: middle;
+    }
+    .event-steps-table th {
+      background: #f7f9fc;
+      color: #606266;
+      font-size: 11px;
+      font-weight: 600;
+      text-align: left;
+    }
+    .event-steps-table tr:last-child td {
+      border-bottom: none;
+    }
+    .event-steps-table th:last-child,
+    .event-steps-table td:last-child {
+      width: 34px;
+      text-align: center;
+    }
+    .event-step-input {
+      width: 100%;
+      min-width: 0;
+      height: 28px;
+      border: 1px solid #dcdfe6;
+      border-radius: 4px;
+      padding: 4px 6px;
+      font-size: 12px;
+      outline: none;
+    }
+    .event-step-input:focus {
+      border-color: #409eff;
+      box-shadow: 0 0 0 2px rgba(64,158,255,0.12);
     }
     .event-path-preview {
       min-height: 18px;
@@ -1527,6 +1610,7 @@
       padding: 4px 0;
       z-index: 1000;
       min-width: 150px;
+      overflow-y: auto;
       display: none;
     }
     .context-menu.show {
