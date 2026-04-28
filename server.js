@@ -5,7 +5,7 @@ const express = require('express');
 const { DatabaseSync } = require('node:sqlite');
 
 const app = express();
-const port = Number(process.env.PORT || 9092);
+const port = Number(process.env.PORT || 9093);
 const rootDir = __dirname;
 const dataDir = path.join(rootDir, 'data');
 const dbPath = path.join(dataDir, 'projects.db');
@@ -503,7 +503,7 @@ app.use((error, req, res, next) => {
 });
 
 app.listen(port, () => {
-  console.log(`Image annotation server running at http://localhost:${port}`);
+  console.log(`Image annotation server running at http://0.0.0.0:${port}`);
 });
 
 function shutdown() {
