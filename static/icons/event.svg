@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Event">
+  <defs>
+    <linearGradient id="event-bg" x1="14" y1="8" x2="50" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fbbf24"/>
+      <stop offset="1" stop-color="#b45309"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="29" fill="url(#event-bg)"/>
+  <circle cx="32" cy="32" r="27" fill="none" stroke="#fff" stroke-width="2" opacity="0.42"/>
+  <path d="M32 13l4.8 13.8h14.6L39.6 35.2 44.1 49 32 40.5 19.9 49l4.5-13.8-11.8-8.4h14.6L32 13z" fill="#fff" stroke="#111827" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M32 22v11" stroke="#b45309" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="32" cy="41" r="2.8" fill="#b45309"/>
+</svg>

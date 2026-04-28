@@ -61,11 +61,16 @@
           'menu.showText': '显示文本',
           'menu.hideText': '隐藏文本',
           'menu.editText': '修改文本',
+          'menu.editEvent': '查看/编辑事件信息',
+          'menu.showEvents': '显示事件',
+          'menu.hideEvents': '隐藏事件',
           'menu.changeType': '修改类型',
           'menu.addChild': '添加子标签',
           'menu.deleteTag': '删除标签',
           'dialog.editTitle': '修改标签文本',
           'dialog.editPlaceholder': '输入标签文本',
+          'dialog.eventTitle': '事件信息',
+          'dialog.locationCategoryTitle': '选择 Location 分类',
           'common.cancel': '取消',
           'common.confirm': '确认',
           'workspace.upload': '上传图片',
@@ -99,7 +104,16 @@
           'tags.editTitle': '编辑文本',
           'tags.addChildTitle': '添加子标签',
           'tags.deleteTitle': '删除',
-          'tags.noChildType': '无法创建子标签：层级仅支持 Station > Location > Process。',
+          'tags.noChildType': '无法创建子标签：层级仅支持设备 Location > Event，或工序 Location > Process > Event。',
+          'tags.locationCategory': 'Location 分类',
+          'tags.locationEquipment': '设备',
+          'tags.locationProcess': '工序',
+          'tags.chooseLocationCategory': '请选择 Location 分类',
+          'event.name': 'Event',
+          'event.switch': 'Event switch',
+          'event.switchFunction': 'Event switch function',
+          'event.unnamed': '未命名事件',
+          'event.listTitle': '关联事件',
           'materials.title': '物料管理',
           'materials.empty': '暂无物料',
           'materials.add': '+ 添加物料',
@@ -176,11 +190,16 @@
           'menu.showText': 'Show text',
           'menu.hideText': 'Hide text',
           'menu.editText': 'Edit text',
+          'menu.editEvent': 'View/edit event info',
+          'menu.showEvents': 'Show events',
+          'menu.hideEvents': 'Hide events',
           'menu.changeType': 'Change type',
           'menu.addChild': 'Add child label',
           'menu.deleteTag': 'Delete label',
           'dialog.editTitle': 'Edit label text',
           'dialog.editPlaceholder': 'Enter label text',
+          'dialog.eventTitle': 'Event information',
+          'dialog.locationCategoryTitle': 'Choose Location category',
           'common.cancel': 'Cancel',
           'common.confirm': 'Confirm',
           'workspace.upload': 'Upload image',
@@ -214,7 +233,16 @@
           'tags.editTitle': 'Edit text',
           'tags.addChildTitle': 'Add child label',
           'tags.deleteTitle': 'Delete',
-          'tags.noChildType': 'Cannot create child label: the hierarchy only supports Station > Location > Process.',
+          'tags.noChildType': 'Cannot create child label: equipment Location > Event, or process Location > Process > Event.',
+          'tags.locationCategory': 'Location category',
+          'tags.locationEquipment': 'Equipment',
+          'tags.locationProcess': 'Process',
+          'tags.chooseLocationCategory': 'Choose Location category',
+          'event.name': 'Event',
+          'event.switch': 'Event switch',
+          'event.switchFunction': 'Event switch function',
+          'event.unnamed': 'Unnamed event',
+          'event.listTitle': 'Events',
           'materials.title': 'Materials',
           'materials.empty': 'No materials',
           'materials.add': '+ Add material',
@@ -278,7 +306,11 @@
           name: 'Process (name&number)', 
           color: '#087f5b',
           icon: './static/icons/process.svg'
-
+        },
+        {
+          name: 'Event',
+          color: '#b7791f',
+          icon: './static/icons/event.svg'
         }
       ];
       
@@ -315,6 +347,7 @@
        * }
        */
       let tags = [];
+      let eventRecords = [];
       
       let imageNaturalWidth = 0;
       let imageNaturalHeight = 0;
@@ -379,6 +412,8 @@
       const createTagMenuItem = document.getElementById('createTagMenuItem');
       const toggleTextMenuItem = document.getElementById('toggleTextMenuItem');
       const editTextMenuItem = document.getElementById('editTextMenuItem');
+      const editEventMenuItem = document.getElementById('editEventMenuItem');
+      const showEventsMenuItem = document.getElementById('showEventsMenuItem');
       const changeTypeMenuItem = document.getElementById('changeTypeMenuItem');
       const addChildMenuItem = document.getElementById('addChildMenuItem');
       const deleteTagMenuItem = document.getElementById('deleteTagMenuItem');
@@ -389,6 +424,15 @@
       const textEditInput = document.getElementById('textEditInput');
       const textEditConfirm = document.getElementById('textEditConfirm');
       const textEditCancel = document.getElementById('textEditCancel');
+      const eventEditDialog = document.getElementById('eventEditDialog');
+      const eventNameInput = document.getElementById('eventNameInput');
+      const eventSwitchInput = document.getElementById('eventSwitchInput');
+      const eventSwitchFunctionInput = document.getElementById('eventSwitchFunctionInput');
+      const eventPathPreview = document.getElementById('eventPathPreview');
+      const eventEditConfirm = document.getElementById('eventEditConfirm');
+      const eventEditCancel = document.getElementById('eventEditCancel');
+      const locationCategoryDialog = document.getElementById('locationCategoryDialog');
+      const locationCategoryCancel = document.getElementById('locationCategoryCancel');
       
       let contextMenuTagId = null;
       let contextMenuPosition = null; // 存储右键点击的位置
@@ -404,6 +448,10 @@
       let projectChangeVersion = 0;
       let currentUser = null;
       let currentSaveStatusKey = 'projects.choose';
+      let displayedEventParentIds = new Set();
+      let hoveredTagId = null;
+      let isDraggingTag = false;
+      let pendingLocationCategoryResolve = null;
 
       function applyStaticI18n() {
         document.documentElement.lang = currentLanguage;
@@ -528,6 +576,8 @@
           x: +tag.x.toFixed(4),
           y: +tag.y.toFixed(4)
         };
+        if (tag.locationCategory) newTag.locationCategory = tag.locationCategory;
+        if (tag.eventRecordId) newTag.eventRecordId = tag.eventRecordId;
         if (tag.materialLinks && tag.materialLinks.length > 0) {
           newTag.materialLinks = tag.materialLinks;
         }
@@ -542,6 +592,7 @@
           image: annotateImage.src || '',
           tagTypes: tagTypes.map(type => ({ ...type })),
           tags: tags.map(cleanTagForPersistence),
+          eventRecords: eventRecords.map(cleanEventRecordForPersistence),
           materials: materials.map(m => ({
             name: m.name,
             abbreviation: m.abbreviation,
@@ -564,6 +615,9 @@
           processLinks: []
         });
         tags = [];
+        eventRecords = [];
+        displayedEventParentIds.clear();
+        hoveredTagId = null;
         canvasBranchFilterIds = [];
         tagSearchQuery = '';
         tagSearchInput.value = '';
@@ -578,7 +632,122 @@
         if (name.includes('Station')) return './static/icons/station.svg';
         if (name.includes('Location')) return './static/icons/location.svg';
         if (name.includes('Process')) return './static/icons/process.svg';
+        if (name.includes('Event')) return './static/icons/event.svg';
         return type.icon || baseTagTypes[index]?.icon || '';
+      }
+
+      function ensureEventType() {
+        if (getTypeIndexByName('Event') !== -1) return;
+        tagTypes.push({ name: 'Event', color: '#b7791f', icon: './static/icons/event.svg' });
+      }
+
+      function normalizeEventSwitch(value) {
+        if (value === true) return 1;
+        if (value === false || value === null || value === undefined || value === '') return 0;
+        const parsed = parseInt(value, 10);
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
+
+      function cleanEventRecordForPersistence(record) {
+        return {
+          id: record && record.id ? String(record.id) : createEventRecordId(),
+          lineName: record && record.lineName ? String(record.lineName) : '',
+          station: record && record.station ? String(record.station) : '',
+          location: record && record.location ? String(record.location) : '',
+          locationCategory: record && record.locationCategory === 'equipment' ? 'equipment' : 'process',
+          process: record && record.process ? String(record.process) : '',
+          event: record && record.event ? String(record.event) : '',
+          eventSwitch: normalizeEventSwitch(record && record.eventSwitch),
+          eventSwitchFunction: record && record.eventSwitchFunction ? String(record.eventSwitchFunction) : ''
+        };
+      }
+
+      function createEventRecordId() {
+        return `event-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      }
+
+      function getEventRecordById(recordId) {
+        return eventRecords.find(record => record.id === recordId) || null;
+      }
+
+      function isEventTag(tag) {
+        const type = tagTypes[tag.typeIndex];
+        return !!(type && type.name.includes('Event'));
+      }
+
+      function isLocationTag(tag) {
+        const type = tagTypes[tag.typeIndex];
+        return !!(type && type.name.includes('Location'));
+      }
+
+      function getDirectEventChildren(tag) {
+        if (!tag || !Array.isArray(tag.children)) return [];
+        return tag.children.filter(child => isEventTag(child));
+      }
+
+      function normalizeImportedTags(tagList) {
+        tagList.forEach(tag => {
+          if (!Array.isArray(tag.children)) tag.children = [];
+          const type = tagTypes[tag.typeIndex];
+          if (type && type.name.includes('Location') && !tag.locationCategory) {
+            tag.locationCategory = tag.children.some(child => isEventTag(child)) ? 'equipment' : 'process';
+          }
+          normalizeImportedTags(tag.children);
+        });
+      }
+
+      function getEventRecordForTag(tag) {
+        if (!tag) return null;
+        let record = tag.eventRecordId ? getEventRecordById(tag.eventRecordId) : null;
+        if (!record) {
+          record = createEventRecordFromTag(tag);
+          tag.eventRecordId = record.id;
+          eventRecords.push(record);
+        }
+        return record;
+      }
+
+      function ensureEventRecordsForTags() {
+        getAllTagsFlattened(tags).forEach(flatTag => {
+          const tag = findTagById(flatTag._id);
+          if (tag && isEventTag(tag)) getEventRecordForTag(tag);
+        });
+      }
+
+      function createEventRecordFromTag(tag) {
+        const path = getTagBusinessPath(tag);
+        return cleanEventRecordForPersistence({
+          id: createEventRecordId(),
+          lineName: path.lineName,
+          station: path.station,
+          location: path.location,
+          locationCategory: path.locationCategory,
+          process: path.process,
+          event: tag.text || '',
+          eventSwitch: 0,
+          eventSwitchFunction: ''
+        });
+      }
+
+      function syncEventRecordPath(tag) {
+        if (!tag || !isEventTag(tag)) return;
+        const record = getEventRecordForTag(tag);
+        const path = getTagBusinessPath(tag);
+        record.lineName = path.lineName;
+        record.station = path.station;
+        record.location = path.location;
+        record.locationCategory = path.locationCategory;
+        record.process = path.process;
+        if (!record.event && tag.text) record.event = tag.text;
+      }
+
+      function getTagTypeIcon(tag, type) {
+        if (type && type.name.includes('Location')) {
+          return tag.locationCategory === 'equipment'
+            ? './static/icons/location-equipment.svg'
+            : './static/icons/location-process.svg';
+        }
+        return type && type.icon ? type.icon : '';
       }
 
       function applyProjectData(data) {
@@ -591,13 +760,21 @@
         if (tagTypes.length === 0) {
           tagTypes.push(...baseTagTypes.map(type => ({ ...type })));
         }
+        ensureEventType();
 
         tags = Array.isArray(data.tags) ? data.tags : [];
+        normalizeImportedTags(tags);
+        eventRecords = Array.isArray(data.eventRecords)
+          ? data.eventRecords.map(cleanEventRecordForPersistence)
+          : [];
+        ensureEventRecordsForTags();
         materials.length = 0;
         if (Array.isArray(data.materials)) {
           materials.push(...data.materials);
         }
         canvasBranchFilterIds = [];
+        displayedEventParentIds.clear();
+        hoveredTagId = null;
         tagSearchQuery = '';
         tagSearchInput.value = '';
 
@@ -881,6 +1058,8 @@
         // 根据是否有标签ID来决定显示哪些菜单项
         const toggleTextItem = document.getElementById('toggleTextMenuItem');
         const editTextItem = document.getElementById('editTextMenuItem');
+        const editEventItem = document.getElementById('editEventMenuItem');
+        const showEventsItem = document.getElementById('showEventsMenuItem');
         const changeTypeItem = document.getElementById('changeTypeMenuItem');
         const addChildItem = document.getElementById('addChildMenuItem');
         const deleteTagItem = document.getElementById('deleteTagMenuItem');
@@ -890,6 +1069,8 @@
           // 如果是针对现有标签的右键菜单
           const tag = findTagById(tagId);
           const canAddChild = tag ? canAddChildTag(tag) : false;
+          const isEvent = tag ? isEventTag(tag) : false;
+          const canShowEvents = tag ? getDirectEventChildren(tag).length > 0 : false;
           if (tag) {
             // 检查当前节点及其子节点是否全部隐藏文本
             const allHidden = checkAllTextHidden(tag);
@@ -897,6 +1078,9 @@
           }
           toggleTextItem.style.display = 'block';
           editTextItem.style.display = 'block';
+          editEventItem.style.display = isEvent ? 'block' : 'none';
+          showEventsItem.textContent = displayedEventParentIds.has(tagId) ? t('menu.hideEvents') : t('menu.showEvents');
+          showEventsItem.style.display = canShowEvents ? 'block' : 'none';
           changeTypeItem.style.display = 'none';
           addChildItem.style.display = canAddChild ? 'block' : 'none';
           deleteTagItem.style.display = 'block';
@@ -905,6 +1089,8 @@
           // 如果是在图片空白处右键，只显示创建标签
           toggleTextItem.style.display = 'none';
           editTextItem.style.display = 'none';
+          editEventItem.style.display = 'none';
+          showEventsItem.style.display = 'none';
           changeTypeItem.style.display = 'none';
           addChildItem.style.display = 'none';
           deleteTagItem.style.display = 'none';
@@ -926,7 +1112,7 @@
       // 点击其他地方关闭菜单
       document.addEventListener('click', (e) => {
         // 如果点击的不是文本编辑对话框，则关闭菜单
-        if (!e.target.closest('#textEditDialog')) {
+        if (!e.target.closest('#textEditDialog') && !e.target.closest('#eventEditDialog') && !e.target.closest('#locationCategoryDialog')) {
           hideContextMenu();
         }
       });
@@ -936,6 +1122,8 @@
         if (e.key === 'Escape') {
           hideContextMenu();
           hideTextEditDialog();
+          hideEventEditDialog();
+          hideLocationCategoryDialog();
         }
       });
 
@@ -957,6 +1145,25 @@
       editTextMenuItem.addEventListener('click', () => {
         if (contextMenuTagId) {
           showTextEditDialog(contextMenuTagId);
+          hideContextMenu();
+        }
+      });
+
+      editEventMenuItem.addEventListener('click', () => {
+        if (contextMenuTagId) {
+          showEventEditDialog(contextMenuTagId);
+          hideContextMenu();
+        }
+      });
+
+      showEventsMenuItem.addEventListener('click', () => {
+        if (contextMenuTagId) {
+          if (displayedEventParentIds.has(contextMenuTagId)) {
+            displayedEventParentIds.delete(contextMenuTagId);
+          } else {
+            displayedEventParentIds.add(contextMenuTagId);
+          }
+          renderMarkers();
           hideContextMenu();
         }
       });
@@ -1020,6 +1227,13 @@
           const tag = findTagById(tagId);
           if (tag) {
             tag.text = textEditInput.value;
+            if (isEventTag(tag)) {
+              const record = getEventRecordForTag(tag);
+              record.event = tag.text;
+              syncEventRecordPath(tag);
+            } else {
+              syncEventRecordPathsForBranch(tag);
+            }
             renderAll();
             markProjectDirty();
           }
@@ -1045,6 +1259,94 @@
           hideTextEditDialog();
         }
       });
+
+      function showEventEditDialog(tagId) {
+        const tag = findTagById(tagId);
+        if (!tag || !isEventTag(tag)) return;
+        syncEventRecordPath(tag);
+        const record = getEventRecordForTag(tag);
+        eventNameInput.value = record.event || tag.text || '';
+        eventSwitchInput.value = String(normalizeEventSwitch(record.eventSwitch));
+        eventSwitchFunctionInput.value = record.eventSwitchFunction || '';
+        const path = getTagBusinessPath(tag);
+        eventPathPreview.textContent = [path.lineName, path.station, path.location, path.process].filter(Boolean).join(' / ');
+        eventEditDialog.dataset.tagId = tagId;
+        eventEditDialog.style.display = 'flex';
+        eventNameInput.focus();
+        eventNameInput.select();
+      }
+
+      function hideEventEditDialog() {
+        eventEditDialog.style.display = 'none';
+        eventNameInput.value = '';
+        eventSwitchInput.value = '0';
+        eventSwitchFunctionInput.value = '';
+        eventPathPreview.textContent = '';
+        delete eventEditDialog.dataset.tagId;
+      }
+
+      eventEditConfirm.addEventListener('click', () => {
+        const tagId = parseInt(eventEditDialog.dataset.tagId);
+        const tag = tagId ? findTagById(tagId) : null;
+        if (tag && isEventTag(tag)) {
+          const record = getEventRecordForTag(tag);
+          record.event = eventNameInput.value;
+          record.eventSwitch = normalizeEventSwitch(eventSwitchInput.value);
+          record.eventSwitchFunction = eventSwitchFunctionInput.value;
+          syncEventRecordPath(tag);
+          tag.text = record.event;
+          renderAll();
+          markProjectDirty();
+        }
+        hideEventEditDialog();
+      });
+
+      eventEditCancel.addEventListener('click', hideEventEditDialog);
+
+      eventNameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') eventEditConfirm.click();
+      });
+
+      eventEditDialog.addEventListener('click', (e) => {
+        if (e.target === eventEditDialog) hideEventEditDialog();
+      });
+
+      function showLocationCategoryDialog() {
+        if (!locationCategoryDialog) return Promise.resolve('process');
+        locationCategoryDialog.style.display = 'flex';
+        const firstChoice = locationCategoryDialog.querySelector('.location-category-choice');
+        if (firstChoice) firstChoice.focus();
+        return new Promise(resolve => {
+          pendingLocationCategoryResolve = resolve;
+        });
+      }
+
+      function hideLocationCategoryDialog(value = null) {
+        if (!locationCategoryDialog || locationCategoryDialog.style.display === 'none') return;
+        locationCategoryDialog.style.display = 'none';
+        if (pendingLocationCategoryResolve) {
+          const resolve = pendingLocationCategoryResolve;
+          pendingLocationCategoryResolve = null;
+          resolve(value);
+        }
+      }
+
+      document.querySelectorAll('.location-category-choice').forEach(button => {
+        button.addEventListener('click', () => {
+          const category = button.dataset.category === 'equipment' ? 'equipment' : 'process';
+          hideLocationCategoryDialog(category);
+        });
+      });
+
+      if (locationCategoryCancel) {
+        locationCategoryCancel.addEventListener('click', () => hideLocationCategoryDialog(null));
+      }
+
+      if (locationCategoryDialog) {
+        locationCategoryDialog.addEventListener('click', (e) => {
+          if (e.target === locationCategoryDialog) hideLocationCategoryDialog(null);
+        });
+      }
 
       // 文本显示全局控制
       function updateTextVisibility() {
@@ -1260,6 +1562,93 @@
         return null;
       }
 
+      function findParentTag(targetId, list = tags, parent = null) {
+        for (let tag of list) {
+          if (tag.id === targetId) return parent;
+          if (tag.children && tag.children.length > 0) {
+            const found = findParentTag(targetId, tag.children, tag);
+            if (found) return found;
+          }
+        }
+        return null;
+      }
+
+      function getTagBusinessPath(tag) {
+        const path = {
+          lineName: currentProjectTitle || '',
+          station: '',
+          location: '',
+          locationCategory: 'process',
+          process: ''
+        };
+        const ancestors = [];
+        let cursor = tag;
+        while (cursor) {
+          ancestors.unshift(cursor);
+          cursor = findParentTag(cursor.id);
+        }
+        ancestors.forEach(item => {
+          const type = tagTypes[item.typeIndex];
+          const name = getTagDisplayName(item);
+          if (!type) return;
+          if (type.name.includes('Station')) path.station = name;
+          if (type.name.includes('Location')) {
+            path.location = name;
+            path.locationCategory = item.locationCategory === 'equipment' ? 'equipment' : 'process';
+          }
+          if (type.name.includes('Process')) path.process = name;
+        });
+        return path;
+      }
+
+      function setHoveredTag(tagId) {
+        if (isDraggingTag) return;
+        hoveredTagId = tagId;
+        updateMarkerHoverState();
+      }
+
+      function clearHoveredTag(tagId) {
+        if (isDraggingTag) return;
+        if (hoveredTagId === tagId) {
+          hoveredTagId = null;
+          updateMarkerHoverState();
+        }
+      }
+
+      function updateMarkerHoverState() {
+        const hoveredTag = hoveredTagId ? findTagById(hoveredTagId) : null;
+        document.querySelectorAll('.tag-marker').forEach(marker => {
+          const markerTagId = parseInt(marker.getAttribute('data-tag-id'));
+          const isHovered = hoveredTag && markerTagId === hoveredTag.id;
+          const isDescendant = hoveredTag && containsTagId(hoveredTag, markerTagId);
+          marker.classList.toggle('hover-root', !!isHovered);
+          marker.classList.toggle('hover-descendant', !!isDescendant);
+        });
+      }
+
+      function createParentEventPopover(parentTag) {
+        const eventChildren = getDirectEventChildren(parentTag);
+        if (eventChildren.length === 0) return null;
+        const popover = document.createElement('div');
+        popover.className = 'parent-event-popover';
+        const title = document.createElement('div');
+        title.className = 'parent-event-popover-title';
+        const parentType = tagTypes[parentTag.typeIndex];
+        title.textContent = parentTag.text || (parentType ? parentType.name : '') || t('tags.unnamed');
+        popover.appendChild(title);
+        eventChildren.forEach(eventTag => {
+          const record = getEventRecordForTag(eventTag);
+          const item = document.createElement('div');
+          item.className = 'parent-event-item';
+          item.innerHTML = `
+            <img src="./static/icons/event.svg" alt="Event">
+            <span>${escapeHtml(`${record.event || eventTag.text || t('event.unnamed')}(${normalizeEventSwitch(record.eventSwitch)})`)}</span>
+          `;
+          popover.appendChild(item);
+        });
+        return popover;
+      }
+
       function renderMarkers() {
         // Markers and connector lines are rebuilt from tag state on each render.
         // Marker positions use normalized tag.x/tag.y values, not screen pixels.
@@ -1280,8 +1669,14 @@
         const allTags = getAllTagsFlattened(visibleRootTags);
         const markerPositions = {}; // 存储标记点位置
         
-        allTags.forEach(tag => {
+        const visibleMarkerTags = allTags.filter(tag => {
           const type = tagTypes[tag.typeIndex];
+          return !(type && type.name.includes('Event'));
+        });
+
+        visibleMarkerTags.forEach(tag => {
+          const type = tagTypes[tag.typeIndex];
+          const originalTag = findTagById(tag._id);
           const marker = document.createElement('div');
           marker.className = 'tag-marker';
           if (tag._isChild) marker.classList.add('child-marker');
@@ -1294,9 +1689,10 @@
           dot.className = 'dot';
           dot.style.setProperty('--marker-color', type ? type.color : '#999');
           
-          if (type && type.icon) {
+          const markerIcon = getTagTypeIcon(originalTag || tag, type);
+          if (markerIcon) {
             const iconImg = document.createElement('img');
-            iconImg.src = type.icon;
+            iconImg.src = markerIcon;
             iconImg.className = 'marker-icon';
             iconImg.alt = type.name;
             dot.appendChild(iconImg);
@@ -1308,10 +1704,15 @@
 
           const textSpan = document.createElement('span');
           textSpan.className = 'tag-text';
-          textSpan.textContent = tag.text || '';
+          const eventRecord = originalTag && isEventTag(originalTag) ? getEventRecordForTag(originalTag) : null;
+          textSpan.textContent = eventRecord ? '' : (tag.text || '');
 
           marker.appendChild(dot);
           marker.appendChild(textSpan);
+          if (originalTag && displayedEventParentIds.has(originalTag.id)) {
+            const eventPopover = createParentEventPopover(originalTag);
+            if (eventPopover) marker.appendChild(eventPopover);
+          }
           annotationCanvas.appendChild(marker);
 
           // 记录标记点位置（用于后续绘制连接线）
@@ -1322,6 +1723,8 @@
           };
 
           marker.addEventListener('mousedown', (e) => startDrag(tag, e));
+          marker.addEventListener('mouseenter', () => setHoveredTag(tag._id));
+          marker.addEventListener('mouseleave', () => clearHoveredTag(tag._id));
           
           // 添加右键菜单事件
           marker.addEventListener('contextmenu', (e) => {
@@ -1332,15 +1735,17 @@
           marker.addEventListener('dblclick', (e) => {
             e.stopPropagation();
             highlightTagInList(tag._id);
+            if (originalTag && isEventTag(originalTag)) showEventEditDialog(tag._id);
           });
         });
         
         // 更新文本显示状态
         updateMarkerTextDisplay();
+        updateMarkerHoverState();
         
-        // 绘制父子连接线
+        // 绘制父子连接线，仅在父子两端都可见时才绘制
         allTags.forEach(tag => {
-          if (tag._parentId && markerPositions[tag._parentId]) {
+          if (tag._parentId && markerPositions[tag._parentId] && markerPositions[tag._id]) {
             const parent = markerPositions[tag._parentId];
             const child = markerPositions[tag._id];
             
@@ -1364,6 +1769,7 @@
         if (typeName.includes('Station')) return 'ST';
         if (typeName.includes('Location')) return 'LC';
         if (typeName.includes('Process')) return 'PC';
+        if (typeName.includes('Event')) return 'EV';
         return typeName.substring(0, 2).toUpperCase();
       }
 
@@ -1380,7 +1786,12 @@
         const parentType = tagTypes[parentTag.typeIndex];
         if (!parentType) return -1;
         if (parentType.name.includes('Station')) return getTypeIndexByName('Location');
-        if (parentType.name.includes('Location')) return getTypeIndexByName('Process');
+        if (parentType.name.includes('Location')) {
+          return parentTag.locationCategory === 'equipment'
+            ? getTypeIndexByName('Event')
+            : getTypeIndexByName('Process');
+        }
+        if (parentType.name.includes('Process')) return getTypeIndexByName('Event');
         return -1;
       }
 
@@ -1390,9 +1801,14 @@
 
       function getTagSearchText(tag) {
         const type = tagTypes[tag.typeIndex];
+        const eventRecord = isEventTag(tag) ? getEventRecordForTag(tag) : null;
         return [
           tag.text || '',
           type ? type.name : '',
+          tag.locationCategory || '',
+          eventRecord ? eventRecord.event : '',
+          eventRecord ? eventRecord.eventSwitchFunction : '',
+          eventRecord ? `${normalizeEventSwitch(eventRecord.eventSwitch)}` : '',
           getTypeAbbreviation(type ? type.name : 'Tag'),
           `${(tag.x * 100).toFixed(1)}`,
           `${(tag.y * 100).toFixed(1)}`
@@ -1516,11 +1932,16 @@
         row.title = t('tags.rowTitle');
 
         const childCount = hasChildren ? tag.children.length : 0;
-        const displayText = tag.text && tag.text.trim() ? tag.text.trim() : t('tags.unnamed');
+        const eventRecord = isEventTag(tag) ? getEventRecordForTag(tag) : null;
+        const displayText = eventRecord
+          ? (eventRecord.event || tag.text || t('event.unnamed'))
+          : (tag.text && tag.text.trim() ? tag.text.trim() : t('tags.unnamed'));
         const parentTag = parentId ? findTagById(parentId) : null;
         const parentMeta = parentTag ? ` · ${t('tags.parent', { name: parentTag.text || getTypeAbbreviation(tagTypes[parentTag.typeIndex]?.name || 'Tag') })}` : '';
         const materialCount = tag.materialLinks && tag.materialLinks.length ? ` · ${t('tags.materialCount', { count: tag.materialLinks.length })}` : '';
         const childMeta = childCount ? ` · ${t('tags.children', { count: childCount })}` : '';
+        const locationMeta = isLocationTag(tag) ? ` · ${tag.locationCategory === 'equipment' ? t('tags.locationEquipment') : t('tags.locationProcess')}` : '';
+        const eventMeta = eventRecord ? ` · ${t('event.switch')}: ${normalizeEventSwitch(eventRecord.eventSwitch)}` : '';
         const canAddChild = canAddChildTag(tag);
 
         row.innerHTML = `
@@ -1528,10 +1949,11 @@
           <div class="tag-node-main">
             <span class="tag-node-dot" style="background:${type ? type.color : '#999'}"></span>
             <span class="tag-node-text">${escapeHtml(displayText)}</span>
-            <span class="tag-node-meta">${escapeHtml(`${getTypeAbbreviation(type ? type.name : 'Tag')}${childMeta}${materialCount}${parentMeta}`)}</span>
+            <span class="tag-node-meta">${escapeHtml(`${getTypeAbbreviation(type ? type.name : 'Tag')}${locationMeta}${eventMeta}${childMeta}${materialCount}${parentMeta}`)}</span>
           </div>
           <div class="tag-node-actions">
             <button class="tag-node-action edit-tag-btn" type="button" title="${escapeHtml(t('tags.editTitle'))}">✎</button>
+            ${eventRecord ? `<button class="tag-node-action edit-event-btn" type="button" title="${escapeHtml(t('menu.editEvent'))}">!</button>` : ''}
             ${canAddChild ? `<button class="tag-node-action add-child-node-btn" type="button" title="${escapeHtml(t('tags.addChildTitle'))}">+</button>` : ''}
             <button class="tag-node-action danger delete-tag-btn" type="button" title="${escapeHtml(t('tags.deleteTitle'))}">×</button>
           </div>
@@ -1542,7 +1964,11 @@
 
         row.addEventListener('dblclick', (e) => {
           e.stopPropagation();
-          showTextEditDialog(tag.id);
+          if (isEventTag(tag)) {
+            showEventEditDialog(tag.id);
+          } else {
+            showTextEditDialog(tag.id);
+          }
         });
         row.addEventListener('contextmenu', (e) => {
           showContextMenu(e, tag.id);
@@ -1552,6 +1978,14 @@
           e.stopPropagation();
           showTextEditDialog(tag.id);
         });
+
+        const editEventBtn = row.querySelector('.edit-event-btn');
+        if (editEventBtn) {
+          editEventBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showEventEditDialog(tag.id);
+          });
+        }
 
         row.querySelector('.delete-tag-btn').addEventListener('click', (e) => {
           e.stopPropagation();
@@ -1564,6 +1998,33 @@
             e.stopPropagation();
             addChildToTag(tag.id);
           });
+        }
+
+        if (isLocationTag(tag)) {
+          const categoryDiv = document.createElement('div');
+          categoryDiv.className = 'tag-node-location-category';
+          categoryDiv.innerHTML = `
+            <label>${escapeHtml(t('tags.locationCategory'))}</label>
+            <select class="location-category-select">
+              <option value="process" ${tag.locationCategory !== 'equipment' ? 'selected' : ''}>${escapeHtml(t('tags.locationProcess'))}</option>
+              <option value="equipment" ${tag.locationCategory === 'equipment' ? 'selected' : ''}>${escapeHtml(t('tags.locationEquipment'))}</option>
+            </select>
+          `;
+          node.appendChild(categoryDiv);
+          const categorySelect = categoryDiv.querySelector('.location-category-select');
+          categorySelect.addEventListener('change', (e) => {
+            updateLocationCategory(tag, e.target.value);
+          });
+        }
+
+        if (eventRecord) {
+          const eventDiv = document.createElement('div');
+          eventDiv.className = 'tag-node-event-summary';
+          eventDiv.innerHTML = `
+            <div><strong>${escapeHtml(t('event.switch'))}:</strong> ${escapeHtml(normalizeEventSwitch(eventRecord.eventSwitch))}</div>
+            ${eventRecord.eventSwitchFunction ? `<div>${escapeHtml(eventRecord.eventSwitchFunction)}</div>` : ''}
+          `;
+          node.appendChild(eventDiv);
         }
 
         if (type && type.name.includes('Process')) {
@@ -1628,7 +2089,40 @@
         markProjectDirty();
       }
 
+      function updateLocationCategory(tag, nextCategory) {
+        if (!isLocationTag(tag)) return;
+        const normalizedCategory = nextCategory === 'equipment' ? 'equipment' : 'process';
+        if (tag.locationCategory === normalizedCategory) return;
+        const hasChildren = tag.children && tag.children.length > 0;
+        if (hasChildren) {
+          const canKeepChildren = tag.children.every(child => {
+            const childType = tagTypes[child.typeIndex];
+            if (!childType) return false;
+            return normalizedCategory === 'equipment'
+              ? childType.name.includes('Event')
+              : childType.name.includes('Process');
+          });
+          if (!canKeepChildren) {
+            alert(t('tags.noChildType'));
+            renderTagList();
+            return;
+          }
+        }
+        tag.locationCategory = normalizedCategory;
+        syncEventRecordPathsForBranch(tag);
+        renderAll();
+        markProjectDirty();
+      }
+
+      function syncEventRecordPathsForBranch(rootTag) {
+        if (isEventTag(rootTag)) syncEventRecordPath(rootTag);
+        if (rootTag.children && rootTag.children.length > 0) {
+          rootTag.children.forEach(syncEventRecordPathsForBranch);
+        }
+      }
+
       function deleteTagById(tagId) {
+        let deletedEventRecordIds = [];
         // 辅助函数：清理单个标签对物料的反向关联
         function cleanTagMaterialLinks(tag) {
           if (tag.materialLinks && tag.materialLinks.length > 0) {
@@ -1649,6 +2143,7 @@
             if (arr[i].id === tagId) {
               // 在删除前，清理该标签及其所有子标签对物料的反向关联
               cleanTagMaterialLinks(arr[i]);
+              deletedEventRecordIds = getEventRecordIdsForBranch(arr[i]);
               
               arr.splice(i, 1);
               return true;
@@ -1661,12 +2156,28 @@
         }
         
         if (removeFromArray(tags)) {
+          if (deletedEventRecordIds.length > 0) {
+            eventRecords = eventRecords.filter(record => !deletedEventRecordIds.includes(record.id));
+          }
+          displayedEventParentIds.delete(tagId);
+          if (hoveredTagId === tagId) hoveredTagId = null;
           renderAll();
           markProjectDirty();
         }
       }
 
-      function addChildToTag(parentId) {
+      function getEventRecordIdsForBranch(rootTag) {
+        const ids = [];
+        if (rootTag.eventRecordId) ids.push(rootTag.eventRecordId);
+        if (rootTag.children && rootTag.children.length > 0) {
+          rootTag.children.forEach(child => {
+            ids.push(...getEventRecordIdsForBranch(child));
+          });
+        }
+        return ids;
+      }
+
+      async function addChildToTag(parentId) {
         const parentTag = findTagById(parentId);
         if (!parentTag) return;
 
@@ -1690,6 +2201,7 @@
           alert(t('tags.noChildType'));
           return;
         }
+        const childType = tagTypes[childTypeIndex];
 
         const newChild = {
           id: Date.now(),
@@ -1699,8 +2211,19 @@
           y: newY,
           children: []
         };
+        if (childType && childType.name.includes('Location')) {
+          const selectedCategory = await showLocationCategoryDialog();
+          if (!selectedCategory) return;
+          newChild.locationCategory = selectedCategory;
+        }
+        if (childType && childType.name.includes('Event')) {
+          const record = createEventRecordFromTag(newChild);
+          newChild.eventRecordId = record.id;
+          eventRecords.push(record);
+        }
         
         parentTag.children.push(newChild);
+        if (childType && childType.name.includes('Event')) syncEventRecordPath(newChild);
         renderAll();
         markProjectDirty();
       }
@@ -1876,6 +2399,9 @@
             // 等待图片容器尺寸稳定后再渲染
             setTimeout(() => {
               tags = [];
+              eventRecords = [];
+              displayedEventParentIds.clear();
+              hoveredTagId = null;
               resetView();
               renderAll();
               markProjectDirty();
@@ -1921,6 +2447,7 @@
 
       // 切换节点及其所有子节点的文本显示/隐藏
       function toggleNodeTextVisibility(tag, show) {
+        if (isEventTag(tag)) return;
         // 设置或清除隐藏标记
         tag._textHidden = !show;
         
@@ -1941,8 +2468,13 @@
           if (tag) {
             const textSpan = marker.querySelector('.tag-text');
             if (textSpan) {
-              // 只有当全局显示开启 且 节点没有被手动隐藏 且 有文本内容时才显示
-              const shouldShow = isGlobalShow && tag._textHidden !== true && tag.text && tag.text.trim() !== '';
+              // Event keeps the canvas clean: show its full text on hover or via
+              // the parent-node event popover, not through the global text toggle.
+              const shouldShow = !isEventTag(tag)
+                && isGlobalShow
+                && tag._textHidden !== true
+                && textSpan.textContent
+                && textSpan.textContent.trim() !== '';
               
               if (shouldShow) {
                 textSpan.classList.remove('force-hidden');
@@ -1994,7 +2526,14 @@
       function changeTagType(tagId, newTypeIndex) {
         const tag = findTagById(tagId);
         if (tag) {
+          const previousEventRecordId = tag.eventRecordId || null;
           tag.typeIndex = newTypeIndex;
+          if (isLocationTag(tag) && !tag.locationCategory) tag.locationCategory = 'process';
+          if (isEventTag(tag)) getEventRecordForTag(tag);
+          if (!isEventTag(tag) && previousEventRecordId) {
+            eventRecords = eventRecords.filter(record => record.id !== previousEventRecordId);
+            delete tag.eventRecordId;
+          }
           renderAll();
           markProjectDirty();
         }
@@ -2092,6 +2631,9 @@
         const originalTag = findTagById(flatTag._id);
         if (!originalTag) return;
 
+        isDraggingTag = true;
+        hoveredTagId = null;
+        updateMarkerHoverState();
         dragTag = originalTag;
         dragStartMouse.x = e.clientX;
         dragStartMouse.y = e.clientY;
@@ -2120,6 +2662,7 @@
           markProjectDirty();
         }
         dragTag = null;
+        isDraggingTag = false;
         window.removeEventListener('mousemove', onDrag);
         window.removeEventListener('mouseup', stopDrag);
       }
@@ -2312,6 +2855,9 @@
       // ---------- 清空所有标签 ----------
       clearAllBtn.addEventListener('click', () => {
         tags = [];
+        eventRecords = [];
+        displayedEventParentIds.clear();
+        hoveredTagId = null;
         materials.forEach(m => m.processLinks = []); // 清空物料的工序关联
         renderAll();
         markProjectDirty();

@@ -36,6 +36,24 @@ db.exec(`
     role TEXT NOT NULL CHECK (role IN ('user', 'admin')),
     created_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS project_event_records (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER NOT NULL,
+    record_id TEXT NOT NULL,
+    line_name TEXT NOT NULL DEFAULT '',
+    station TEXT NOT NULL DEFAULT '',
+    location TEXT NOT NULL DEFAULT '',
+    location_category TEXT NOT NULL CHECK (location_category IN ('equipment', 'process')) DEFAULT 'process',
+    process TEXT NOT NULL DEFAULT '',
+    event TEXT NOT NULL DEFAULT '',
+    event_switch INTEGER NOT NULL DEFAULT 0,
+    event_switch_function TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL,
+    UNIQUE (project_id, record_id),
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+  );
+  CREATE INDEX IF NOT EXISTS idx_project_event_records_project_id
+    ON project_event_records(project_id);
 `);
 
 let dbWriteQueue = Promise.resolve();
@@ -50,9 +68,11 @@ const emptyProjectData = {
   tagTypes: [
     { name: 'Station', color: '#c92a2a', icon: './static/icons/station.svg' },
     { name: 'Location', color: '#005f99', icon: './static/icons/location.svg' },
-    { name: 'Process (name&number)', color: '#087f5b', icon: './static/icons/process.svg' }
+    { name: 'Process (name&number)', color: '#087f5b', icon: './static/icons/process.svg' },
+    { name: 'Event', color: '#b7791f', icon: './static/icons/event.svg' }
   ],
   tags: [],
+  eventRecords: [],
   materials: [
     {
       name: '物料A',
@@ -65,10 +85,14 @@ const emptyProjectData = {
 };
 
 app.use(express.json({ limit: '100mb' }));
+app.use('/data', (req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
 app.use(express.static(rootDir));
 
 initializeUsers();
 ensureCredentialReminder();
+syncExistingProjectEventRecords();
 
 function nowIso() {
   return new Date().toISOString();
@@ -111,6 +135,74 @@ function validateProjectData(data) {
     throw error;
   }
   return data;
+}
+
+function normalizeEventSwitch(value) {
+  if (value === true) return 1;
+  if (value === false || value === null || value === undefined || value === '') return 0;
+  const parsed = parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function normalizeEventRecord(record) {
+  return {
+    id: record && record.id ? String(record.id) : crypto.randomUUID(),
+    lineName: record && record.lineName ? String(record.lineName) : '',
+    station: record && record.station ? String(record.station) : '',
+    location: record && record.location ? String(record.location) : '',
+    locationCategory: record && record.locationCategory === 'equipment' ? 'equipment' : 'process',
+    process: record && record.process ? String(record.process) : '',
+    event: record && record.event ? String(record.event) : '',
+    eventSwitch: normalizeEventSwitch(record && record.eventSwitch),
+    eventSwitchFunction: record && record.eventSwitchFunction ? String(record.eventSwitchFunction) : ''
+  };
+}
+
+function normalizeProjectEventRecords(data) {
+  const normalized = Array.isArray(data.eventRecords)
+    ? data.eventRecords.map(normalizeEventRecord)
+    : [];
+  data.eventRecords = normalized;
+  return normalized;
+}
+
+function syncProjectEventRecords(projectId, data, timestamp = nowIso()) {
+  const records = normalizeProjectEventRecords(data);
+  db.prepare('DELETE FROM project_event_records WHERE project_id = ?').run(projectId);
+  const insert = db.prepare(`
+    INSERT INTO project_event_records (
+      project_id, record_id, line_name, station, location, location_category,
+      process, event, event_switch, event_switch_function, updated_at
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  records.forEach(record => {
+    insert.run(
+      projectId,
+      record.id,
+      record.lineName,
+      record.station,
+      record.location,
+      record.locationCategory,
+      record.process,
+      record.event,
+      record.eventSwitch,
+      record.eventSwitchFunction,
+      timestamp
+    );
+  });
+}
+
+function syncExistingProjectEventRecords() {
+  const rows = db.prepare('SELECT id, data_json FROM projects').all();
+  rows.forEach(row => {
+    try {
+      const data = JSON.parse(row.data_json);
+      syncProjectEventRecords(row.id, data);
+    } catch (error) {
+      // Keep startup resilient; invalid project JSON will still fail when opened.
+    }
+  });
 }
 
 function hashPassword(password, salt) {
@@ -312,6 +404,7 @@ app.post('/api/projects', requireAdmin, async (req, res, next) => {
         INSERT INTO projects (name, data_json, created_at, updated_at)
         VALUES (?, ?, ?, ?)
       `).run(name, JSON.stringify(emptyProjectData), timestamp, timestamp);
+      syncProjectEventRecords(result.lastInsertRowid, emptyProjectData, timestamp);
       return db.prepare('SELECT * FROM projects WHERE id = ?').get(result.lastInsertRowid);
     }));
     res.status(201).json({ project: parseProjectRow(row) });
@@ -326,10 +419,12 @@ app.post('/api/projects/import', requireAdmin, async (req, res, next) => {
     const data = validateProjectData(req.body && req.body.data);
     const row = await enqueueDbWrite(() => runWriteTransaction(() => {
       const timestamp = nowIso();
+      normalizeProjectEventRecords(data);
       const result = db.prepare(`
         INSERT INTO projects (name, data_json, created_at, updated_at)
         VALUES (?, ?, ?, ?)
       `).run(name, JSON.stringify(data), timestamp, timestamp);
+      syncProjectEventRecords(result.lastInsertRowid, data, timestamp);
       return db.prepare('SELECT * FROM projects WHERE id = ?').get(result.lastInsertRowid);
     }));
     res.status(201).json({ project: parseProjectRow(row) });
@@ -360,11 +455,13 @@ app.put('/api/projects/:id', requireAuth, async (req, res, next) => {
       }
       const timestamp = nowIso();
       const nextName = name || row.name;
+      normalizeProjectEventRecords(data);
       db.prepare(`
         UPDATE projects
         SET name = ?, data_json = ?, updated_at = ?
         WHERE id = ?
       `).run(nextName, JSON.stringify(data), timestamp, req.params.id);
+      syncProjectEventRecords(req.params.id, data, timestamp);
       return db.prepare('SELECT * FROM projects WHERE id = ?').get(req.params.id);
     }));
     res.json({ project: parseProjectRow(updated) });

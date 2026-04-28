@@ -77,6 +77,10 @@
     <div class="context-menu-divider"></div>
     <div class="context-menu-item" id="editTextMenuItem" data-i18n="menu.editText">修改文本</div>
     <div class="context-menu-divider"></div>
+    <div class="context-menu-item" id="editEventMenuItem" data-i18n="menu.editEvent">查看/编辑事件信息</div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" id="showEventsMenuItem" data-i18n="menu.showEvents">显示事件</div>
+    <div class="context-menu-divider"></div>
     <div class="context-menu-item" id="changeTypeMenuItem" data-i18n="menu.changeType">修改类型</div>
     <div class="context-menu-divider"></div>
     <div class="context-menu-item" id="addChildMenuItem" data-i18n="menu.addChild">添加子标签</div>
@@ -96,6 +100,50 @@
       <div class="text-edit-actions">
         <button class="btn" id="textEditCancel" data-i18n="common.cancel">取消</button>
         <button class="btn btn-primary" id="textEditConfirm" data-i18n="common.confirm">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 事件信息编辑对话框 -->
+  <div id="eventEditDialog" class="text-edit-dialog" style="display:none;">
+    <div class="text-edit-panel event-edit-panel">
+      <h3 class="text-edit-title" data-i18n="dialog.eventTitle">事件信息</h3>
+      <label class="event-field">
+        <span data-i18n="event.name">Event</span>
+        <input type="text" id="eventNameInput" class="text-edit-input" placeholder="Event" data-i18n-placeholder="event.name">
+      </label>
+      <label class="event-field">
+        <span data-i18n="event.switch">Event switch</span>
+        <input type="number" step="1" id="eventSwitchInput" class="text-edit-input event-switch-input" placeholder="0" data-i18n-placeholder="event.switch">
+      </label>
+      <label class="event-field">
+        <span data-i18n="event.switchFunction">Event switch function</span>
+        <textarea id="eventSwitchFunctionInput" class="event-textarea" rows="4" placeholder="Event switch function" data-i18n-placeholder="event.switchFunction"></textarea>
+      </label>
+      <div class="event-path-preview" id="eventPathPreview"></div>
+      <div class="text-edit-actions">
+        <button class="btn" id="eventEditCancel" data-i18n="common.cancel">取消</button>
+        <button class="btn btn-primary" id="eventEditConfirm" data-i18n="common.confirm">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Location 分类选择对话框 -->
+  <div id="locationCategoryDialog" class="text-edit-dialog" style="display:none;">
+    <div class="text-edit-panel location-category-panel">
+      <h3 class="text-edit-title" data-i18n="dialog.locationCategoryTitle">选择 Location 分类</h3>
+      <div class="location-category-actions">
+        <button class="location-category-choice" id="locationEquipmentChoice" type="button" data-category="equipment">
+          <img src="./static/icons/location-equipment.svg" alt="">
+          <span data-i18n="tags.locationEquipment">设备</span>
+        </button>
+        <button class="location-category-choice" id="locationProcessChoice" type="button" data-category="process">
+          <img src="./static/icons/location-process.svg" alt="">
+          <span data-i18n="tags.locationProcess">工序</span>
+        </button>
+      </div>
+      <div class="text-edit-actions">
+        <button class="btn" id="locationCategoryCancel" data-i18n="common.cancel">取消</button>
       </div>
     </div>
   </div>
