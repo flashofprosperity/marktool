@@ -1,8 +1,6 @@
-const fs = require('fs');
 const path = require('path');
 const repository = require('./repository');
-const { runXmlToExcel } = require('./xmlConverter');
-const { parseExcelToRows } = require('./excelParser');
+const { parseXmlToRows } = require('./xmlParser');
 const { buildProjectFromRows } = require('../projects/projectBuilder');
 const projectsService = require('../projects/service');
 const { getJobWorkDir } = require('./upload');
@@ -40,16 +38,9 @@ async function processXmlImport(jobId, options) {
 
     const workDir = getJobWorkDir(jobId);
     const xmlPath = job.sourceFile || path.join(workDir, 'input.xml');
-    const excelPath = path.join(workDir, 'output.xlsx');
 
-    repository.markJobRunning(jobId, '正在调用 Python 转换 XML');
-    await runXmlToExcel({ jobWorkDir: workDir, xmlPath, excelPath });
-
-    const outputStat = fs.statSync(excelPath);
-    repository.updateJobOutput(jobId, excelPath, outputStat.size);
-
-    repository.updateJobMessage(jobId, '正在解析 Excel');
-    const rows = parseExcelToRows(excelPath);
+    repository.markJobRunning(jobId, '正在解析 XML');
+    const rows = parseXmlToRows(xmlPath);
 
     repository.updateJobMessage(jobId, '正在构建项目');
     const projectData = buildProjectFromRows(rows);
