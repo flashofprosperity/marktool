@@ -603,7 +603,8 @@
     .tag-marker.hover-descendant {
       z-index: 120;
     }
-    .tag-marker.hover-descendant .tag-text:not(:empty) {
+    .tag-marker:not(.event-marker).hover-descendant .tag-text:not(:empty) {
+      display: block;
       border-color: #f59e0b;
       box-shadow:
         0 0 0 2px rgba(255,247,237,0.98),
@@ -648,6 +649,9 @@
       display: none !important;
     }
     .tag-marker:not(.event-marker).hover-root .tag-text.force-hidden:not(:empty) {
+      display: block !important;
+    }
+    .tag-marker:not(.event-marker).hover-descendant .tag-text.force-hidden:not(:empty) {
       display: block !important;
     }
     .parent-event-popover {
@@ -1257,19 +1261,6 @@
       border-color: #fde2e2;
       color: #f56c6c;
     }
-    .tag-node-materials {
-      margin: 2px 0 6px 39px;
-      display: grid;
-      gap: 4px;
-    }
-    .tag-node-materials select {
-      width: 100%;
-      border: 1px solid #dcdfe6;
-      border-radius: 4px;
-      padding: 4px;
-      font-size: 11px;
-      background: #fff;
-    }
     .tag-node-location-category,
     .tag-node-event-summary {
       margin: 2px 0 6px 39px;
@@ -1402,13 +1393,6 @@
       display: flex;
       flex-direction: column;
     }
-    .material-details {
-      font-size: 12px;
-      color: #666;
-    }
-    .material-details div {
-      margin-bottom: 2px;
-    }
     .no-materials {
       color: #999;
       font-size: 14px;
@@ -1522,25 +1506,6 @@
       color: #7b8794;
       font-size: 12px;
       overflow-wrap: anywhere;
-    }
-
-    
-    /* Process物料关联样式 */
-    .process-materials {
-      margin-top: 8px;
-      font-size: 12px;
-    }
-    .process-materials label {
-      display: block;
-      margin-bottom: 4px;
-      font-weight: 500;
-    }
-    .process-materials select {
-      width: 100%;
-      border: 1px solid #dcdfe6;
-      border-radius: 4px;
-      padding: 4px;
-      font-size: 11px;
     }
 
     /* 通用按钮样式补充 */
@@ -1671,34 +1636,11 @@
       background: #f5f7fa;
       color: #409eff;
     }
-    .context-menu-item.has-submenu::after {
-      content: '▶';
-      position: absolute;
-      right: 10px;
-      font-size: 10px;
-    }
     .context-menu-divider {
       height: 1px;
       background: #e4e7ed;
       margin: 4px 0;
     }
-    
-    /* 子菜单位置调整 */
-    #typeSubMenu {
-      min-width: 180px;
-    }
-    .type-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .type-option-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    .type-icon-preview,
     .marker-icon {
       display: inline-block;
       width: 28px;
@@ -1707,22 +1649,4 @@
       border-radius: 50%;
       background: rgba(255,255,255,0.85);
       border: 1px solid rgba(0,0,0,0.18);
-    }
-    .type-icon-preview {
-      width: 22px;
-      min-width: 22px;
-      height: 22px;
-    }
-    .type-icon-empty {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      color: #999;
-      background: #f5f7fa;
-    }
-    .type-option.current {
-      background: #ecf5ff;
-      color: #409eff;
-      font-weight: 600;
     }

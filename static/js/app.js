@@ -22,6 +22,7 @@
           'toolbar.importType': '导入类型',
           'toolbar.importJson': 'JSON',
           'toolbar.importCsv': 'CSV',
+          'toolbar.importXml': 'XML',
           'toolbar.clearAll': '清空所有标签',
           'toolbar.language': '语言',
           'auth.logout': '退出',
@@ -67,7 +68,6 @@
           'menu.editEvent': '查看/编辑事件信息',
           'menu.showEvents': '显示事件',
           'menu.hideEvents': '隐藏事件',
-          'menu.changeType': '修改类型',
           'menu.addChild': '添加子标签',
           'menu.deleteTag': '删除标签',
           'dialog.editTitle': '修改标签文本',
@@ -103,7 +103,6 @@
           'tags.noMatch': '没有匹配的标签',
           'tags.unnamed': '未命名标签',
           'tags.children': '{count} 子',
-          'tags.materialCount': '物料 {count}',
           'tags.parent': '父级: {name}',
           'tags.rowTitle': '双击编辑标签文本，右键打开更多操作',
           'tags.editTitle': '编辑文本',
@@ -111,7 +110,7 @@
           'tags.deleteTitle': '删除',
           'tags.assignCoordinateTitle': '定位',
           'tags.unassignedCoordinate': '未定位',
-          'tags.noChildType': '无法创建子标签：层级仅支持设备 Location > Event，或工序 Location > Process > Event。',
+          'tags.noChildType': '无法创建子标签：当前层级仅支持 Station > Location > Event。',
           'tags.locationCategory': 'Location 分类',
           'tags.locationEquipment': '设备',
           'tags.locationProcess': '工序',
@@ -143,11 +142,6 @@
           'materials.category': '分类',
           'materials.type': '类型',
           'materials.delete': '删除',
-          'materials.linkedProcesses': '关联工序:',
-          'materials.processCount': '{count} 个',
-          'materials.noLinks': '暂无关联',
-          'materials.unnamedProcess': '未命名工序',
-          'materials.selectTitle': '关联物料，按住 Ctrl/Cmd 可多选',
           'export.adminOnly': '只有管理员可以导出 JSON',
           'export.defaultName': 'mes-core-data-designer',
           'import.adminOnly': '只有管理员可以导入项目',
@@ -156,6 +150,11 @@
           'import.success': '导入成功，已创建新项目！',
           'import.failed': '导入失败：{message}',
           'import.parseFailed': 'JSON文件解析失败：{message}',
+          'xml.uploading': '正在上传 XML 文件...',
+          'xml.submitted': 'XML 已上传，正在后台处理...',
+          'xml.success': 'XML 导入完成，已创建新项目。',
+          'xml.failed': 'XML 导入失败：{message}',
+          'xml.pollFailed': '查询 XML 导入任务失败：{message}',
           'csv.importFailed': 'CSV导入失败：{message}',
           'csv.importSuccess': 'CSV导入完成：新增 {stations} 个 Station，新增 {locations} 个 Location，跳过 {skipped} 行。',
           'csv.missingColumns': 'CSV缺少必要列：Station No. 或 LocationID。',
@@ -175,6 +174,7 @@
           'toolbar.importType': 'Import type',
           'toolbar.importJson': 'JSON',
           'toolbar.importCsv': 'CSV',
+          'toolbar.importXml': 'XML',
           'toolbar.clearAll': 'Clear all labels',
           'toolbar.language': 'Language',
           'auth.logout': 'Log out',
@@ -220,7 +220,6 @@
           'menu.editEvent': 'View/edit event info',
           'menu.showEvents': 'Show events',
           'menu.hideEvents': 'Hide events',
-          'menu.changeType': 'Change type',
           'menu.addChild': 'Add child label',
           'menu.deleteTag': 'Delete label',
           'dialog.editTitle': 'Edit label text',
@@ -256,7 +255,6 @@
           'tags.noMatch': 'No matching labels',
           'tags.unnamed': 'Unnamed label',
           'tags.children': '{count} child',
-          'tags.materialCount': '{count} material',
           'tags.parent': 'Parent: {name}',
           'tags.rowTitle': 'Double-click to edit text, right-click for more actions',
           'tags.editTitle': 'Edit text',
@@ -264,7 +262,7 @@
           'tags.deleteTitle': 'Delete',
           'tags.assignCoordinateTitle': 'Locate',
           'tags.unassignedCoordinate': 'Unlocated',
-          'tags.noChildType': 'Cannot create child label: equipment Location > Event, or process Location > Process > Event.',
+          'tags.noChildType': 'Cannot create child label: the current hierarchy supports Station > Location > Event.',
           'tags.locationCategory': 'Location category',
           'tags.locationEquipment': 'Equipment',
           'tags.locationProcess': 'Process',
@@ -296,11 +294,6 @@
           'materials.category': 'Category',
           'materials.type': 'Type',
           'materials.delete': 'Delete',
-          'materials.linkedProcesses': 'Linked processes:',
-          'materials.processCount': '{count}',
-          'materials.noLinks': 'No links',
-          'materials.unnamedProcess': 'Unnamed process',
-          'materials.selectTitle': 'Link materials. Hold Ctrl/Cmd for multi-select',
           'export.adminOnly': 'Only admins can export JSON',
           'export.defaultName': 'mes-core-data-designer',
           'import.adminOnly': 'Only admins can import projects',
@@ -309,6 +302,11 @@
           'import.success': 'Import complete. A new project was created.',
           'import.failed': 'Import failed: {message}',
           'import.parseFailed': 'JSON parse failed: {message}',
+          'xml.uploading': 'Uploading XML file...',
+          'xml.submitted': 'XML uploaded. Processing in the background...',
+          'xml.success': 'XML import complete. A new project was created.',
+          'xml.failed': 'XML import failed: {message}',
+          'xml.pollFailed': 'XML import status check failed: {message}',
           'csv.importFailed': 'CSV import failed: {message}',
           'csv.importSuccess': 'CSV import complete: {stations} Station(s), {locations} Location(s), {skipped} row(s) skipped.',
           'csv.missingColumns': 'CSV is missing required columns: Station No. or LocationID.',
@@ -350,11 +348,6 @@
           color: '#005f99',
           icon: './static/icons/location.svg'
         },
-        { 
-          name: 'Process (name&number)', 
-          color: '#087f5b',
-          icon: './static/icons/process.svg'
-        },
         {
           name: 'Event',
           color: '#b7791f',
@@ -369,7 +362,7 @@
        *   abbreviation: short display text,
        *   category: string,
        *   type: string,
-       *   processLinks: tag id[] linked from Process tags
+       *   processLinks: legacy linked tag id[]
        * }
        */
       const materials = [
@@ -377,8 +370,7 @@
           name: t('materials.defaultName'),
           abbreviation: 'MA',
           category: t('materials.defaultCategory'),
-          type: t('materials.defaultType'),
-          processLinks: [] // 与process关联的ID数组
+          type: t('materials.defaultType')
         },
       ];
       /*
@@ -446,6 +438,7 @@
       const importTypeSelect = document.getElementById('importTypeSelect');
       const importBtn = document.getElementById('importBtn');
       const importFileInput = document.getElementById('importFileInput');
+      const xmlImportFileInput = document.getElementById('xmlImportFileInput');
       const clearAllBtn = document.getElementById('clearAllBtn');
       const showTextCheckbox = document.getElementById('showTextCheckbox');
       const materialListContainer = document.getElementById('materialListContainer');
@@ -461,14 +454,14 @@
       const editTextMenuItem = document.getElementById('editTextMenuItem');
       const editEventMenuItem = document.getElementById('editEventMenuItem');
       const showEventsMenuItem = document.getElementById('showEventsMenuItem');
-      const changeTypeMenuItem = document.getElementById('changeTypeMenuItem');
       const addChildMenuItem = document.getElementById('addChildMenuItem');
       const deleteTagMenuItem = document.getElementById('deleteTagMenuItem');
-      const typeSubMenu = document.getElementById('typeSubMenu');
       
       // 文本编辑对话框元素
       const textEditDialog = document.getElementById('textEditDialog');
       const textEditInput = document.getElementById('textEditInput');
+      const locationEditCategoryField = document.getElementById('locationEditCategoryField');
+      const locationEditCategorySelect = document.getElementById('locationEditCategorySelect');
       const textEditConfirm = document.getElementById('textEditConfirm');
       const textEditCancel = document.getElementById('textEditCancel');
       const eventEditDialog = document.getElementById('eventEditDialog');
@@ -601,8 +594,8 @@
 
       function updateImportUi() {
         if (!importTypeSelect || !importBtn) return;
-        const isJsonImport = importTypeSelect.value !== 'csv';
-        importBtn.disabled = isJsonImport && !isAdmin();
+        const requiresAdmin = importTypeSelect.value !== 'csv';
+        importBtn.disabled = requiresAdmin && !isAdmin();
         importBtn.title = importBtn.disabled ? t('import.adminOnly') : '';
       }
 
@@ -661,18 +654,24 @@
       }
 
       function serializeProjectData() {
+        const cleanMaterials = materials.map(m => {
+          const material = {
+            name: m.name,
+            abbreviation: m.abbreviation,
+            category: m.category,
+            type: m.type
+          };
+          if (Array.isArray(m.processLinks) && m.processLinks.length > 0) {
+            material.processLinks = m.processLinks;
+          }
+          return material;
+        });
         return {
           image: annotateImage.src || '',
           tagTypes: tagTypes.map(type => ({ ...type })),
           tags: tags.map(cleanTagForPersistence),
           eventRecords: eventRecords.map(cleanEventRecordForPersistence),
-          materials: materials.map(m => ({
-            name: m.name,
-            abbreviation: m.abbreviation,
-            category: m.category,
-            type: m.type,
-            processLinks: m.processLinks || []
-          }))
+          materials: cleanMaterials
         };
       }
 
@@ -684,8 +683,7 @@
           name: t('materials.defaultName'),
           abbreviation: 'MA',
           category: t('materials.defaultCategory'),
-          type: t('materials.defaultType'),
-          processLinks: []
+          type: t('materials.defaultType')
         });
         tags = [];
         eventRecords = [];
@@ -706,7 +704,7 @@
         const name = type && type.name ? type.name : '';
         if (name.includes('Station')) return './static/icons/station.svg';
         if (name.includes('Location')) return './static/icons/location.svg';
-        if (name.includes('Process')) return './static/icons/process.svg';
+        if (name.includes('Process')) return '';
         if (name.includes('Event')) return './static/icons/event.svg';
         return type.icon || baseTagTypes[index]?.icon || '';
       }
@@ -779,7 +777,7 @@
           tag.y = hasAssignedCoordinates(tag) ? Number(tag.y) : null;
           const type = tagTypes[tag.typeIndex];
           if (type && type.name.includes('Location') && !tag.locationCategory) {
-            tag.locationCategory = tag.children.some(child => isEventTag(child)) ? 'equipment' : 'process';
+            tag.locationCategory = 'process';
           }
           normalizeImportedTags(tag.children);
         });
@@ -1040,6 +1038,58 @@
         await openProject(body.project.id);
       }
 
+      async function uploadXmlImport(file, name) {
+        if (!isAdmin()) {
+          alert(t('import.adminOnly'));
+          return;
+        }
+        setSaveStatusKey('saving', 'xml.uploading');
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('name', name);
+        const response = await fetch('/api/imports/xml', {
+          method: 'POST',
+          body: formData
+        });
+        if (!response.ok) {
+          let message = t('api.requestFailed');
+          try {
+            const body = await response.json();
+            if (body.error) message = body.error;
+          } catch (error) {
+            message = response.statusText || message;
+          }
+          throw new Error(message);
+        }
+        const body = await response.json();
+        setSaveStatusKey('saving', 'xml.submitted');
+        return pollXmlImportJob(body.jobId);
+      }
+
+      async function pollXmlImportJob(jobId) {
+        const maxAttempts = 1800;
+        for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+          await delay(1500);
+          const body = await apiRequest(`/api/imports/${jobId}`);
+          const job = body.job || {};
+          if (job.status === 'completed') {
+            setSaveStatusKey('saved', 'projects.choose');
+            await loadProjectList();
+            if (job.projectId) await openProject(job.projectId);
+            return job;
+          }
+          if (job.status === 'failed') {
+            throw new Error(job.error || t('xml.failed', { message: '' }));
+          }
+          if (job.message) setSaveStatus('saving', job.message);
+        }
+        throw new Error('XML 导入任务查询超时');
+      }
+
+      function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
       async function checkCurrentSession() {
         try {
           const body = await apiRequest('/api/me');
@@ -1183,7 +1233,6 @@
         contextMenuTagId = tagId;
         contextMenuPosition = position;
         lastContextMenuOpenedAt = Date.now();
-        typeSubMenu.classList.remove('show');
         
         // 根据是否有标签ID来决定显示哪些菜单项
         const createTagItem = document.getElementById('createTagMenuItem');
@@ -1206,7 +1255,6 @@
           setMenuItemVisible(editEventMenuItem, isEvent);
           showEventsMenuItem.textContent = displayedEventParentIds.has(tagId) ? t('menu.hideEvents') : t('menu.showEvents');
           setMenuItemVisible(showEventsMenuItem, canShowEvents);
-          setMenuItemVisible(changeTypeMenuItem, false);
           setMenuItemVisible(addChildMenuItem, canAddChild);
           setMenuItemVisible(deleteTagMenuItem, !!tag);
         } else {
@@ -1216,7 +1264,6 @@
           setMenuItemVisible(editTextMenuItem, false);
           setMenuItemVisible(editEventMenuItem, false);
           setMenuItemVisible(showEventsMenuItem, false);
-          setMenuItemVisible(changeTypeMenuItem, false);
           setMenuItemVisible(addChildMenuItem, false);
           setMenuItemVisible(deleteTagMenuItem, false);
         }
@@ -1227,7 +1274,6 @@
 
       function hideContextMenu() {
         contextMenu.classList.remove('show');
-        typeSubMenu.classList.remove('show');
         contextMenuTagId = null;
         contextMenuPosition = null;
       }
@@ -1236,7 +1282,7 @@
       document.addEventListener('click', (e) => {
         if (e.button !== 0) return;
         if (Date.now() - lastContextMenuOpenedAt < 250) return;
-        if (e.target.closest('#contextMenu') || e.target.closest('#typeSubMenu')) return;
+        if (e.target.closest('#contextMenu')) return;
         // 如果点击的不是文本编辑对话框，则关闭菜单
         if (!e.target.closest('#textEditDialog') && !e.target.closest('#eventEditDialog') && !e.target.closest('#locationCategoryDialog')) {
           hideContextMenu();
@@ -1294,14 +1340,6 @@
         }
       });
 
-      // 修改类型菜单项 - 显示子菜单
-      changeTypeMenuItem.addEventListener('click', (e) => {
-        if (contextMenuTagId) {
-          e.stopPropagation();
-          showTypeSubMenu(contextMenuTagId);
-        }
-      });
-
       // 添加子标签菜单项
       addChildMenuItem.addEventListener('click', () => {
         if (contextMenuTagId) {
@@ -1332,6 +1370,12 @@
         if (!tag) return;
         
         textEditInput.value = tag.text || '';
+        if (isLocationTag(tag) && locationEditCategoryField && locationEditCategorySelect) {
+          locationEditCategoryField.classList.remove('is-hidden');
+          locationEditCategorySelect.value = tag.locationCategory === 'equipment' ? 'equipment' : 'process';
+        } else if (locationEditCategoryField) {
+          locationEditCategoryField.classList.add('is-hidden');
+        }
         textEditDialog.style.display = 'flex';
         textEditInput.focus();
         textEditInput.select();
@@ -1343,6 +1387,8 @@
       function hideTextEditDialog() {
         textEditDialog.style.display = 'none';
         textEditInput.value = '';
+        if (locationEditCategoryField) locationEditCategoryField.classList.add('is-hidden');
+        if (locationEditCategorySelect) locationEditCategorySelect.value = 'process';
         delete textEditDialog.dataset.tagId;
       }
 
@@ -1353,6 +1399,16 @@
           const tag = findTagById(tagId);
           if (tag) {
             tag.text = textEditInput.value;
+            if (isLocationTag(tag) && locationEditCategorySelect) {
+              const nextCategory = locationEditCategorySelect.value === 'equipment' ? 'equipment' : 'process';
+              if (tag.locationCategory !== nextCategory) {
+                if (!canLocationKeepChildrenForCategory(tag)) {
+                  alert(t('tags.noChildType'));
+                  return;
+                }
+                tag.locationCategory = nextCategory;
+              }
+            }
             if (isEventTag(tag)) {
               const record = getEventRecordForTag(tag);
               record.event = tag.text;
@@ -1529,6 +1585,8 @@
         } else {
           imageWrapper.classList.remove('show-text');
         }
+        updateMarkerTextDisplay();
+        updateMarkerHoverState();
       }
       showTextCheckbox.addEventListener('change', updateTextVisibility);
 
@@ -1964,7 +2022,6 @@
       function getTypeAbbreviation(typeName) {
         if (typeName.includes('Station')) return 'ST';
         if (typeName.includes('Location')) return 'LC';
-        if (typeName.includes('Process')) return 'PC';
         if (typeName.includes('Event')) return 'EV';
         return typeName.substring(0, 2).toUpperCase();
       }
@@ -1982,12 +2039,7 @@
         const parentType = tagTypes[parentTag.typeIndex];
         if (!parentType) return -1;
         if (parentType.name.includes('Station')) return getTypeIndexByName('Location');
-        if (parentType.name.includes('Location')) {
-          return parentTag.locationCategory === 'equipment'
-            ? getTypeIndexByName('Event')
-            : getTypeIndexByName('Process');
-        }
-        if (parentType.name.includes('Process')) return getTypeIndexByName('Event');
+        if (parentType.name.includes('Location')) return getTypeIndexByName('Event');
         return -1;
       }
 
@@ -2142,7 +2194,6 @@
           : (tag.text && tag.text.trim() ? tag.text.trim() : t('tags.unnamed'));
         const parentTag = parentId ? findTagById(parentId) : null;
         const parentMeta = parentTag ? ` · ${t('tags.parent', { name: parentTag.text || getTypeAbbreviation(tagTypes[parentTag.typeIndex]?.name || 'Tag') })}` : '';
-        const materialCount = tag.materialLinks && tag.materialLinks.length ? ` · ${t('tags.materialCount', { count: tag.materialLinks.length })}` : '';
         const childMeta = childCount ? ` · ${t('tags.children', { count: childCount })}` : '';
         const locationMeta = isLocationTag(tag) ? ` · ${tag.locationCategory === 'equipment' ? t('tags.locationEquipment') : t('tags.locationProcess')}` : '';
         const eventMeta = eventRecord ? ` · es: ${normalizeEventSwitch(eventRecord.eventSwitch)}` : '';
@@ -2156,7 +2207,7 @@
           <div class="tag-node-main">
             <span class="tag-node-dot" style="background:${type ? type.color : '#999'}"></span>
             <span class="tag-node-text">${escapeHtml(displayText)}</span>
-            <span class="tag-node-meta">${escapeHtml(`${getTypeAbbreviation(type ? type.name : 'Tag')}${locationMeta}${eventMeta}${unassignedMeta}${childMeta}${materialCount}${parentMeta}`)}</span>
+            <span class="tag-node-meta">${escapeHtml(`${getTypeAbbreviation(type ? type.name : 'Tag')}${locationMeta}${eventMeta}${unassignedMeta}${childMeta}${parentMeta}`)}</span>
           </div>
           <div class="tag-node-actions">
             ${canAssignCoordinate ? `<button class="tag-node-action assign-coordinate-btn" type="button" title="${escapeHtml(t('csv.assignButtonTitle'))}">⌖</button>` : ''}
@@ -2218,23 +2269,6 @@
           });
         }
 
-        if (type && type.name.includes('Process')) {
-          if (!tag.materialLinks) tag.materialLinks = [];
-          const materialsDiv = document.createElement('div');
-          materialsDiv.className = 'tag-node-materials';
-          materialsDiv.innerHTML = `
-            <select class="material-select" multiple size="${Math.min(4, Math.max(2, materials.length || 2))}" title="${escapeHtml(t('materials.selectTitle'))}">
-              ${materials.map((m, i) => `<option value="${i}" ${tag.materialLinks.includes(i) ? 'selected' : ''}>${escapeHtml(m.name)} (${escapeHtml(m.abbreviation)})</option>`).join('')}
-            </select>
-          `;
-          node.appendChild(materialsDiv);
-          const materialSelect = materialsDiv.querySelector('.material-select');
-          materialSelect.addEventListener('change', (e) => {
-            const selectedOptions = Array.from(e.target.selectedOptions).map(opt => parseInt(opt.value));
-            updateTagMaterialLinks(tag, selectedOptions);
-          });
-        }
-
         if (hasChildren && includeChildren) {
           const childrenContent = document.createElement('div');
           childrenContent.className = 'tag-tree-children';
@@ -2263,50 +2297,13 @@
       // ---------- State mutations and business operations ----------
       // Keep relationship cleanup here so render functions can stay mostly
       // focused on drawing UI from state.
-      function updateTagMaterialLinks(tag, selectedOptions) {
-        const oldLinks = tag.materialLinks || [];
-        tag.materialLinks = selectedOptions;
-
-        oldLinks.forEach(materialIndex => {
-          if (!selectedOptions.includes(materialIndex) && materials[materialIndex]) {
-            materials[materialIndex].processLinks = materials[materialIndex].processLinks.filter(pid => pid !== tag.id);
-          }
+      function canLocationKeepChildrenForCategory(tag) {
+        if (!isLocationTag(tag)) return false;
+        if (!tag.children || tag.children.length === 0) return true;
+        return tag.children.every(child => {
+          const childType = tagTypes[child.typeIndex];
+          return childType && childType.name.includes('Event');
         });
-
-        selectedOptions.forEach(materialIndex => {
-          if (!oldLinks.includes(materialIndex) && materials[materialIndex] && !materials[materialIndex].processLinks.includes(tag.id)) {
-            materials[materialIndex].processLinks.push(tag.id);
-          }
-        });
-
-        renderMaterialList();
-        renderTagList();
-        markProjectDirty();
-      }
-
-      function updateLocationCategory(tag, nextCategory) {
-        if (!isLocationTag(tag)) return;
-        const normalizedCategory = nextCategory === 'equipment' ? 'equipment' : 'process';
-        if (tag.locationCategory === normalizedCategory) return;
-        const hasChildren = tag.children && tag.children.length > 0;
-        if (hasChildren) {
-          const canKeepChildren = tag.children.every(child => {
-            const childType = tagTypes[child.typeIndex];
-            if (!childType) return false;
-            return normalizedCategory === 'equipment'
-              ? childType.name.includes('Event')
-              : childType.name.includes('Process');
-          });
-          if (!canKeepChildren) {
-            alert(t('tags.noChildType'));
-            renderTagList();
-            return;
-          }
-        }
-        tag.locationCategory = normalizedCategory;
-        syncEventRecordPathsForBranch(tag);
-        renderAll();
-        markProjectDirty();
       }
 
       function syncEventRecordPathsForBranch(rootTag) {
@@ -2323,7 +2320,7 @@
           if (tag.materialLinks && tag.materialLinks.length > 0) {
             tag.materialLinks.forEach(materialIndex => {
               if (materials[materialIndex]) {
-                materials[materialIndex].processLinks = materials[materialIndex].processLinks.filter(pid => pid !== tag.id);
+                materials[materialIndex].processLinks = (materials[materialIndex].processLinks || []).filter(pid => pid !== tag.id);
               }
             });
           }
@@ -2492,22 +2489,6 @@
               </div>
             </div>
             
-            <div class="material-details">
-              <div style="margin-bottom:4px;">
-                <strong>${escapeHtml(t('materials.linkedProcesses'))}</strong> ${escapeHtml(t('materials.processCount', { count: material.processLinks.length }))}
-              </div>
-              ${material.processLinks.length > 0 ? `
-                <div class="linked-processes" style="max-height:60px; overflow-y:auto; font-size:11px; color:#666;">
-                  ${material.processLinks.map(pid => {
-                    const processTag = findTagById(pid);
-                    if (processTag) {
-                      return `<div class="process-link-item" data-tag-id="${pid}" style="cursor:pointer; padding:2px 4px; border-radius:3px; transition:background 0.2s;" onmouseover="this.style.background='#f0f2f5'" onmouseout="this.style.background='transparent'">• ${escapeHtml(processTag.text || t('materials.unnamedProcess'))}</div>`;
-                    }
-                    return '';
-                  }).join('')}
-                </div>
-              ` : `<div style="color:#999; font-style:italic;">${escapeHtml(t('materials.noLinks'))}</div>`}
-            </div>
           `;
           materialListContainer.appendChild(materialDiv);
         });
@@ -2555,14 +2536,6 @@
             removeMaterialAtIndex(index);
             renderAll();
             markProjectDirty();
-          });
-        });
-        
-        // 绑定工序链接点击事件 - 跳转到对应的标签编辑器
-        document.querySelectorAll('.process-link-item').forEach(item => {
-          item.addEventListener('click', (e) => {
-            const tagId = parseInt(e.currentTarget.dataset.tagId);
-            highlightTagInList(tagId);
           });
         });
       }
@@ -2632,20 +2605,12 @@
 
       // 检查节点及其所有子节点的文本是否全部隐藏
       function checkAllTextHidden(tag) {
-        // 如果当前节点明确被标记为隐藏
-        if (tag._textHidden === true) {
-          // 检查所有子节点是否也都被隐藏
-          if (tag.children && tag.children.length > 0) {
-            for (let child of tag.children) {
-              if (!checkAllTextHidden(child)) {
-                return false;
-              }
-            }
-          }
-          return true;
+        if (!tag || isEventTag(tag)) return true;
+        if (tag._textHidden !== true) return false;
+        if (tag.children && tag.children.length > 0) {
+          return tag.children.every(child => isEventTag(child) || checkAllTextHidden(child));
         }
-        // 如果当前节点没有被标记为隐藏（包括undefined和false），返回false
-        return false;
+        return true;
       }
 
       // 切换节点及其所有子节点的文本显示/隐藏
@@ -2687,78 +2652,6 @@
             }
           }
         });
-      }
-
-      // 显示类型选择子菜单
-      function showTypeSubMenu(tagId) {
-        const tag = findTagById(tagId);
-        if (!tag) return;
-
-        // 清空并重建子菜单
-        typeSubMenu.innerHTML = '';
-        
-        tagTypes.forEach((type, index) => {
-          const option = document.createElement('div');
-          option.className = 'context-menu-item type-option';
-          if (index === tag.typeIndex) {
-            option.classList.add('current');
-          }
-          
-          option.innerHTML = `
-            ${type.icon ? `<img src="${escapeHtml(type.icon)}" class="type-icon-preview" alt="${escapeHtml(type.name)}">` : `<span class="type-option-dot" style="background: ${type.color}"></span>`}
-            <span>${escapeHtml(type.name)}</span>
-          `;
-          
-          option.addEventListener('click', (e) => {
-            e.stopPropagation();
-            changeTagType(tagId, index);
-            hideContextMenu();
-          });
-          
-          typeSubMenu.appendChild(option);
-        });
-        
-        // 定位子菜单（在主菜单右侧）
-        const menuRect = contextMenu.getBoundingClientRect();
-        typeSubMenu.style.maxHeight = `${Math.max(120, window.innerHeight - 16)}px`;
-        typeSubMenu.style.overflowY = 'auto';
-        typeSubMenu.style.left = '0px';
-        typeSubMenu.style.top = '0px';
-        typeSubMenu.classList.add('show');
-        const subMenuRect = typeSubMenu.getBoundingClientRect();
-        const viewportPadding = 8;
-        const rightSideLeft = menuRect.right + 5;
-        const leftSideLeft = menuRect.left - subMenuRect.width - 5;
-        const preferredLeft = rightSideLeft + subMenuRect.width + viewportPadding <= window.innerWidth
-          ? rightSideLeft
-          : leftSideLeft;
-        const left = Math.min(
-          Math.max(viewportPadding, preferredLeft),
-          Math.max(viewportPadding, window.innerWidth - subMenuRect.width - viewportPadding)
-        );
-        const top = Math.min(
-          Math.max(viewportPadding, menuRect.top),
-          Math.max(viewportPadding, window.innerHeight - subMenuRect.height - viewportPadding)
-        );
-        typeSubMenu.style.left = `${left}px`;
-        typeSubMenu.style.top = `${top}px`;
-      }
-
-      // 修改标签类型
-      function changeTagType(tagId, newTypeIndex) {
-        const tag = findTagById(tagId);
-        if (tag) {
-          const previousEventRecordId = tag.eventRecordId || null;
-          tag.typeIndex = newTypeIndex;
-          if (isLocationTag(tag) && !tag.locationCategory) tag.locationCategory = 'process';
-          if (isEventTag(tag)) getEventRecordForTag(tag);
-          if (!isEventTag(tag) && previousEventRecordId) {
-            eventRecords = eventRecords.filter(record => record.id !== previousEventRecordId);
-            delete tag.eventRecordId;
-          }
-          renderAll();
-          markProjectDirty();
-        }
       }
 
       // 在右侧列表中高亮定位标签
@@ -3049,8 +2942,7 @@
           name: t('materials.newName'),
           abbreviation: t('materials.newAbbrev'),
           category: t('materials.defaultCategory'),
-          type: t('materials.defaultType'),
-          processLinks: []
+          type: t('materials.defaultType')
         };
         materials.push(newMaterial);
         renderMaterialList();
@@ -3066,7 +2958,7 @@
         collapsedTypeGroupIds.clear();
         displayedEventParentIds.clear();
         hoveredTagId = null;
-        materials.forEach(m => m.processLinks = []); // 清空物料的工序关联
+        materials.forEach(m => m.processLinks = []); // 清空旧项目的关联标签
         renderAll();
         markProjectDirty();
       });
@@ -3095,6 +2987,14 @@
           if (window.MESCsvImport && typeof window.MESCsvImport.openFilePicker === 'function') {
             window.MESCsvImport.openFilePicker();
           }
+          return;
+        }
+        if (importTypeSelect.value === 'xml') {
+          if (!isAdmin()) {
+            alert(t('import.adminOnly'));
+            return;
+          }
+          xmlImportFileInput.click();
           return;
         }
         if (!isAdmin()) {
@@ -3130,6 +3030,24 @@
         
         // 清空文件输入框，允许重复导入同一文件
         importFileInput.value = '';
+      });
+
+      xmlImportFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const defaultName = file.name.replace(/\.xml$/i, '') || t('import.defaultProject');
+        const name = prompt(t('projects.promptImportName'), defaultName);
+        if (!name || !name.trim()) {
+          xmlImportFileInput.value = '';
+          return;
+        }
+        uploadXmlImport(file, name.trim())
+          .then(() => alert(t('xml.success')))
+          .catch(error => {
+            setSaveStatusKey('idle', 'projects.choose');
+            alert(t('xml.failed', { message: error.message }));
+          });
+        xmlImportFileInput.value = '';
       });
 
       window.MESDesignerApi = {

@@ -2,4 +2,7 @@ node_modules/
 data/
 .chrome-pan-test/
 release/
+LEGACY_ARCHITECTURE_CANDIDATES
 *.log
+__pycache__/
+scripts/py/*.xml

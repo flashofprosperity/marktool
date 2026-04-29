@@ -24,6 +24,7 @@
       <select id="importTypeSelect" aria-label="Import type" data-i18n-title="toolbar.importType">
         <option value="json" data-i18n="toolbar.importJson">JSON</option>
         <option value="csv" data-i18n="toolbar.importCsv">CSV</option>
+        <option value="xml" data-i18n="toolbar.importXml">XML</option>
       </select>
       <button class="btn btn-primary" id="importBtn" data-i18n="toolbar.import">导入</button>
     </div>
@@ -43,6 +44,7 @@
 
   <input type="file" id="importFileInput" accept=".json" style="display:none;">
   <input type="file" id="csvImportFileInput" accept=".csv,text/csv" style="display:none;">
+  <input type="file" id="xmlImportFileInput" accept=".xml,text/xml,application/xml" style="display:none;">
 
   <main class="login-home" id="loginHome">
     <form class="login-panel" id="loginForm">
@@ -88,15 +90,9 @@
     <div class="context-menu-divider"></div>
     <div class="context-menu-item" id="showEventsMenuItem" data-i18n="menu.showEvents">显示事件</div>
     <div class="context-menu-divider"></div>
-    <div class="context-menu-item" id="changeTypeMenuItem" data-i18n="menu.changeType">修改类型</div>
-    <div class="context-menu-divider"></div>
     <div class="context-menu-item" id="addChildMenuItem" data-i18n="menu.addChild">添加子标签</div>
     <div class="context-menu-divider"></div>
     <div class="context-menu-item" id="deleteTagMenuItem" data-i18n="menu.deleteTag">删除标签</div>
-  </div>
-  
-  <!-- 类型选择子菜单 -->
-  <div class="context-menu" id="typeSubMenu">
   </div>
   
   <!-- 文本编辑对话框 -->
@@ -104,6 +100,13 @@
     <div class="text-edit-panel">
       <h3 class="text-edit-title" data-i18n="dialog.editTitle">修改标签文本</h3>
       <input type="text" id="textEditInput" class="text-edit-input" placeholder="输入标签文本" data-i18n-placeholder="dialog.editPlaceholder">
+      <label class="event-field location-edit-field is-hidden" id="locationEditCategoryField">
+        <span data-i18n="tags.locationCategory">Location 分类</span>
+        <select id="locationEditCategorySelect" class="text-edit-input">
+          <option value="process" data-i18n="tags.locationProcess">工序</option>
+          <option value="equipment" data-i18n="tags.locationEquipment">设备</option>
+        </select>
+      </label>
       <div class="text-edit-actions">
         <button class="btn" id="textEditCancel" data-i18n="common.cancel">取消</button>
         <button class="btn btn-primary" id="textEditConfirm" data-i18n="common.confirm">确认</button>
