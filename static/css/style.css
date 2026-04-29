@@ -203,10 +203,45 @@
       color: #606266;
       font-size: 13px;
     }
+    .project-tools {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) 180px 160px;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .project-search-input,
+    .project-filter-select {
+      height: 36px;
+      border: 1px solid #dcdfe6;
+      border-radius: 6px;
+      background: #fff;
+      padding: 0 10px;
+      color: #303133;
+      font-size: 13px;
+      outline: none;
+    }
+    .project-search-input:focus,
+    .project-filter-select:focus {
+      border-color: #409eff;
+      box-shadow: 0 0 0 2px rgba(64,158,255,0.12);
+    }
     .project-list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 12px;
+    }
+    .project-group {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .project-group-title {
+      grid-column: 1 / -1;
+      margin: 6px 0 -2px;
+      color: #303133;
+      font-size: 13px;
+      font-weight: 650;
     }
     .project-card {
       border: 1px solid #dfe5ee;
@@ -229,8 +264,34 @@
       color: #909399;
       margin-bottom: 12px;
     }
+    .project-card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 22px;
+      margin-bottom: 12px;
+    }
+    .project-tag-chip {
+      max-width: 100%;
+      border: 1px solid #d9ecff;
+      border-radius: 999px;
+      background: #ecf5ff;
+      color: #337ecc;
+      padding: 2px 8px;
+      font-size: 12px;
+      line-height: 18px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .project-tag-empty {
+      color: #a8abb2;
+      font-size: 12px;
+      line-height: 22px;
+    }
     .project-card-actions {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
       justify-content: flex-end;
     }
@@ -376,6 +437,11 @@
       max-width: 96px;
       font-weight: 600;
       color: #303133;
+    }
+    @media (max-width: 760px) {
+      .project-tools {
+        grid-template-columns: 1fr;
+      }
     }
     .import-switcher {
       display: flex;

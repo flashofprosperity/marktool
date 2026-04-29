@@ -30,12 +30,13 @@ function createImportJob(job) {
       id, type, status, source_file, output_file, source_file_size, output_file_size,
       project_id, message, error, created_by, created_at, updated_at
     )
-    VALUES (?, ?, 'queued', ?, '', ?, 0, NULL, ?, '', ?, ?, ?)
+    VALUES (?, ?, 'queued', ?, '', ?, 0, ?, ?, '', ?, ?, ?)
   `).run(
     job.id,
     job.type,
     job.sourceFile,
     job.sourceFileSize || 0,
+    job.projectId || null,
     job.message || '等待处理',
     job.createdBy || '',
     timestamp,

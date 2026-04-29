@@ -3,16 +3,29 @@ const { nowIso } = require('../../utils/time');
 const {
   normalizeProjectEventRecords,
   parseProjectRow,
-  projectSummary
+  projectSummary,
+  normalizeProjectTags
 } = require('./model');
 
-function listProjects() {
+function listProjects(filters = {}) {
+  const q = String(filters.q || '').trim().toLowerCase();
+  const tag = String(filters.tag || '').trim();
   const rows = db.prepare(`
     SELECT id, name, created_at, updated_at
     FROM projects
     ORDER BY updated_at DESC, id DESC
   `).all();
-  return rows.map(projectSummary);
+  return rows.map(row => ({
+    ...row,
+    tags: getProjectTags(row.id)
+  }))
+    .filter(row => {
+      if (tag && !row.tags.includes(tag)) return false;
+      if (!q) return true;
+      return row.name.toLowerCase().includes(q)
+        || row.tags.some(projectTag => projectTag.toLowerCase().includes(q));
+    })
+    .map(projectSummary);
 }
 
 function getProjectRow(id) {
@@ -46,6 +59,26 @@ function updateProject(id, name, data, timestamp = nowIso()) {
 
 function deleteProject(id) {
   return db.prepare('DELETE FROM projects WHERE id = ?').run(id);
+}
+
+function getProjectTags(projectId) {
+  return db.prepare(`
+    SELECT tag
+    FROM project_tags
+    WHERE project_id = ?
+    ORDER BY tag COLLATE NOCASE ASC
+  `).all(projectId).map(row => row.tag);
+}
+
+function setProjectTags(projectId, tags, timestamp = nowIso()) {
+  const normalized = normalizeProjectTags(tags);
+  db.prepare('DELETE FROM project_tags WHERE project_id = ?').run(projectId);
+  const insert = db.prepare(`
+    INSERT INTO project_tags (project_id, tag, created_at)
+    VALUES (?, ?, ?)
+  `);
+  normalized.forEach(tag => insert.run(projectId, tag, timestamp));
+  return normalized;
 }
 
 function syncProjectEventRecords(projectId, data, timestamp = nowIso()) {
@@ -95,6 +128,8 @@ module.exports = {
   insertProject,
   updateProject,
   deleteProject,
+  getProjectTags,
+  setProjectTags,
   syncProjectEventRecords,
   syncExistingProjectEventRecords
 };

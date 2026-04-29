@@ -95,8 +95,22 @@ function projectSummary(row) {
     id: row.id,
     name: row.name,
     createdAt: row.created_at,
-    updatedAt: row.updated_at
+    updatedAt: row.updated_at,
+    tags: Array.isArray(row.tags) ? row.tags : []
   };
+}
+
+function normalizeProjectTags(tags) {
+  if (!Array.isArray(tags)) return [];
+  const seen = new Set();
+  const normalized = [];
+  tags.forEach(tag => {
+    const value = String(tag || '').trim().slice(0, 40);
+    if (!value || seen.has(value)) return;
+    seen.add(value);
+    normalized.push(value);
+  });
+  return normalized.slice(0, 20);
 }
 
 module.exports = {
@@ -108,5 +122,6 @@ module.exports = {
   normalizeEventRecord,
   normalizeProjectEventRecords,
   parseProjectRow,
-  projectSummary
+  projectSummary,
+  normalizeProjectTags
 };

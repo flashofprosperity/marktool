@@ -3,7 +3,7 @@ const { emptyProjectData } = require('./model');
 
 function buildProjectFromRows(rows) {
   if (!Array.isArray(rows) || rows.length === 0) {
-    const error = new Error('Excel 没有可导入的数据');
+    const error = new Error('XML 没有可导入的数据');
     error.status = 400;
     throw error;
   }
@@ -112,7 +112,7 @@ function buildProjectFromRows(rows) {
   });
 
   if (project.tags.length === 0) {
-    const error = new Error('Excel 缺少可导入的 Station 或 Location 数据');
+    const error = new Error('XML 缺少可导入的 Station 或 Location 数据');
     error.status = 400;
     throw error;
   }
@@ -143,6 +143,163 @@ function buildProcessStep(row) {
   return Object.values(step).some(Boolean) ? step : null;
 }
 
+function mergeProjectDataIncrementally(currentData, xmlData) {
+  const merged = cloneProjectData(currentData);
+  if (!Array.isArray(merged.tagTypes) || merged.tagTypes.length === 0) {
+    merged.tagTypes = emptyProjectData.tagTypes.map(type => ({ ...type }));
+  }
+  if (!Array.isArray(merged.tags)) merged.tags = [];
+  if (!Array.isArray(merged.eventRecords)) merged.eventRecords = [];
+  if (!Array.isArray(merged.materials)) {
+    merged.materials = emptyProjectData.materials.map(material => ({ ...material }));
+  }
+
+  const typeMap = buildTypeMap(merged.tagTypes);
+  const existingStationMap = new Map();
+  merged.tags.forEach(station => {
+    existingStationMap.set(clean(station.text), station);
+  });
+  let nextId = findMaxNumericTagId(merged.tags);
+
+  (Array.isArray(xmlData.tags) ? xmlData.tags : []).forEach(xmlStation => {
+    const stationName = clean(xmlStation.text);
+    if (!stationName) return;
+    let targetStation = existingStationMap.get(stationName);
+    if (!targetStation) {
+      targetStation = cloneTagForAppend(xmlStation, typeMap, () => {
+        nextId += 1;
+        return nextId;
+      });
+      merged.tags.push(targetStation);
+      existingStationMap.set(stationName, targetStation);
+      appendEventRecordsForBranch(merged, xmlData, targetStation, xmlStation);
+      return;
+    }
+
+    if (!Array.isArray(targetStation.children)) targetStation.children = [];
+    const existingLocationMap = new Map();
+    targetStation.children.forEach(location => {
+      existingLocationMap.set(clean(location.text), location);
+    });
+
+    (Array.isArray(xmlStation.children) ? xmlStation.children : []).forEach(xmlLocation => {
+      const locationName = clean(xmlLocation.text);
+      if (!locationName) return;
+      let targetLocation = existingLocationMap.get(locationName);
+      if (!targetLocation) {
+        targetLocation = cloneTagForAppend(xmlLocation, typeMap, () => {
+          nextId += 1;
+          return nextId;
+        });
+        targetStation.children.push(targetLocation);
+        existingLocationMap.set(locationName, targetLocation);
+        appendEventRecordsForBranch(merged, xmlData, targetLocation, xmlLocation);
+        return;
+      }
+
+      if (!Array.isArray(targetLocation.children)) targetLocation.children = [];
+      const existingEventMap = new Map();
+      targetLocation.children.forEach(eventTag => {
+        existingEventMap.set(eventMergeKey(merged, eventTag), eventTag);
+      });
+
+      (Array.isArray(xmlLocation.children) ? xmlLocation.children : []).forEach(xmlEvent => {
+        const xmlRecord = findEventRecord(xmlData, xmlEvent.eventRecordId);
+        const key = eventMergeKey(xmlData, xmlEvent, xmlRecord);
+        if (existingEventMap.has(key)) return;
+        const targetEvent = cloneTagForAppend(xmlEvent, typeMap, () => {
+          nextId += 1;
+          return nextId;
+        });
+        targetLocation.children.push(targetEvent);
+        existingEventMap.set(key, targetEvent);
+        if (xmlRecord) merged.eventRecords.push({ ...xmlRecord });
+      });
+    });
+  });
+
+  return merged;
+}
+
+function cloneProjectData(data) {
+  return JSON.parse(JSON.stringify(data || {}));
+}
+
+function buildTypeMap(tagTypes) {
+  const station = getTypeIndex(tagTypes, 'Station', 0);
+  const location = getTypeIndex(tagTypes, 'Location', 1);
+  const event = getTypeIndex(tagTypes, 'Event', 2);
+  return new Map([[0, station], [1, location], [2, event]]);
+}
+
+function getTypeIndex(tagTypes, name, fallback) {
+  const index = tagTypes.findIndex(type => type && String(type.name || '').includes(name));
+  if (index !== -1) return index;
+  tagTypes.push({ ...emptyProjectData.tagTypes[fallback] });
+  return tagTypes.length - 1;
+}
+
+function findMaxNumericTagId(tagList) {
+  let maxId = Date.now();
+  flattenTags(tagList).forEach(tag => {
+    const value = Number(tag.id);
+    if (Number.isFinite(value)) maxId = Math.max(maxId, value);
+  });
+  return maxId;
+}
+
+function flattenTags(tagList, result = []) {
+  (Array.isArray(tagList) ? tagList : []).forEach(tag => {
+    result.push(tag);
+    if (Array.isArray(tag.children)) flattenTags(tag.children, result);
+  });
+  return result;
+}
+
+function cloneTagForAppend(tag, typeMap, nextId) {
+  const cloned = JSON.parse(JSON.stringify(tag));
+  rewriteTagForAppend(cloned, typeMap, nextId);
+  return cloned;
+}
+
+function rewriteTagForAppend(tag, typeMap, nextId) {
+  tag.id = nextId();
+  if (typeMap.has(tag.typeIndex)) tag.typeIndex = typeMap.get(tag.typeIndex);
+  tag.x = null;
+  tag.y = null;
+  if (!Array.isArray(tag.children)) tag.children = [];
+  tag.children.forEach(child => rewriteTagForAppend(child, typeMap, nextId));
+}
+
+function appendEventRecordsForBranch(merged, xmlData, mergedBranch, xmlBranch) {
+  const xmlRecordIds = new Set();
+  flattenTags([xmlBranch]).forEach(tag => {
+    if (tag.eventRecordId) xmlRecordIds.add(tag.eventRecordId);
+  });
+  const mergedRecordIds = new Set();
+  flattenTags([mergedBranch]).forEach(tag => {
+    if (tag.eventRecordId) mergedRecordIds.add(tag.eventRecordId);
+  });
+  xmlRecordIds.forEach(recordId => {
+    const record = findEventRecord(xmlData, recordId);
+    if (record && mergedRecordIds.has(recordId)) merged.eventRecords.push({ ...record });
+  });
+}
+
+function findEventRecord(data, recordId) {
+  if (!recordId || !Array.isArray(data.eventRecords)) return null;
+  return data.eventRecords.find(record => record.id === recordId) || null;
+}
+
+function eventMergeKey(data, eventTag, record = null) {
+  const eventRecord = record || findEventRecord(data, eventTag && eventTag.eventRecordId);
+  return [
+    clean(eventTag && eventTag.text),
+    clean(eventRecord && eventRecord.eventSwitch)
+  ].join('\u001f');
+}
+
 module.exports = {
-  buildProjectFromRows
+  buildProjectFromRows,
+  mergeProjectDataIncrementally
 };

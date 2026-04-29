@@ -43,16 +43,24 @@ async function processXmlImport(jobId, options) {
     const rows = parseXmlToRows(xmlPath);
 
     repository.updateJobMessage(jobId, '正在构建项目');
-    const projectData = buildProjectFromRows(rows);
-    const name = resolveProjectName(options.name, job.sourceFile);
-
     repository.updateJobMessage(jobId, '正在写入数据库');
-    await projectsService.completeImportAsProject({
-      jobId,
-      name,
-      projectData,
-      startedAt
-    });
+    if (options.type === 'xml-update' || job.type === 'xml-update') {
+      await projectsService.completeXmlUpdateProject({
+        jobId,
+        projectId: options.projectId || job.projectId,
+        rows,
+        startedAt
+      });
+    } else {
+      const projectData = buildProjectFromRows(rows);
+      const name = resolveProjectName(options.name, job.sourceFile);
+      await projectsService.completeImportAsProject({
+        jobId,
+        name,
+        projectData,
+        startedAt
+      });
+    }
   } catch (error) {
     try {
       repository.markJobFailed(jobId, error.message || error);

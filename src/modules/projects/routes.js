@@ -1,12 +1,23 @@
 const express = require('express');
 const { requireAuth, requireAdmin } = require('../../middleware/auth');
 const service = require('./service');
+const importsService = require('../imports/service');
+const { uploadXml } = require('../imports/upload');
 
 const router = express.Router();
 
 router.get('/', requireAuth, async (req, res, next) => {
   try {
-    res.json({ projects: await service.listProjects() });
+    res.json({ projects: await service.listProjects({ q: req.query.q, tag: req.query.tag }) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.patch('/:id/tags', requireAdmin, async (req, res, next) => {
+  try {
+    const project = await service.updateProjectTags(req.params.id, req.body && req.body.tags);
+    res.json({ project });
   } catch (error) {
     next(error);
   }
@@ -29,6 +40,36 @@ router.post('/import', requireAdmin, async (req, res, next) => {
     next(error);
   }
 });
+
+router.post('/:id/import-xml', requireAdmin, ensureProjectExists, uploadXml.single('file'), (req, res, next) => {
+  try {
+    const job = importsService.createXmlImportJob({
+      jobId: req.importJobId,
+      file: req.file,
+      name: req.project.name,
+      user: req.user,
+      projectId: req.project.id,
+      type: 'xml-update'
+    });
+    res.status(202).json({ jobId: job.id, status: job.status });
+  } catch (error) {
+    next(error);
+  }
+});
+
+async function ensureProjectExists(req, res, next) {
+  try {
+    const project = await service.getProject(req.params.id);
+    if (!project) {
+      res.status(404).json({ error: '项目不存在' });
+      return;
+    }
+    req.project = project;
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
 
 router.get('/:id', requireAuth, async (req, res, next) => {
   try {

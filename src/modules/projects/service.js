@@ -5,12 +5,14 @@ const {
   emptyProjectData,
   validateName,
   validateProjectData,
-  parseProjectRow
+  parseProjectRow,
+  normalizeProjectTags
 } = require('./model');
 const importRepository = require('../imports/repository');
+const { buildProjectFromRows, mergeProjectDataIncrementally } = require('./projectBuilder');
 
-async function listProjects() {
-  return repository.listProjects();
+async function listProjects(filters = {}) {
+  return repository.listProjects(filters);
 }
 
 async function createProject(nameValue) {
@@ -61,6 +63,26 @@ async function deleteProject(id) {
   }));
 }
 
+async function updateProjectTags(id, tagsValue) {
+  const tags = normalizeProjectTags(tagsValue);
+  return enqueueDbWrite(() => runWriteTransaction(() => {
+    const existing = repository.getProjectRow(id);
+    if (!existing) {
+      const error = new Error('项目不存在');
+      error.status = 404;
+      throw error;
+    }
+    const savedTags = repository.setProjectTags(id, tags);
+    return {
+      id: existing.id,
+      name: existing.name,
+      createdAt: existing.created_at,
+      updatedAt: existing.updated_at,
+      tags: savedTags
+    };
+  }));
+}
+
 async function completeImportAsProject({ jobId, name, projectData, startedAt }) {
   const projectName = validateName(name);
   return enqueueDbWrite(() => runWriteTransaction(() => {
@@ -72,6 +94,25 @@ async function completeImportAsProject({ jobId, name, projectData, startedAt }) 
   }));
 }
 
+async function completeXmlUpdateProject({ jobId, projectId, rows, startedAt }) {
+  return enqueueDbWrite(() => runWriteTransaction(() => {
+    const existing = repository.getProjectRow(projectId);
+    if (!existing) {
+      const error = new Error('项目不存在');
+      error.status = 404;
+      throw error;
+    }
+    const currentData = JSON.parse(existing.data_json);
+    const xmlData = buildProjectFromRows(rows);
+    const mergedData = mergeProjectDataIncrementally(currentData, xmlData);
+    const timestamp = nowIso();
+    const row = repository.updateProject(projectId, existing.name, mergedData, timestamp);
+    const durationMs = startedAt ? Date.now() - startedAt : null;
+    importRepository.markJobCompleted(jobId, projectId, timestamp, durationMs);
+    return parseProjectRow(row);
+  }));
+}
+
 module.exports = {
   listProjects,
   createProject,
@@ -79,5 +120,7 @@ module.exports = {
   getProject,
   updateProject,
   deleteProject,
-  completeImportAsProject
+  updateProjectTags,
+  completeImportAsProject,
+  completeXmlUpdateProject
 };

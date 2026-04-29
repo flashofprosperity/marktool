@@ -40,11 +40,23 @@
           'projects.new': '新建项目',
           'projects.noneAdmin': '暂无项目，点击“新建项目”开始。',
           'projects.noneUser': '暂无项目，请联系管理员创建。',
+          'projects.noMatch': '没有匹配的项目。',
           'projects.loading': '正在加载项目...',
           'projects.loadFailed': '项目加载失败：{message}',
           'projects.updatedAt': '更新于 {time}',
           'projects.open': '打开',
           'projects.delete': '删除',
+          'projects.editTags': '编辑标签',
+          'projects.xmlUpdate': 'XML 更新',
+          'projects.searchPlaceholder': '搜索项目或标签',
+          'projects.allTags': '全部标签',
+          'projects.groupList': '默认列表',
+          'projects.groupByTag': '按标签分组',
+          'projects.uncategorized': '未分类',
+          'projects.promptTags': '请输入项目标签，用逗号分隔',
+          'projects.tagsUpdateFailed': '项目标签更新失败：{message}',
+          'projects.xmlUpdateSuccess': 'XML 更新完成。',
+          'projects.xmlUpdateFailed': 'XML 更新失败：{message}',
           'projects.untitled': '该项目',
           'projects.unopened': '未打开项目',
           'projects.choose': '请选择项目',
@@ -192,11 +204,23 @@
           'projects.new': 'New project',
           'projects.noneAdmin': 'No projects yet. Click "New project" to start.',
           'projects.noneUser': 'No projects yet. Contact an admin to create one.',
+          'projects.noMatch': 'No matching projects.',
           'projects.loading': 'Loading projects...',
           'projects.loadFailed': 'Project load failed: {message}',
           'projects.updatedAt': 'Updated {time}',
           'projects.open': 'Open',
           'projects.delete': 'Delete',
+          'projects.editTags': 'Edit tags',
+          'projects.xmlUpdate': 'XML update',
+          'projects.searchPlaceholder': 'Search projects or tags',
+          'projects.allTags': 'All tags',
+          'projects.groupList': 'List',
+          'projects.groupByTag': 'Group by tag',
+          'projects.uncategorized': 'Uncategorized',
+          'projects.promptTags': 'Enter project tags, separated by commas',
+          'projects.tagsUpdateFailed': 'Project tag update failed: {message}',
+          'projects.xmlUpdateSuccess': 'XML update complete.',
+          'projects.xmlUpdateFailed': 'XML update failed: {message}',
           'projects.untitled': 'this project',
           'projects.unopened': 'No project open',
           'projects.choose': 'Choose a project',
@@ -408,6 +432,9 @@
       const projectHome = document.getElementById('projectHome');
       const appWorkspace = document.getElementById('appWorkspace');
       const projectList = document.getElementById('projectList');
+      const projectSearchInput = document.getElementById('projectSearchInput');
+      const projectTagFilterSelect = document.getElementById('projectTagFilterSelect');
+      const projectGroupSelect = document.getElementById('projectGroupSelect');
       const newProjectBtn = document.getElementById('newProjectBtn');
       const backToProjectsBtn = document.getElementById('backToProjectsBtn');
       const currentProjectName = document.getElementById('currentProjectName');
@@ -492,6 +519,11 @@
       let suppressAutosave = false;
       let projectChangeVersion = 0;
       let currentUser = null;
+      let allProjects = [];
+      let projectSearchQuery = '';
+      let projectTagFilter = '';
+      let projectGroupMode = 'list';
+      let pendingXmlUpdateProjectId = null;
       let currentSaveStatusKey = 'projects.choose';
       let displayedEventParentIds = new Set();
       let hoveredTagId = null;
@@ -894,23 +926,90 @@
 
       function renderProjectList(projects) {
         projectList.innerHTML = '';
-        if (projects.length === 0) {
-          projectList.innerHTML = `<div class="project-empty">${isAdmin() ? t('projects.noneAdmin') : t('projects.noneUser')}</div>`;
+        allProjects = Array.isArray(projects) ? projects : [];
+        updateProjectTagFilterOptions();
+        const visibleProjects = getVisibleProjects();
+        if (visibleProjects.length === 0) {
+          const emptyKey = allProjects.length > 0 ? 'projects.noMatch' : (isAdmin() ? 'projects.noneAdmin' : 'projects.noneUser');
+          projectList.innerHTML = `<div class="project-empty">${escapeHtml(t(emptyKey))}</div>`;
           return;
         }
+        if (projectGroupMode === 'tag') {
+          renderProjectGroups(visibleProjects);
+          return;
+        }
+        visibleProjects.forEach(project => {
+          projectList.appendChild(createProjectCard(project));
+        });
+      }
+
+      function renderProjectGroups(projects) {
+        const groups = new Map();
         projects.forEach(project => {
+          const tags = Array.isArray(project.tags) && project.tags.length > 0
+            ? project.tags
+            : [t('projects.uncategorized')];
+          tags.forEach(tag => {
+            if (!groups.has(tag)) groups.set(tag, []);
+            groups.get(tag).push(project);
+          });
+        });
+        Array.from(groups.keys()).sort((a, b) => a.localeCompare(b)).forEach(tag => {
+          const group = document.createElement('section');
+          group.className = 'project-group';
+          group.innerHTML = `<h3 class="project-group-title">${escapeHtml(tag)}</h3>`;
+          groups.get(tag).forEach(project => group.appendChild(createProjectCard(project)));
+          projectList.appendChild(group);
+        });
+      }
+
+      function createProjectCard(project) {
           const card = document.createElement('div');
           card.className = 'project-card';
+          const tags = Array.isArray(project.tags) ? project.tags : [];
+          const tagHtml = tags.length > 0
+            ? tags.map(tag => `<span class="project-tag-chip">${escapeHtml(tag)}</span>`).join('')
+            : `<span class="project-tag-empty">${escapeHtml(t('projects.uncategorized'))}</span>`;
           card.innerHTML = `
             <div class="project-card-title">${escapeHtml(project.name)}</div>
             <div class="project-card-meta">${escapeHtml(t('projects.updatedAt', { time: formatDateTime(project.updatedAt) }))}</div>
+            <div class="project-card-tags">${tagHtml}</div>
             <div class="project-card-actions">
               <button class="btn open-project-btn" type="button" data-id="${project.id}">${escapeHtml(t('projects.open'))}</button>
+              ${isAdmin() ? `<button class="btn edit-project-tags-btn" type="button" data-id="${project.id}">${escapeHtml(t('projects.editTags'))}</button>` : ''}
+              ${isAdmin() ? `<button class="btn xml-update-project-btn" type="button" data-id="${project.id}">${escapeHtml(t('projects.xmlUpdate'))}</button>` : ''}
               ${isAdmin() ? `<button class="btn btn-danger delete-project-btn" type="button" data-id="${project.id}">${escapeHtml(t('projects.delete'))}</button>` : ''}
             </div>
           `;
-          projectList.appendChild(card);
+          return card;
+      }
+
+      function getVisibleProjects() {
+        const query = projectSearchQuery.trim().toLowerCase();
+        return allProjects.filter(project => {
+          const tags = Array.isArray(project.tags) ? project.tags : [];
+          if (projectTagFilter && !tags.includes(projectTagFilter)) return false;
+          if (!query) return true;
+          return String(project.name || '').toLowerCase().includes(query)
+            || tags.some(tag => String(tag).toLowerCase().includes(query));
         });
+      }
+
+      function updateProjectTagFilterOptions() {
+        if (!projectTagFilterSelect) return;
+        const tags = Array.from(new Set(
+          allProjects.flatMap(project => Array.isArray(project.tags) ? project.tags : [])
+        )).sort((a, b) => a.localeCompare(b));
+        const currentValue = projectTagFilter;
+        projectTagFilterSelect.innerHTML = `<option value="">${escapeHtml(t('projects.allTags'))}</option>`;
+        tags.forEach(tag => {
+          const option = document.createElement('option');
+          option.value = tag;
+          option.textContent = tag;
+          projectTagFilterSelect.appendChild(option);
+        });
+        projectTagFilter = tags.includes(currentValue) ? currentValue : '';
+        projectTagFilterSelect.value = projectTagFilter;
       }
 
       function formatDateTime(value) {
@@ -982,6 +1081,14 @@
         await loadProjectList();
       }
 
+      async function updateProjectTags(projectId, tags) {
+        await apiRequest(`/api/projects/${projectId}/tags`, {
+          method: 'PATCH',
+          body: JSON.stringify({ tags })
+        });
+        await loadProjectList();
+      }
+
       function markProjectDirty() {
         if (suppressAutosave || !currentProjectId) return;
         hasUnsavedProjectChanges = true;
@@ -1048,6 +1155,33 @@
         formData.append('file', file);
         formData.append('name', name);
         const response = await fetch('/api/imports/xml', {
+          method: 'POST',
+          body: formData
+        });
+        if (!response.ok) {
+          let message = t('api.requestFailed');
+          try {
+            const body = await response.json();
+            if (body.error) message = body.error;
+          } catch (error) {
+            message = response.statusText || message;
+          }
+          throw new Error(message);
+        }
+        const body = await response.json();
+        setSaveStatusKey('saving', 'xml.submitted');
+        return pollXmlImportJob(body.jobId);
+      }
+
+      async function uploadXmlUpdate(file, projectId) {
+        if (!isAdmin()) {
+          alert(t('import.adminOnly'));
+          return;
+        }
+        setSaveStatusKey('saving', 'xml.uploading');
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await fetch(`/api/projects/${projectId}/import-xml`, {
           method: 'POST',
           body: formData
         });
@@ -1165,9 +1299,31 @@
 
       projectList.addEventListener('click', async (e) => {
         const openBtn = e.target.closest('.open-project-btn');
+        const editTagsBtn = e.target.closest('.edit-project-tags-btn');
+        const xmlUpdateBtn = e.target.closest('.xml-update-project-btn');
         const deleteBtn = e.target.closest('.delete-project-btn');
         if (openBtn) {
           await openProject(parseInt(openBtn.dataset.id));
+          return;
+        }
+        if (editTagsBtn) {
+          if (!isAdmin()) return;
+          const id = parseInt(editTagsBtn.dataset.id);
+          const project = allProjects.find(item => Number(item.id) === id);
+          const currentTags = project && Array.isArray(project.tags) ? project.tags.join(', ') : '';
+          const value = prompt(t('projects.promptTags'), currentTags);
+          if (value === null) return;
+          try {
+            await updateProjectTags(id, value.split(',').map(tag => tag.trim()));
+          } catch (error) {
+            alert(t('projects.tagsUpdateFailed', { message: error.message }));
+          }
+          return;
+        }
+        if (xmlUpdateBtn) {
+          if (!isAdmin()) return;
+          pendingXmlUpdateProjectId = parseInt(xmlUpdateBtn.dataset.id);
+          xmlImportFileInput.click();
           return;
         }
         if (deleteBtn) {
@@ -1612,6 +1768,18 @@
       });
       collapseAllTagsBtn.addEventListener('click', collapseAllTags);
       importTypeSelect.addEventListener('change', updateImportUi);
+      projectSearchInput.addEventListener('input', (e) => {
+        projectSearchQuery = e.target.value;
+        renderProjectList(allProjects);
+      });
+      projectTagFilterSelect.addEventListener('change', (e) => {
+        projectTagFilter = e.target.value;
+        renderProjectList(allProjects);
+      });
+      projectGroupSelect.addEventListener('change', (e) => {
+        projectGroupMode = e.target.value === 'tag' ? 'tag' : 'list';
+        renderProjectList(allProjects);
+      });
       tagSearchInput.addEventListener('input', (e) => {
         tagSearchQuery = e.target.value.trim().toLowerCase();
         updateCanvasBranchFilterOptions();
@@ -3034,7 +3202,22 @@
 
       xmlImportFileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
-        if (!file) return;
+        if (!file) {
+          pendingXmlUpdateProjectId = null;
+          return;
+        }
+        if (pendingXmlUpdateProjectId) {
+          const projectId = pendingXmlUpdateProjectId;
+          pendingXmlUpdateProjectId = null;
+          uploadXmlUpdate(file, projectId)
+            .then(() => alert(t('projects.xmlUpdateSuccess')))
+            .catch(error => {
+              setSaveStatusKey('idle', 'projects.choose');
+              alert(t('projects.xmlUpdateFailed', { message: error.message }));
+            });
+          xmlImportFileInput.value = '';
+          return;
+        }
         const defaultName = file.name.replace(/\.xml$/i, '') || t('import.defaultProject');
         const name = prompt(t('projects.promptImportName'), defaultName);
         if (!name || !name.trim()) {

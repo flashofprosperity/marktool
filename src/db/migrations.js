@@ -59,6 +59,15 @@ function runMigrations() {
       duration_ms INTEGER,
       FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL
     );
+    CREATE TABLE IF NOT EXISTS project_tags (
+      project_id INTEGER NOT NULL,
+      tag TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      UNIQUE (project_id, tag),
+      FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_project_tags_tag
+      ON project_tags(tag);
   `);
   ensureEventRecordTableShape();
 }

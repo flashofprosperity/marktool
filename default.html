@@ -72,6 +72,16 @@
         </div>
         <button class="btn btn-primary" id="newProjectBtn" type="button" data-i18n="projects.new">新建项目</button>
       </div>
+      <div class="project-tools">
+        <input class="project-search-input" id="projectSearchInput" type="search" placeholder="搜索项目或标签" data-i18n-placeholder="projects.searchPlaceholder">
+        <select class="project-filter-select" id="projectTagFilterSelect" aria-label="Project tag filter">
+          <option value="" data-i18n="projects.allTags">全部标签</option>
+        </select>
+        <select class="project-filter-select" id="projectGroupSelect" aria-label="Project group mode">
+          <option value="list" data-i18n="projects.groupList">默认列表</option>
+          <option value="tag" data-i18n="projects.groupByTag">按标签分组</option>
+        </select>
+      </div>
       <div class="project-list" id="projectList">
         <div class="project-empty">正在加载项目...</div>
       </div>
