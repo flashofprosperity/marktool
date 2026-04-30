@@ -136,6 +136,11 @@
     `;
   }
 
+  function renderPanelEventDrawer(locations) {
+    // 不再使用drawer，event列表将直接渲染在chip内部
+    return '';
+  }
+
   function bindEventItems(root) {
     root.querySelectorAll('.location-group-event-item').forEach(button => {
       button.addEventListener('click', event => {
@@ -516,7 +521,7 @@
     panelEl.style.left = `${group.panel.x * 100}%`;
     panelEl.style.top = `${group.panel.y * 100}%`;
     panelEl.style.width = `${group.panel.width * 100}%`;
-    panelEl.style.maxHeight = `${group.panel.height * 100}%`;
+    panelEl.style.height = `${group.panel.height * 100}%`;
     const groupDisplayName = getGroupDisplayName(group, api.findTagById(Number(group.stationId)));
     panelEl.innerHTML = `
       <div class="location-group-canvas-panel-header">
@@ -524,16 +529,32 @@
         <span>${escapeHtml(String(locations.length))}</span>
         <button class="location-group-panel-collapse" type="button">${escapeHtml(t('groups.collapse'))}</button>
       </div>
-      <div class="location-group-canvas-grid">
-        ${locations.map(location => {
+      <div class="location-group-canvas-body">
+        <div class="location-group-canvas-grid">
+          ${locations.map(location => {
           const hit = search && getDisplayName(location).toLowerCase().includes(search);
           const events = getEventChildren(location);
-          return `<div class="location-group-chip ${hit ? 'search-hit' : ''}" data-location-id="${location.id}">
+          const isActive = Number(activeEventLocationId) === Number(location.id);
+          return `<div class="location-group-chip ${hit ? 'search-hit' : ''} ${isActive ? 'active' : ''}" data-location-id="${location.id}">
             <button class="location-group-chip-main" type="button" data-location-id="${location.id}">${escapeHtml(getDisplayName(location))}</button>
-            ${events.length > 0 ? `<button class="location-group-chip-event" type="button" data-location-id="${location.id}">!${events.length}</button>` : ''}
-            ${renderEventList(location)}
+            ${events.length > 0 ? `<button class="location-group-chip-event" type="button" data-location-id="${location.id}">${events.length}</button>` : `<span class="location-group-chip-event empty">0</span>`}
+            ${isActive && events.length > 0 ? `
+            <div class="location-group-chip-event-popover">
+              <div class="location-group-chip-event-popover-title">${escapeHtml(getDisplayName(location))}</div>
+              ${events.map(eventTag => {
+                const record = api.getEventRecordForTag ? api.getEventRecordForTag(eventTag) : null;
+                const label = record && record.event ? record.event : getDisplayName(eventTag);
+                const meta = record ? `es: ${record.eventSwitch || ''}` : '';
+                return `<div class="location-group-chip-event-item" data-event-id="${eventTag.id}">
+                  <span>${escapeHtml(label)}</span>
+                  ${meta ? `<small>${escapeHtml(meta)}</small>` : ''}
+                </div>`;
+              }).join('')}
+            </div>` : ''}
           </div>`;
         }).join('')}
+        </div>
+        ${renderPanelEventDrawer(locations)}
       </div>
       <button class="location-group-resize-handle" type="button" aria-label="${escapeHtml(t('groups.resize'))}" title="${escapeHtml(t('groups.resize'))}"></button>
     `;
@@ -561,6 +582,14 @@
         toggleEventList(button.dataset.locationId);
       });
     });
+    const closeEventDrawerBtn = panelEl.querySelector('.location-group-event-drawer-close');
+    if (closeEventDrawerBtn) {
+      closeEventDrawerBtn.addEventListener('click', event => {
+        event.stopPropagation();
+        activeEventLocationId = null;
+        scheduleOverlayRender();
+      });
+    }
     bindEventItems(panelEl);
     return panelEl;
   }

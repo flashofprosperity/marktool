@@ -59,6 +59,8 @@
           'projects.allTags': '全部标签',
           'projects.groupList': '默认列表',
           'projects.groupByTag': '按标签分组',
+          'projects.sortByUpdated': '按时间排序',
+          'projects.sortByName': '按首字母排序',
           'projects.uncategorized': '未分类',
           'projects.promptTags': '请输入项目标签，用逗号分隔',
           'projects.tagsUpdateFailed': '项目标签更新失败：{message}',
@@ -265,6 +267,8 @@
           'projects.allTags': 'All tags',
           'projects.groupList': 'List',
           'projects.groupByTag': 'Group by tag',
+          'projects.sortByUpdated': 'By updated time',
+          'projects.sortByName': 'By first letter',
           'projects.uncategorized': 'Uncategorized',
           'projects.promptTags': 'Enter project tags, separated by commas',
           'projects.tagsUpdateFailed': 'Project tag update failed: {message}',
@@ -521,6 +525,7 @@
       const projectSearchInput = document.getElementById('projectSearchInput');
       const projectTagFilterSelect = document.getElementById('projectTagFilterSelect');
       const projectGroupSelect = document.getElementById('projectGroupSelect');
+      const projectSortSelect = document.getElementById('projectSortSelect');
       const newProjectBtn = document.getElementById('newProjectBtn');
       const newProjectJsonBtn = document.getElementById('newProjectJsonBtn');
       const newProjectCsvBtn = document.getElementById('newProjectCsvBtn');
@@ -619,6 +624,7 @@
       let projectSearchQuery = '';
       let projectTagFilter = '';
       let projectGroupMode = 'list';
+      let projectSortMode = 'updated';
       let pendingJsonImportMode = 'update-current';
       let pendingXmlImportMode = 'update-current';
       let pendingXmlUpdateProjectId = null;
@@ -1126,7 +1132,7 @@
         projectList.innerHTML = '';
         allProjects = Array.isArray(projects) ? projects : [];
         updateProjectTagFilterOptions();
-        const visibleProjects = getVisibleProjects();
+        const visibleProjects = sortProjects(getVisibleProjects());
         updateProjectSummary(visibleProjects.length);
         if (visibleProjects.length === 0) {
           const emptyKey = allProjects.length > 0 ? 'projects.noMatch' : (isAdmin() ? 'projects.noneAdmin' : 'projects.noneUser');
@@ -1140,6 +1146,36 @@
         visibleProjects.forEach(project => {
           projectList.appendChild(createProjectCard(project));
         });
+      }
+
+      function sortProjects(projects) {
+        const sorted = [...projects];
+        if (projectSortMode === 'name') {
+          sorted.sort((a, b) => {
+            const nameCompare = String(a.name || '').localeCompare(String(b.name || ''), currentLanguage, {
+              sensitivity: 'base',
+              numeric: true
+            });
+            if (nameCompare !== 0) return nameCompare;
+            return getProjectUpdatedTime(b) - getProjectUpdatedTime(a);
+          });
+          return sorted;
+        }
+        sorted.sort((a, b) => {
+          const timeCompare = getProjectUpdatedTime(b) - getProjectUpdatedTime(a);
+          if (timeCompare !== 0) return timeCompare;
+          return String(a.name || '').localeCompare(String(b.name || ''), currentLanguage, {
+            sensitivity: 'base',
+            numeric: true
+          });
+        });
+        return sorted;
+      }
+
+      function getProjectUpdatedTime(project) {
+        const value = project && (project.updatedAt || project.createdAt);
+        const time = Date.parse(value || '');
+        return Number.isFinite(time) ? time : 0;
       }
 
       function updateProjectSummary(visibleCount) {
@@ -2179,6 +2215,12 @@
           renderProjectList(allProjects);
         });
       }
+      if (projectSortSelect) {
+        projectSortSelect.addEventListener('change', (e) => {
+          projectSortMode = e.target.value === 'name' ? 'name' : 'updated';
+          renderProjectList(allProjects);
+        });
+      }
       tagSearchInput.addEventListener('input', (e) => {
         tagSearchQuery = e.target.value.trim().toLowerCase();
         updateCanvasBranchFilterOptions();
@@ -3151,12 +3193,7 @@
             
             // 等待图片容器尺寸稳定后再渲染
             setTimeout(() => {
-              tags = [];
-              eventRecords = [];
               canvasHiddenBranchIds = [];
-              collapsedTagIds.clear();
-              collapsedTypeGroupIds.clear();
-              displayedEventParentIds.clear();
               hoveredTagId = null;
               resetView();
               renderAll();
@@ -3500,8 +3537,14 @@
         }
       }
 
+      function shouldUseNativeWheelScroll(target) {
+        if (!(target instanceof Element)) return false;
+        return !!target.closest('.location-group-canvas-grid, .location-group-event-list, .location-group-event-drawer-list');
+      }
+
       imageWrapper.addEventListener('wheel', (e) => {
         if (!annotateImage.src) return;
+        if (shouldUseNativeWheelScroll(e.target)) return;
         e.preventDefault();
 
         const wrapperRect = imageWrapper.getBoundingClientRect();
