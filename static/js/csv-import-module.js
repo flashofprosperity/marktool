@@ -6,6 +6,7 @@
   if (!csvInput) return;
 
   let pendingStationId = null;
+  let pendingTextHandler = null;
   let idCounter = Date.now();
 
   function nextTagId() {
@@ -200,6 +201,13 @@
 
     const reader = new FileReader();
     reader.onload = ev => {
+      if (pendingTextHandler) {
+        const handler = pendingTextHandler;
+        pendingTextHandler = null;
+        Promise.resolve(handler(ev.target.result, file))
+          .catch(error => alert(t('csv.importFailed', { message: error.message })));
+        return;
+      }
       try {
         const result = importCsvText(ev.target.result);
         alert(t('csv.importSuccess', result));
@@ -227,7 +235,8 @@
   }, true);
 
   window.MESCsvImport = {
-    openFilePicker() {
+    openFilePicker(options = {}) {
+      pendingTextHandler = typeof options.onText === 'function' ? options.onText : null;
       csvInput.click();
     },
     startCoordinateAssignment,

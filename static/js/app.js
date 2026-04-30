@@ -38,6 +38,10 @@
           'projects.title': '项目',
           'projects.help': '选择一个服务端项目继续标注，或创建新的持久化项目。',
           'projects.new': '新建项目',
+          'projects.newBlank': '新建空白',
+          'projects.newJson': 'JSON 新建',
+          'projects.newCsv': 'CSV 新建',
+          'projects.newXml': 'XML 新建',
           'projects.noneAdmin': '暂无项目，点击“新建项目”开始。',
           'projects.noneUser': '暂无项目，请联系管理员创建。',
           'projects.noMatch': '没有匹配的项目。',
@@ -47,6 +51,9 @@
           'projects.open': '打开',
           'projects.delete': '删除',
           'projects.editTags': '编辑标签',
+          'projects.editName': '编辑名称',
+          'projects.editMenu': '编辑',
+          'projects.copy': '复制',
           'projects.xmlUpdate': 'XML 更新',
           'projects.searchPlaceholder': '搜索项目或标签',
           'projects.allTags': '全部标签',
@@ -61,6 +68,11 @@
           'projects.unopened': '未打开项目',
           'projects.choose': '请选择项目',
           'projects.promptName': '请输入项目名称',
+          'projects.renameFailed': '项目名称更新失败：{message}',
+          'projects.copyName': '{name} 副本',
+          'projects.promptCopyName': '请输入复制后的项目名称',
+          'projects.copyFailed': '复制项目失败：{message}',
+          'projects.summary': '共 {total} 个项目，当前显示 {visible} 个',
           'projects.promptImportName': '请输入导入后创建的项目名称',
           'projects.confirmDelete': '确定删除“{title}”？此操作不可恢复。',
           'projects.openFailed': '打开项目失败：{message}',
@@ -95,9 +107,39 @@
           'canvas.zoomIn': '放大',
           'canvas.reset': '重置',
           'canvas.resetTitle': '重置视图',
+          'canvas.renderMode': '渲染模式',
+          'canvas.renderImageMode': '图片比例',
+          'canvas.renderScreenMode': '清晰总览',
           'panel.toggle': '折叠/展开',
           'panel.view': '视图',
           'panel.tags': '标签列表',
+          'groups.title': 'Location 集合',
+          'groups.toggle': '显示集合视图',
+          'groups.create': '新建集合',
+          'groups.empty': '暂无 Location 集合。',
+          'groups.noStations': '请先创建 Station。',
+          'groups.noLocations': '该 Station 下暂无 Location。',
+          'groups.name': '名称',
+          'groups.station': '所属 Station',
+          'groups.locations': '包含 Location',
+          'groups.iconSize': '图标大小',
+          'groups.locate': '定位',
+          'groups.events': '事件',
+          'groups.edit': '编辑',
+          'groups.rename': '重命名',
+          'groups.delete': '删除',
+          'groups.collapse': '折叠',
+          'groups.expand': '展开',
+          'groups.save': '保存',
+          'groups.cancel': '取消',
+          'groups.defaultName': 'Location 集合',
+          'groups.count': '{count} 个 Location',
+          'groups.unassigned': '未命名 Location',
+          'groups.confirmDelete': '删除 Location 集合“{name}”？不会删除原 Location。',
+          'groups.clickToExpand': '点击展开集合',
+          'groups.searchHit': '搜索命中',
+          'groups.byStation': '按 Station 分类',
+          'groups.resize': '调整大小',
           'panel.searchPlaceholder': '搜索标签、类型、坐标',
           'panel.clearSearch': '清空搜索',
           'panel.canvasDisplay': '画布显示',
@@ -202,6 +244,10 @@
           'projects.title': 'Projects',
           'projects.help': 'Choose a server project to continue, or create a new persistent project.',
           'projects.new': 'New project',
+          'projects.newBlank': 'Blank',
+          'projects.newJson': 'From JSON',
+          'projects.newCsv': 'From CSV',
+          'projects.newXml': 'From XML',
           'projects.noneAdmin': 'No projects yet. Click "New project" to start.',
           'projects.noneUser': 'No projects yet. Contact an admin to create one.',
           'projects.noMatch': 'No matching projects.',
@@ -211,6 +257,9 @@
           'projects.open': 'Open',
           'projects.delete': 'Delete',
           'projects.editTags': 'Edit tags',
+          'projects.editName': 'Edit name',
+          'projects.editMenu': 'Edit',
+          'projects.copy': 'Copy',
           'projects.xmlUpdate': 'XML update',
           'projects.searchPlaceholder': 'Search projects or tags',
           'projects.allTags': 'All tags',
@@ -225,6 +274,11 @@
           'projects.unopened': 'No project open',
           'projects.choose': 'Choose a project',
           'projects.promptName': 'Enter a project name',
+          'projects.renameFailed': 'Project rename failed: {message}',
+          'projects.copyName': '{name} copy',
+          'projects.promptCopyName': 'Enter the copied project name',
+          'projects.copyFailed': 'Copy project failed: {message}',
+          'projects.summary': '{total} projects, {visible} shown',
           'projects.promptImportName': 'Enter the new project name for this import',
           'projects.confirmDelete': 'Delete "{title}"? This cannot be undone.',
           'projects.openFailed': 'Open project failed: {message}',
@@ -259,9 +313,39 @@
           'canvas.zoomIn': 'Zoom in',
           'canvas.reset': 'Reset',
           'canvas.resetTitle': 'Reset view',
+          'canvas.renderMode': 'Render mode',
+          'canvas.renderImageMode': 'Image scale',
+          'canvas.renderScreenMode': 'Screen clear',
           'panel.toggle': 'Collapse/expand',
           'panel.view': 'View',
           'panel.tags': 'Label list',
+          'groups.title': 'Location Group',
+          'groups.toggle': 'Show group view',
+          'groups.create': 'New group',
+          'groups.empty': 'No Location Groups yet.',
+          'groups.noStations': 'Create a Station first.',
+          'groups.noLocations': 'This Station has no Locations.',
+          'groups.name': 'Name',
+          'groups.station': 'Station',
+          'groups.locations': 'Locations',
+          'groups.iconSize': 'Icon size',
+          'groups.locate': 'Locate',
+          'groups.events': 'Events',
+          'groups.edit': 'Edit',
+          'groups.rename': 'Rename',
+          'groups.delete': 'Delete',
+          'groups.collapse': 'Collapse',
+          'groups.expand': 'Expand',
+          'groups.save': 'Save',
+          'groups.cancel': 'Cancel',
+          'groups.defaultName': 'Location Group',
+          'groups.count': '{count} Location(s)',
+          'groups.unassigned': 'Unnamed Location',
+          'groups.confirmDelete': 'Delete Location Group "{name}"? Original Locations will remain.',
+          'groups.clickToExpand': 'Click to expand group',
+          'groups.searchHit': 'Search match',
+          'groups.byStation': 'Group by Station',
+          'groups.resize': 'Resize',
           'panel.searchPlaceholder': 'Search labels, types, coordinates',
           'panel.clearSearch': 'Clear search',
           'panel.canvasDisplay': 'Canvas',
@@ -422,6 +506,7 @@
       // references instead of calling getElementById again unless the element is
       // created dynamically.
       const loginHome = document.getElementById('loginHome');
+      const toolbar = document.querySelector('.toolbar');
       const loginForm = document.getElementById('loginForm');
       const loginUsername = document.getElementById('loginUsername');
       const loginPassword = document.getElementById('loginPassword');
@@ -432,10 +517,14 @@
       const projectHome = document.getElementById('projectHome');
       const appWorkspace = document.getElementById('appWorkspace');
       const projectList = document.getElementById('projectList');
+      const projectSummary = document.getElementById('projectSummary');
       const projectSearchInput = document.getElementById('projectSearchInput');
       const projectTagFilterSelect = document.getElementById('projectTagFilterSelect');
       const projectGroupSelect = document.getElementById('projectGroupSelect');
       const newProjectBtn = document.getElementById('newProjectBtn');
+      const newProjectJsonBtn = document.getElementById('newProjectJsonBtn');
+      const newProjectCsvBtn = document.getElementById('newProjectCsvBtn');
+      const newProjectXmlBtn = document.getElementById('newProjectXmlBtn');
       const backToProjectsBtn = document.getElementById('backToProjectsBtn');
       const currentProjectName = document.getElementById('currentProjectName');
       const saveStatus = document.getElementById('saveStatus');
@@ -444,6 +533,7 @@
       const imageWrapper = document.getElementById('imageWrapper');
       const annotationCanvas = document.getElementById('annotationCanvas');
       const annotateImage = document.getElementById('annotateImage');
+      const markerRenderModeSelect = document.getElementById('markerRenderModeSelect');
       const zoomInBtn = document.getElementById('zoomInBtn');
       const zoomOutBtn = document.getElementById('zoomOutBtn');
       const zoomResetBtn = document.getElementById('zoomResetBtn');
@@ -453,6 +543,7 @@
       const sidePanelSelect = document.getElementById('sidePanelSelect');
       const tagsPanelView = document.getElementById('tagsPanelView');
       const materialsPanelView = document.getElementById('materialsPanelView');
+      const locationGroupPanel = document.getElementById('locationGroupPanel');
       const tagSearchInput = document.getElementById('tagSearchInput');
       const tagSearchClearBtn = document.getElementById('tagSearchClearBtn');
       const canvasBranchFilterBtn = document.getElementById('canvasBranchFilterBtn');
@@ -460,6 +551,7 @@
       const canvasBranchFilterMenu = document.getElementById('canvasBranchFilterMenu');
       const tagTreeModeBtn = document.getElementById('tagTreeModeBtn');
       const tagTypeModeBtn = document.getElementById('tagTypeModeBtn');
+      const tagGroupModeBtn = document.getElementById('tagGroupModeBtn');
       const collapseAllTagsBtn = document.getElementById('collapseAllTagsBtn');
       const exportBtn = document.getElementById('exportBtn');
       const importTypeSelect = document.getElementById('importTypeSelect');
@@ -473,6 +565,7 @@
 
       const panelRight = document.getElementById('panelRight');
       const toggleRightBtn = document.getElementById('toggleRightBtn');
+      const panelCenter = document.querySelector('.panel-center');
 
       // 右键菜单元素
       const contextMenu = document.getElementById('contextMenu');
@@ -508,6 +601,9 @@
       let sidePanelView = 'tags';
       let tagListMode = 'tree';
       let tagSearchQuery = '';
+      let locationGroups = [];
+      let locationGroupRenderEnabled = true;
+      let markerRenderMode = 'image';
       let canvasHiddenBranchIds = [];
       let collapsedTagIds = new Set();
       let collapsedTypeGroupIds = new Set();
@@ -523,6 +619,8 @@
       let projectSearchQuery = '';
       let projectTagFilter = '';
       let projectGroupMode = 'list';
+      let pendingJsonImportMode = 'update-current';
+      let pendingXmlImportMode = 'update-current';
       let pendingXmlUpdateProjectId = null;
       let currentSaveStatusKey = 'projects.choose';
       let displayedEventParentIds = new Set();
@@ -530,6 +628,7 @@
       let isDraggingTag = false;
       let pendingLocationCategoryResolve = null;
       let lastContextMenuOpenedAt = 0;
+      const renderHooks = [];
 
       function applyStaticI18n() {
         document.documentElement.lang = currentLanguage;
@@ -547,6 +646,7 @@
           el.setAttribute('alt', t(el.dataset.i18nAlt));
         });
         if (languageSelect) languageSelect.value = currentLanguage;
+        if (markerRenderModeSelect) markerRenderModeSelect.value = markerRenderMode;
         setSaveStatus(saveStatus.className.replace('save-status ', '') || 'idle', t(currentSaveStatusKey));
       }
 
@@ -559,8 +659,10 @@
         if (!currentProjectId) setProjectNameToFallback();
         updateAuthUi();
         updateCanvasBranchFilterOptions();
+        renderProjectList(allProjects);
         renderTagList();
         renderMaterialList();
+        runRenderHooks();
       }
 
       // ---------- Server-backed project persistence ----------
@@ -602,11 +704,33 @@
         setSaveStatus(state, t(key));
       }
 
+      function registerRenderHook(callback) {
+        if (typeof callback === 'function' && !renderHooks.includes(callback)) {
+          renderHooks.push(callback);
+        }
+      }
+
+      function runRenderHooks(reason = 'all') {
+        renderHooks.forEach(callback => callback(reason));
+      }
+
+      function updateWorkspaceLayoutMode() {
+        if (!panelCenter) return;
+        const isWorkspaceVisible = !appWorkspace.classList.contains('is-hidden');
+        const panelVisible = isWorkspaceVisible && !panelRight.classList.contains('is-hidden') && !panelRight.classList.contains('hidden');
+        panelCenter.classList.toggle('with-side-panel', panelVisible);
+        panelCenter.classList.toggle('without-side-panel', !panelVisible);
+      }
+
       function setWorkspaceVisible(isVisible) {
         loginHome.classList.add('is-hidden');
         projectHome.classList.toggle('is-hidden', isVisible);
         appWorkspace.classList.toggle('is-hidden', !isVisible);
         panelRight.classList.toggle('is-hidden', !isVisible);
+        document.body.classList.remove('login-view', 'project-home-view', 'workspace-view');
+        document.body.classList.add(isVisible ? 'workspace-view' : 'project-home-view');
+        if (toolbar) toolbar.classList.remove('is-hidden');
+        updateWorkspaceLayoutMode();
       }
 
       function isAdmin() {
@@ -619,6 +743,9 @@
           : t('auth.notLoggedIn');
         logoutBtn.classList.toggle('is-hidden', !currentUser);
         newProjectBtn.classList.toggle('is-hidden', !isAdmin());
+        newProjectJsonBtn.classList.toggle('is-hidden', !isAdmin());
+        newProjectCsvBtn.classList.toggle('is-hidden', !isAdmin());
+        newProjectXmlBtn.classList.toggle('is-hidden', !isAdmin());
         exportBtn.classList.toggle('is-hidden', !isAdmin());
         document.body.classList.toggle('is-admin', !!isAdmin());
         updateImportUi();
@@ -642,6 +769,9 @@
         projectHome.classList.add('is-hidden');
         appWorkspace.classList.add('is-hidden');
         panelRight.classList.add('is-hidden');
+        document.body.classList.remove('project-home-view', 'workspace-view');
+        document.body.classList.add('login-view');
+        if (toolbar) toolbar.classList.add('is-hidden');
         updateAuthUi();
       }
 
@@ -650,6 +780,9 @@
         projectHome.classList.remove('is-hidden');
         appWorkspace.classList.add('is-hidden');
         panelRight.classList.add('is-hidden');
+        document.body.classList.remove('login-view', 'workspace-view');
+        document.body.classList.add('project-home-view');
+        if (toolbar) toolbar.classList.remove('is-hidden');
         updateAuthUi();
       }
 
@@ -685,6 +818,31 @@
           && Number.isFinite(Number(tag.y));
       }
 
+      function cleanLocationGroupForPersistence(group) {
+        const anchor = group && group.anchor ? group.anchor : {};
+        const panel = group && group.panel ? group.panel : {};
+        return {
+          id: group && group.id ? String(group.id) : createLocationGroupId(),
+          name: group && group.name ? String(group.name) : 'Location Group',
+          stationId: group && group.stationId !== undefined && group.stationId !== null ? Number(group.stationId) : null,
+          locationIds: Array.isArray(group && group.locationIds)
+            ? group.locationIds.map(id => Number(id)).filter(id => Number.isFinite(id))
+            : [],
+          anchor: {
+            x: Number.isFinite(Number(anchor.x)) ? +Number(anchor.x).toFixed(4) : 0.5,
+            y: Number.isFinite(Number(anchor.y)) ? +Number(anchor.y).toFixed(4) : 0.5
+          },
+          panel: {
+            x: Number.isFinite(Number(panel.x)) ? +Number(panel.x).toFixed(4) : 0.58,
+            y: Number.isFinite(Number(panel.y)) ? +Number(panel.y).toFixed(4) : 0.5,
+            width: Number.isFinite(Number(panel.width)) ? +Number(panel.width).toFixed(4) : 0.24,
+            height: Number.isFinite(Number(panel.height)) ? +Number(panel.height).toFixed(4) : 0.22
+          },
+          iconSize: Number.isFinite(Number(group && group.iconSize)) ? Number(group.iconSize) : 48,
+          collapsed: group && group.collapsed !== undefined ? !!group.collapsed : true
+        };
+      }
+
       function serializeProjectData() {
         const cleanMaterials = materials.map(m => {
           const material = {
@@ -703,7 +861,8 @@
           tagTypes: tagTypes.map(type => ({ ...type })),
           tags: tags.map(cleanTagForPersistence),
           eventRecords: eventRecords.map(cleanEventRecordForPersistence),
-          materials: cleanMaterials
+          materials: cleanMaterials,
+          locationGroups: locationGroups.map(cleanLocationGroupForPersistence)
         };
       }
 
@@ -718,6 +877,7 @@
           type: t('materials.defaultType')
         });
         tags = [];
+        locationGroups = [];
         eventRecords = [];
         displayedEventParentIds.clear();
         hoveredTagId = null;
@@ -781,6 +941,29 @@
 
       function createEventRecordId() {
         return `event-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      }
+
+      function createLocationGroupId() {
+        return `group-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      }
+
+      function getGroupedLocationIdSet() {
+        const groupedIds = new Set();
+        locationGroups.forEach(group => {
+          if (!Array.isArray(group.locationIds)) return;
+          group.locationIds.forEach(id => groupedIds.add(Number(id)));
+        });
+        return groupedIds;
+      }
+
+      function isLocationGrouped(tagId) {
+        return getGroupedLocationIdSet().has(Number(tagId));
+      }
+
+      function setLocationGroupRenderEnabled(isEnabled) {
+        locationGroupRenderEnabled = !!isEnabled;
+        renderMarkers();
+        runRenderHooks('overlay');
       }
 
       function getEventRecordById(recordId) {
@@ -870,7 +1053,21 @@
         return type && type.icon ? type.icon : '';
       }
 
+      function normalizeProjectData(data) {
+        const normalized = data && typeof data === 'object' ? data : {};
+        return {
+          ...normalized,
+          image: normalized.image || '',
+          tagTypes: Array.isArray(normalized.tagTypes) ? normalized.tagTypes : baseTagTypes.map(type => ({ ...type })),
+          tags: Array.isArray(normalized.tags) ? normalized.tags : [],
+          eventRecords: Array.isArray(normalized.eventRecords) ? normalized.eventRecords : [],
+          materials: Array.isArray(normalized.materials) ? normalized.materials : [],
+          locationGroups: Array.isArray(normalized.locationGroups) ? normalized.locationGroups : []
+        };
+      }
+
       function applyProjectData(data) {
+        data = normalizeProjectData(data);
         const importedTypes = Array.isArray(data.tagTypes) ? data.tagTypes : baseTagTypes;
         tagTypes.length = 0;
         tagTypes.push(...importedTypes.map((type, index) => ({
@@ -884,6 +1081,7 @@
 
         tags = Array.isArray(data.tags) ? data.tags : [];
         normalizeImportedTags(tags);
+        locationGroups = data.locationGroups.map(cleanLocationGroupForPersistence);
         eventRecords = Array.isArray(data.eventRecords)
           ? data.eventRecords.map(cleanEventRecordForPersistence)
           : [];
@@ -929,6 +1127,7 @@
         allProjects = Array.isArray(projects) ? projects : [];
         updateProjectTagFilterOptions();
         const visibleProjects = getVisibleProjects();
+        updateProjectSummary(visibleProjects.length);
         if (visibleProjects.length === 0) {
           const emptyKey = allProjects.length > 0 ? 'projects.noMatch' : (isAdmin() ? 'projects.noneAdmin' : 'projects.noneUser');
           projectList.innerHTML = `<div class="project-empty">${escapeHtml(t(emptyKey))}</div>`;
@@ -940,6 +1139,14 @@
         }
         visibleProjects.forEach(project => {
           projectList.appendChild(createProjectCard(project));
+        });
+      }
+
+      function updateProjectSummary(visibleCount) {
+        if (!projectSummary) return;
+        projectSummary.textContent = t('projects.summary', {
+          total: allProjects.length,
+          visible: visibleCount
         });
       }
 
@@ -971,14 +1178,25 @@
             ? tags.map(tag => `<span class="project-tag-chip">${escapeHtml(tag)}</span>`).join('')
             : `<span class="project-tag-empty">${escapeHtml(t('projects.uncategorized'))}</span>`;
           card.innerHTML = `
-            <div class="project-card-title">${escapeHtml(project.name)}</div>
-            <div class="project-card-meta">${escapeHtml(t('projects.updatedAt', { time: formatDateTime(project.updatedAt) }))}</div>
-            <div class="project-card-tags">${tagHtml}</div>
+            <div class="project-card-main">
+              <div class="project-card-title" title="${escapeHtml(project.name)}">${escapeHtml(project.name)}</div>
+              <div class="project-card-meta">${escapeHtml(t('projects.updatedAt', { time: formatDateTime(project.updatedAt) }))}</div>
+              <div class="project-card-tags">${tagHtml}</div>
+            </div>
             <div class="project-card-actions">
-              <button class="btn open-project-btn" type="button" data-id="${project.id}">${escapeHtml(t('projects.open'))}</button>
-              ${isAdmin() ? `<button class="btn edit-project-tags-btn" type="button" data-id="${project.id}">${escapeHtml(t('projects.editTags'))}</button>` : ''}
-              ${isAdmin() ? `<button class="btn xml-update-project-btn" type="button" data-id="${project.id}">${escapeHtml(t('projects.xmlUpdate'))}</button>` : ''}
-              ${isAdmin() ? `<button class="btn btn-danger delete-project-btn" type="button" data-id="${project.id}">${escapeHtml(t('projects.delete'))}</button>` : ''}
+              <button class="btn btn-primary open-project-btn" type="button" data-id="${project.id}">${escapeHtml(t('projects.open'))}</button>
+              ${isAdmin() ? `
+                <details class="project-edit-menu">
+                  <summary class="btn">${escapeHtml(t('projects.editMenu'))}</summary>
+                  <div class="project-edit-menu-list">
+                    <button class="project-menu-item edit-project-name-btn" type="button" data-id="${project.id}">${escapeHtml(t('projects.editName'))}</button>
+                    <button class="project-menu-item edit-project-tags-btn" type="button" data-id="${project.id}">${escapeHtml(t('projects.editTags'))}</button>
+                    <button class="project-menu-item copy-project-btn" type="button" data-id="${project.id}">${escapeHtml(t('projects.copy'))}</button>
+                    <button class="project-menu-item xml-update-project-btn" type="button" data-id="${project.id}">${escapeHtml(t('projects.xmlUpdate'))}</button>
+                    <button class="project-menu-item project-menu-danger delete-project-btn" type="button" data-id="${project.id}">${escapeHtml(t('projects.delete'))}</button>
+                  </div>
+                </details>
+              ` : ''}
             </div>
           `;
           return card;
@@ -1089,6 +1307,55 @@
         await loadProjectList();
       }
 
+      async function renameProject(projectId, name) {
+        const id = Number(projectId);
+        const trimmedName = String(name || '').trim();
+        if (!trimmedName) return;
+        const data = currentProjectId === id
+          ? serializeProjectData()
+          : normalizeProjectData((await apiRequest(`/api/projects/${id}`)).project.data);
+        const body = await apiRequest(`/api/projects/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            name: trimmedName,
+            data
+          })
+        });
+        if (currentProjectId === id) {
+          currentProjectTitle = body.project.name;
+          currentProjectName.textContent = currentProjectTitle;
+          hasUnsavedProjectChanges = false;
+          setSaveStatusKey('saved', 'save.saved');
+        }
+        await loadProjectList();
+      }
+
+      async function copyProject(projectId, name, sourceTags = []) {
+        const id = Number(projectId);
+        const trimmedName = String(name || '').trim();
+        if (!trimmedName) return;
+        const source = (await apiRequest(`/api/projects/${id}`)).project;
+        const body = await apiRequest('/api/projects/import', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: trimmedName,
+            data: normalizeProjectData(source.data)
+          })
+        });
+        if (Array.isArray(sourceTags) && sourceTags.length > 0) {
+          await updateProjectTags(body.project.id, sourceTags);
+        } else {
+          await loadProjectList();
+        }
+        await openProject(body.project.id);
+      }
+
+      function closeProjectEditMenus(exceptMenu = null) {
+        document.querySelectorAll('.project-edit-menu[open]').forEach(menu => {
+          if (menu !== exceptMenu) menu.removeAttribute('open');
+        });
+      }
+
       function markProjectDirty() {
         if (suppressAutosave || !currentProjectId) return;
         hasUnsavedProjectChanges = true;
@@ -1143,6 +1410,32 @@
         });
         await loadProjectList();
         await openProject(body.project.id);
+      }
+
+      async function replaceCurrentProjectFromJson(data) {
+        if (!currentProjectId) {
+          alert(t('projects.choose'));
+          return;
+        }
+        if (!isAdmin()) {
+          alert(t('import.adminOnly'));
+          return;
+        }
+        applyProjectData(normalizeProjectData(data));
+        markProjectDirty();
+        await saveCurrentProject();
+      }
+
+      async function createProjectFromCsvText(text, name) {
+        if (!isAdmin()) {
+          alert(t('import.adminOnly'));
+          return null;
+        }
+        await createProject(name);
+        if (!window.MESCsvImport || typeof window.MESCsvImport.importCsvText !== 'function') return null;
+        const result = window.MESCsvImport.importCsvText(text);
+        await saveCurrentProject();
+        return result;
       }
 
       async function uploadXmlImport(file, name) {
@@ -1288,6 +1581,37 @@
         }
       });
 
+      newProjectJsonBtn.addEventListener('click', () => {
+        if (!isAdmin()) return;
+        pendingJsonImportMode = 'create';
+        importFileInput.click();
+      });
+
+      newProjectCsvBtn.addEventListener('click', () => {
+        if (!isAdmin()) return;
+        if (!window.MESCsvImport || typeof window.MESCsvImport.openFilePicker !== 'function') return;
+        window.MESCsvImport.openFilePicker({
+          onText: async (text, file) => {
+            const defaultName = file.name.replace(/\.csv$/i, '') || t('import.defaultProject');
+            const name = prompt(t('projects.promptImportName'), defaultName);
+            if (!name || !name.trim()) return;
+            try {
+              const result = await createProjectFromCsvText(text, name.trim());
+              if (result) alert(t('csv.importSuccess', result));
+            } catch (error) {
+              alert(t('csv.importFailed', { message: error.message }));
+            }
+          }
+        });
+      });
+
+      newProjectXmlBtn.addEventListener('click', () => {
+        if (!isAdmin()) return;
+        pendingXmlImportMode = 'create';
+        pendingXmlUpdateProjectId = null;
+        xmlImportFileInput.click();
+      });
+
       backToProjectsBtn.addEventListener('click', () => {
         setWorkspaceVisible(false);
         loadProjectList();
@@ -1298,12 +1622,50 @@
       });
 
       projectList.addEventListener('click', async (e) => {
+        const menu = e.target.closest('.project-edit-menu');
+        const menuSummary = e.target.closest('.project-edit-menu summary');
+        if (menuSummary) {
+          closeProjectEditMenus(menu);
+          return;
+        }
         const openBtn = e.target.closest('.open-project-btn');
+        const editNameBtn = e.target.closest('.edit-project-name-btn');
         const editTagsBtn = e.target.closest('.edit-project-tags-btn');
+        const copyBtn = e.target.closest('.copy-project-btn');
         const xmlUpdateBtn = e.target.closest('.xml-update-project-btn');
         const deleteBtn = e.target.closest('.delete-project-btn');
+        if (editNameBtn || editTagsBtn || copyBtn || xmlUpdateBtn || deleteBtn) {
+          closeProjectEditMenus();
+        }
         if (openBtn) {
           await openProject(parseInt(openBtn.dataset.id));
+          return;
+        }
+        if (editNameBtn) {
+          if (!isAdmin()) return;
+          const id = parseInt(editNameBtn.dataset.id);
+          const project = allProjects.find(item => Number(item.id) === id);
+          const value = prompt(t('projects.promptName'), project ? project.name : '');
+          if (value === null || !value.trim()) return;
+          try {
+            await renameProject(id, value);
+          } catch (error) {
+            alert(t('projects.renameFailed', { message: error.message }));
+          }
+          return;
+        }
+        if (copyBtn) {
+          if (!isAdmin()) return;
+          const id = parseInt(copyBtn.dataset.id);
+          const project = allProjects.find(item => Number(item.id) === id);
+          const sourceName = project && project.name ? project.name : t('projects.untitled');
+          const value = prompt(t('projects.promptCopyName'), t('projects.copyName', { name: sourceName }));
+          if (value === null || !value.trim()) return;
+          try {
+            await copyProject(id, value, project && Array.isArray(project.tags) ? project.tags : []);
+          } catch (error) {
+            alert(t('projects.copyFailed', { message: error.message }));
+          }
           return;
         }
         if (editTagsBtn) {
@@ -1322,6 +1684,7 @@
         }
         if (xmlUpdateBtn) {
           if (!isAdmin()) return;
+          pendingXmlImportMode = 'update-current';
           pendingXmlUpdateProjectId = parseInt(xmlUpdateBtn.dataset.id);
           xmlImportFileInput.click();
           return;
@@ -1340,9 +1703,14 @@
         }
       });
 
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.project-edit-menu')) closeProjectEditMenus();
+      });
+
       // 右侧面板隐藏/显示（浮动覆盖模式）
       toggleRightBtn.addEventListener('click', () => {
         panelRight.classList.toggle('hidden');
+        updateWorkspaceLayoutMode();
       });
 
       // 右键菜单功能
@@ -1747,49 +2115,82 @@
       showTextCheckbox.addEventListener('change', updateTextVisibility);
 
       function renderSidePanelView() {
-        sidePanelSelect.value = sidePanelView;
+        sidePanelSelect.value = sidePanelView === 'materials' ? 'materials' : 'tags';
+        const showGroupMode = sidePanelView === 'tags' && tagListMode === 'group';
         tagsPanelView.classList.toggle('is-hidden', sidePanelView !== 'tags');
+        tagListContainer.classList.toggle('is-hidden', showGroupMode);
+        if (locationGroupPanel) locationGroupPanel.classList.toggle('is-hidden', !showGroupMode);
         materialsPanelView.classList.toggle('is-hidden', sidePanelView !== 'materials');
       }
 
-      sidePanelSelect.addEventListener('change', (e) => {
-        sidePanelView = e.target.value === 'materials' ? 'materials' : 'tags';
+      function setSidePanelView(nextView) {
+        sidePanelView = ['tags', 'materials'].includes(nextView) ? nextView : 'tags';
         renderSidePanelView();
+        renderTagList();
+        runRenderHooks('panel');
+      }
+
+      sidePanelSelect.addEventListener('change', (e) => {
+        setSidePanelView(e.target.value);
       });
       renderSidePanelView();
+      updateWorkspaceLayoutMode();
 
       tagTreeModeBtn.addEventListener('click', () => {
+        sidePanelView = 'tags';
         tagListMode = 'tree';
+        renderSidePanelView();
         renderTagList();
+        runRenderHooks('panel');
       });
       tagTypeModeBtn.addEventListener('click', () => {
+        sidePanelView = 'tags';
         tagListMode = 'type';
+        renderSidePanelView();
         renderTagList();
+        runRenderHooks('panel');
       });
+      if (tagGroupModeBtn) {
+        tagGroupModeBtn.addEventListener('click', () => {
+          sidePanelView = 'tags';
+          tagListMode = 'group';
+          renderSidePanelView();
+          renderTagList();
+          runRenderHooks('panel');
+        });
+      }
       collapseAllTagsBtn.addEventListener('click', collapseAllTags);
       importTypeSelect.addEventListener('change', updateImportUi);
-      projectSearchInput.addEventListener('input', (e) => {
-        projectSearchQuery = e.target.value;
-        renderProjectList(allProjects);
-      });
-      projectTagFilterSelect.addEventListener('change', (e) => {
-        projectTagFilter = e.target.value;
-        renderProjectList(allProjects);
-      });
-      projectGroupSelect.addEventListener('change', (e) => {
-        projectGroupMode = e.target.value === 'tag' ? 'tag' : 'list';
-        renderProjectList(allProjects);
-      });
+      if (projectSearchInput) {
+        projectSearchInput.addEventListener('input', (e) => {
+          projectSearchQuery = e.target.value;
+          renderProjectList(allProjects);
+        });
+      }
+      if (projectTagFilterSelect) {
+        projectTagFilterSelect.addEventListener('change', (e) => {
+          projectTagFilter = e.target.value;
+          renderProjectList(allProjects);
+        });
+      }
+      if (projectGroupSelect) {
+        projectGroupSelect.addEventListener('change', (e) => {
+          projectGroupMode = e.target.value === 'tag' ? 'tag' : 'list';
+          renderProjectList(allProjects);
+        });
+      }
       tagSearchInput.addEventListener('input', (e) => {
         tagSearchQuery = e.target.value.trim().toLowerCase();
         updateCanvasBranchFilterOptions();
         renderTagList();
+        runRenderHooks('overlay');
       });
       tagSearchClearBtn.addEventListener('click', () => {
         tagSearchQuery = '';
         tagSearchInput.value = '';
         updateCanvasBranchFilterOptions();
         renderTagList();
+        runRenderHooks('overlay');
       });
       canvasBranchFilterBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -2087,9 +2488,11 @@
         const visibleRootTags = getCanvasVisibleRootTags();
         const allTags = getAllTagsFlattened(visibleRootTags);
         const markerPositions = {}; // 存储标记点位置
+        const groupedLocationIds = getGroupedLocationIdSet();
         
         const visibleMarkerTags = allTags.filter(tag => {
           const type = tagTypes[tag.typeIndex];
+          if (locationGroupRenderEnabled && type && type.name.includes('Location') && groupedLocationIds.has(Number(tag._id))) return false;
           return hasAssignedCoordinates(tag) && !(type && type.name.includes('Event'));
         });
 
@@ -2227,7 +2630,7 @@
           eventRecord ? `${normalizeEventSwitch(eventRecord.eventSwitch)}` : '',
           eventRecord ? normalizeProcessSteps(eventRecord.processSteps).map(step => Object.values(step).join(' ')).join(' ') : '',
           getTypeAbbreviation(type ? type.name : 'Tag'),
-          hasAssignedCoordinates(tag) ? `${(tag.x * 100).toFixed(1)}` : t('tags.unassignedCoordinate'),
+          hasAssignedCoordinates(tag) ? `${(tag.x * 100).toFixed(1)}` : (isEventTag(tag) ? '' : t('tags.unassignedCoordinate')),
           hasAssignedCoordinates(tag) ? `${(tag.y * 100).toFixed(1)}` : ''
         ].join(' ').toLowerCase();
       }
@@ -2246,6 +2649,7 @@
         tagListContainer.innerHTML = '';
         tagTreeModeBtn.classList.toggle('active', tagListMode === 'tree');
         tagTypeModeBtn.classList.toggle('active', tagListMode === 'type');
+        if (tagGroupModeBtn) tagGroupModeBtn.classList.toggle('active', tagListMode === 'group');
         tagSearchInput.value = tagSearchQuery;
 
         if (tags.length === 0) {
@@ -2351,12 +2755,13 @@
         if (isCanvasBranchHiddenBySelfOrAncestor(tag)) {
           row.classList.add('canvas-filter-hidden');
         }
-        if (!hasAssignedCoordinates(tag)) row.classList.add('coordinate-unassigned');
+        const isEventNode = isEventTag(tag);
+        if (!isEventNode && !hasAssignedCoordinates(tag)) row.classList.add('coordinate-unassigned');
         row.setAttribute('data-tag-id', tag.id);
         row.title = t('tags.rowTitle');
 
         const childCount = hasChildren ? tag.children.length : 0;
-        const eventRecord = isEventTag(tag) ? getEventRecordForTag(tag) : null;
+        const eventRecord = isEventNode ? getEventRecordForTag(tag) : null;
         const displayText = eventRecord
           ? (eventRecord.event || tag.text || t('event.unnamed'))
           : (tag.text && tag.text.trim() ? tag.text.trim() : t('tags.unnamed'));
@@ -2365,7 +2770,7 @@
         const childMeta = childCount ? ` · ${t('tags.children', { count: childCount })}` : '';
         const locationMeta = isLocationTag(tag) ? ` · ${tag.locationCategory === 'equipment' ? t('tags.locationEquipment') : t('tags.locationProcess')}` : '';
         const eventMeta = eventRecord ? ` · es: ${normalizeEventSwitch(eventRecord.eventSwitch)}` : '';
-        const unassignedMeta = !hasAssignedCoordinates(tag) ? ` · ${t('tags.unassignedCoordinate')}` : '';
+        const unassignedMeta = !isEventNode && !hasAssignedCoordinates(tag) ? ` · ${t('tags.unassignedCoordinate')}` : '';
         const canAddChild = canAddChildTag(tag);
         const canAssignCoordinate = type && type.name.includes('Station') && !hasAssignedCoordinates(tag);
         const isCollapsed = hasChildren && includeChildren && collapsedTagIds.has(String(tag.id));
@@ -2525,6 +2930,12 @@
           });
           displayedEventParentIds.delete(tagId);
           if (hoveredTagId === tagId) hoveredTagId = null;
+          locationGroups = locationGroups
+            .filter(group => Number(group.stationId) !== Number(tagId))
+            .map(group => ({
+              ...group,
+              locationIds: group.locationIds.filter(locationId => Number(locationId) !== Number(tagId))
+            }));
           renderAll();
           markProjectDirty();
         }
@@ -2600,6 +3011,7 @@
         renderMarkers();
         renderTagList();
         renderMaterialList();
+        runRenderHooks('all');
       }
 
       function removeMaterialAtIndex(index) {
@@ -2825,6 +3237,7 @@
       // 在右侧列表中高亮定位标签
       function highlightTagInList(tagId) {
         sidePanelView = 'tags';
+        tagListMode = 'tree';
         renderSidePanelView();
         let parentTag = findParentTag(tagId);
         while (parentTag) {
@@ -2885,6 +3298,16 @@
       let dragTag = null;
       let dragStartMouse = { x: 0, y: 0 };
       let dragStartPos = { x: 0, y: 0 };
+      let markerDragRenderPending = false;
+
+      function scheduleMarkerDragRender() {
+        if (markerDragRenderPending) return;
+        markerDragRenderPending = true;
+        requestAnimationFrame(() => {
+          markerDragRenderPending = false;
+          renderMarkers();
+        });
+      }
 
       function startDrag(flatTag, e) {
         if (e.button !== 0) return;
@@ -2918,8 +3341,7 @@
         dragTag.x = Math.min(1, Math.max(0, dragStartPos.x + dx));
         dragTag.y = Math.min(1, Math.max(0, dragStartPos.y + dy));
 
-        renderMarkers();
-        renderTagList();
+        scheduleMarkerDragRender();
       }
 
       function stopDrag() {
@@ -2928,6 +3350,7 @@
         }
         dragTag = null;
         isDraggingTag = false;
+        renderAll();
         window.removeEventListener('mousemove', onDrag);
         window.removeEventListener('mouseup', stopDrag);
       }
@@ -2941,6 +3364,7 @@
       function fitCanvasToImage() {
         // The image is rendered at a fitted display size, while tag coordinates
         // remain normalized and independent from this current display size.
+        imageWrapper.style.height = '';
         const naturalWidth = annotateImage.naturalWidth || 1;
         const naturalHeight = annotateImage.naturalHeight || 1;
         const maxWidth = Math.max(1, imageWrapper.clientWidth);
@@ -2958,7 +3382,10 @@
         imageWrapper.style.setProperty('--pan-x', `${panOffset.x}px`);
         imageWrapper.style.setProperty('--pan-y', `${panOffset.y}px`);
         imageWrapper.style.setProperty('--zoom', zoomLevel.toFixed(4));
+        imageWrapper.style.setProperty('--inverse-zoom', (1 / Math.max(0.1, zoomLevel)).toFixed(4));
+        imageWrapper.classList.toggle('screen-marker-mode', markerRenderMode === 'screen');
         zoomReadout.textContent = `${Math.round(zoomLevel * 100)}%`;
+        runRenderHooks('transform');
       }
 
       function resetView() {
@@ -2985,8 +3412,8 @@
         const scaledHeight = annotationCanvas.offsetHeight * zoomLevel;
         const wrapperWidth = imageWrapper.clientWidth;
         const wrapperHeight = imageWrapper.clientHeight;
-        const horizontalPeek = Math.min(180, Math.max(64, wrapperWidth * 0.18));
-        const verticalPeek = Math.min(140, Math.max(48, wrapperHeight * 0.18));
+        const horizontalVisible = Math.min(96, Math.max(36, wrapperWidth * 0.1));
+        const verticalVisible = Math.min(84, Math.max(32, wrapperHeight * 0.1));
         const centerX = (wrapperWidth - scaledWidth) / 2;
         const centerY = (wrapperHeight - scaledHeight) / 2;
 
@@ -2996,19 +3423,19 @@
         let maxY;
 
         if (scaledWidth <= wrapperWidth) {
-          minX = centerX - horizontalPeek;
-          maxX = centerX + horizontalPeek;
+          minX = centerX;
+          maxX = centerX;
         } else {
-          minX = wrapperWidth - scaledWidth - horizontalPeek;
-          maxX = horizontalPeek;
+          minX = horizontalVisible - scaledWidth;
+          maxX = wrapperWidth - horizontalVisible;
         }
 
         if (scaledHeight <= wrapperHeight) {
-          minY = centerY - verticalPeek;
-          maxY = centerY + verticalPeek;
+          minY = centerY;
+          maxY = centerY;
         } else {
-          minY = wrapperHeight - scaledHeight - verticalPeek;
-          maxY = verticalPeek;
+          minY = verticalVisible - scaledHeight;
+          maxY = wrapperHeight - verticalVisible;
         }
 
         panOffset.x = Math.max(minX, Math.min(maxX, panOffset.x));
@@ -3096,6 +3523,13 @@
         e.stopPropagation();
         resetView();
       });
+      if (markerRenderModeSelect) {
+        markerRenderModeSelect.addEventListener('change', (e) => {
+          markerRenderMode = e.target.value === 'screen' ? 'screen' : 'image';
+          applyPanTransform();
+          renderMarkers();
+        });
+      }
 
       window.addEventListener('resize', () => {
         if (!annotateImage.src || imageWrapper.style.display === 'none') return;
@@ -3151,6 +3585,10 @@
 
       // ---------- 导入 JSON ----------
       importBtn.addEventListener('click', () => {
+        if (!currentProjectId) {
+          alert(t('projects.choose'));
+          return;
+        }
         if (importTypeSelect.value === 'csv') {
           if (window.MESCsvImport && typeof window.MESCsvImport.openFilePicker === 'function') {
             window.MESCsvImport.openFilePicker();
@@ -3162,6 +3600,8 @@
             alert(t('import.adminOnly'));
             return;
           }
+          pendingXmlImportMode = 'update-current';
+          pendingXmlUpdateProjectId = currentProjectId;
           xmlImportFileInput.click();
           return;
         }
@@ -3169,6 +3609,7 @@
           alert(t('import.adminOnly'));
           return;
         }
+        pendingJsonImportMode = 'update-current';
         importFileInput.click();
       });
 
@@ -3184,14 +3625,22 @@
               alert(t('import.invalidJson'));
               return;
             }
-            const defaultName = file.name.replace(/\.json$/i, '') || t('import.defaultProject');
-            const name = prompt(t('projects.promptImportName'), defaultName);
-            if (!name || !name.trim()) return;
-            importProjectFromJson(data, name.trim())
-              .then(() => alert(t('import.success')))
-              .catch(error => alert(t('import.failed', { message: error.message })));
+            if (pendingJsonImportMode === 'create') {
+              const defaultName = file.name.replace(/\.json$/i, '') || t('import.defaultProject');
+              const name = prompt(t('projects.promptImportName'), defaultName);
+              if (!name || !name.trim()) return;
+              importProjectFromJson(data, name.trim())
+                .then(() => alert(t('import.success')))
+                .catch(error => alert(t('import.failed', { message: error.message })));
+            } else {
+              replaceCurrentProjectFromJson(data)
+                .then(() => alert(t('import.success')))
+                .catch(error => alert(t('import.failed', { message: error.message })));
+            }
           } catch (error) {
             alert(t('import.parseFailed', { message: error.message }));
+          } finally {
+            pendingJsonImportMode = 'update-current';
           }
         };
         reader.readAsText(file);
@@ -3204,11 +3653,13 @@
         const file = e.target.files[0];
         if (!file) {
           pendingXmlUpdateProjectId = null;
+          pendingXmlImportMode = 'update-current';
           return;
         }
         if (pendingXmlUpdateProjectId) {
           const projectId = pendingXmlUpdateProjectId;
           pendingXmlUpdateProjectId = null;
+          pendingXmlImportMode = 'update-current';
           uploadXmlUpdate(file, projectId)
             .then(() => alert(t('projects.xmlUpdateSuccess')))
             .catch(error => {
@@ -3218,9 +3669,15 @@
           xmlImportFileInput.value = '';
           return;
         }
+        if (pendingXmlImportMode !== 'create') {
+          pendingXmlImportMode = 'update-current';
+          xmlImportFileInput.value = '';
+          return;
+        }
         const defaultName = file.name.replace(/\.xml$/i, '') || t('import.defaultProject');
         const name = prompt(t('projects.promptImportName'), defaultName);
         if (!name || !name.trim()) {
+          pendingXmlImportMode = 'update-current';
           xmlImportFileInput.value = '';
           return;
         }
@@ -3228,8 +3685,9 @@
           .then(() => alert(t('xml.success')))
           .catch(error => {
             setSaveStatusKey('idle', 'projects.choose');
-            alert(t('xml.failed', { message: error.message }));
-          });
+              alert(t('xml.failed', { message: error.message }));
+            });
+        pendingXmlImportMode = 'update-current';
         xmlImportFileInput.value = '';
       });
 
@@ -3237,14 +3695,27 @@
         t,
         getTags: () => tags,
         getTagTypes: () => tagTypes,
+        getLocationGroups: () => locationGroups,
+        createLocationGroupId,
         getTypeIndexByName,
+        getAllTagsFlattened,
         findTagById,
+        findParentTag,
+        getDirectEventChildren,
+        getEventRecordForTag,
         hasAssignedCoordinates,
+        isLocationGrouped,
+        setLocationGroupRenderEnabled,
+        highlightTagInList,
+        showEventEditDialog,
         getCanvasPointFromEvent,
         getAnnotationCanvas: () => annotationCanvas,
         getImageWrapper: () => imageWrapper,
+        getZoomLevel: () => zoomLevel,
         hasOpenProject: () => !!currentProjectId,
         hasImage: () => !!annotateImage.src,
+        getTagSearchQuery: () => tagSearchQuery,
+        registerRenderHook,
         renderAll,
         markProjectDirty
       };

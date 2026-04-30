@@ -6,6 +6,7 @@
   <title>MES Core Data Designer</title>
   <link rel="icon" href="./static/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./static/css/style.css">
+  <link rel="stylesheet" href="./static/css/location-groups.css">
 </head>
 <body>
   <div class="toolbar">
@@ -69,8 +70,14 @@
         <div>
           <h2 data-i18n="projects.title">项目</h2>
           <p data-i18n="projects.help">选择一个服务端项目继续标注，或创建新的持久化项目。</p>
+          <div class="project-summary" id="projectSummary"></div>
         </div>
-        <button class="btn btn-primary" id="newProjectBtn" type="button" data-i18n="projects.new">新建项目</button>
+        <div class="project-create-actions">
+          <button class="btn btn-primary" id="newProjectBtn" type="button" data-i18n="projects.newBlank">新建空白</button>
+          <button class="btn" id="newProjectJsonBtn" type="button" data-i18n="projects.newJson">JSON 新建</button>
+          <button class="btn" id="newProjectCsvBtn" type="button" data-i18n="projects.newCsv">CSV 新建</button>
+          <button class="btn" id="newProjectXmlBtn" type="button" data-i18n="projects.newXml">XML 新建</button>
+        </div>
       </div>
       <div class="project-tools">
         <input class="project-search-input" id="projectSearchInput" type="search" placeholder="搜索项目或标签" data-i18n-placeholder="projects.searchPlaceholder">
@@ -201,6 +208,10 @@
           <img id="annotateImage" class="annotate-image" src="" alt="标注图片" draggable="false" data-i18n-alt="workspace.imageAlt">
         </div>
         <div class="canvas-controls">
+          <select class="canvas-render-mode-select" id="markerRenderModeSelect" title="渲染模式" data-i18n-title="canvas.renderMode">
+            <option value="image" data-i18n="canvas.renderImageMode">图片比例</option>
+            <option value="screen" data-i18n="canvas.renderScreenMode">清晰总览</option>
+          </select>
           <button class="canvas-control-btn" id="zoomOutBtn" type="button" title="缩小" data-i18n-title="canvas.zoomOut">-</button>
           <span class="zoom-readout" id="zoomReadout">100%</span>
           <button class="canvas-control-btn" id="zoomInBtn" type="button" title="放大" data-i18n-title="canvas.zoomIn">+</button>
@@ -242,12 +253,14 @@
             <div class="tag-mode-row">
               <button class="tag-mode-btn active" id="tagTreeModeBtn" type="button" data-i18n="panel.treeMode">树状结构</button>
               <button class="tag-mode-btn" id="tagTypeModeBtn" type="button" data-i18n="panel.typeMode">按类型</button>
+              <button class="tag-mode-btn" id="tagGroupModeBtn" type="button" data-i18n="groups.title">Location Group</button>
               <button class="tag-mode-btn tag-collapse-all-btn" id="collapseAllTagsBtn" type="button" data-i18n="panel.collapseAll">全部折叠</button>
             </div>
           </div>
           <div id="tagListContainer">
             <div class="no-tags" data-i18n="tags.empty">暂无标签，点击图片添加</div>
           </div>
+          <div id="locationGroupPanel" class="is-hidden"></div>
         </section>
         <section class="side-panel-view is-hidden" id="materialsPanelView">
           <div id="materialListContainer">
@@ -262,6 +275,7 @@
   </div>
 
     <script src="./static/js/app.js"></script>
+    <script src="./static/js/location-group-module.js"></script>
     <script src="./static/js/csv-import-module.js"></script>
 </body>
 </html>
