@@ -3,6 +3,7 @@ node_modules/
 data/
 .chrome-pan-test/
 release/
+ui/dist/
 LEGACY_ARCHITECTURE_CANDIDATES
 *.log
 npm-debug.log*

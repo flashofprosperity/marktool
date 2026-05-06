@@ -136,9 +136,30 @@
     `;
   }
 
-  function renderPanelEventDrawer(locations) {
-    // 不再使用drawer，event列表将直接渲染在chip内部
-    return '';
+  function renderPanelEventPopout(locations) {
+    const location = locations.find(item => Number(item.id) === Number(activeEventLocationId));
+    const events = location ? getEventChildren(location) : [];
+    if (!location || events.length === 0) return '';
+    return `
+      <div class="location-group-event-popout">
+        <div class="location-group-event-popout-header">
+          <strong title="${escapeHtml(getDisplayName(location))}">${escapeHtml(getDisplayName(location))}</strong>
+          <span>${escapeHtml(t('groups.events'))} ${events.length}</span>
+          <button class="location-group-event-popout-close" type="button" aria-label="${escapeHtml(t('groups.cancel'))}">×</button>
+        </div>
+        <div class="location-group-event-popout-list">
+          ${events.map(eventTag => {
+            const record = api.getEventRecordForTag ? api.getEventRecordForTag(eventTag) : null;
+            const label = record && record.event ? record.event : getDisplayName(eventTag);
+            const meta = record ? `es: ${record.eventSwitch || ''}` : '';
+            return `<button class="location-group-event-item location-group-event-popout-item" type="button" data-event-id="${eventTag.id}">
+              <span>${escapeHtml(label)}</span>
+              <small>${escapeHtml(meta)}</small>
+            </button>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
   }
 
   function bindEventItems(root) {
@@ -538,24 +559,11 @@
           return `<div class="location-group-chip ${hit ? 'search-hit' : ''} ${isActive ? 'active' : ''}" data-location-id="${location.id}">
             <button class="location-group-chip-main" type="button" data-location-id="${location.id}">${escapeHtml(getDisplayName(location))}</button>
             ${events.length > 0 ? `<button class="location-group-chip-event" type="button" data-location-id="${location.id}">${events.length}</button>` : `<span class="location-group-chip-event empty">0</span>`}
-            ${isActive && events.length > 0 ? `
-            <div class="location-group-chip-event-popover">
-              <div class="location-group-chip-event-popover-title">${escapeHtml(getDisplayName(location))}</div>
-              ${events.map(eventTag => {
-                const record = api.getEventRecordForTag ? api.getEventRecordForTag(eventTag) : null;
-                const label = record && record.event ? record.event : getDisplayName(eventTag);
-                const meta = record ? `es: ${record.eventSwitch || ''}` : '';
-                return `<div class="location-group-chip-event-item" data-event-id="${eventTag.id}">
-                  <span>${escapeHtml(label)}</span>
-                  ${meta ? `<small>${escapeHtml(meta)}</small>` : ''}
-                </div>`;
-              }).join('')}
-            </div>` : ''}
           </div>`;
         }).join('')}
         </div>
-        ${renderPanelEventDrawer(locations)}
       </div>
+      ${renderPanelEventPopout(locations)}
       <button class="location-group-resize-handle" type="button" aria-label="${escapeHtml(t('groups.resize'))}" title="${escapeHtml(t('groups.resize'))}"></button>
     `;
     panelEl.querySelector('.location-group-canvas-panel-header').addEventListener('mousedown', event => {
@@ -582,9 +590,9 @@
         toggleEventList(button.dataset.locationId);
       });
     });
-    const closeEventDrawerBtn = panelEl.querySelector('.location-group-event-drawer-close');
-    if (closeEventDrawerBtn) {
-      closeEventDrawerBtn.addEventListener('click', event => {
+    const closeEventPopoutBtn = panelEl.querySelector('.location-group-event-popout-close');
+    if (closeEventPopoutBtn) {
+      closeEventPopoutBtn.addEventListener('click', event => {
         event.stopPropagation();
         activeEventLocationId = null;
         scheduleOverlayRender();

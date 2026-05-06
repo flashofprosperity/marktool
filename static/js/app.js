@@ -3539,7 +3539,7 @@
 
       function shouldUseNativeWheelScroll(target) {
         if (!(target instanceof Element)) return false;
-        return !!target.closest('.location-group-canvas-grid, .location-group-event-list, .location-group-event-drawer-list');
+        return !!target.closest('.location-group-canvas-grid, .location-group-event-list, .location-group-event-popout-list');
       }
 
       imageWrapper.addEventListener('wheel', (e) => {
