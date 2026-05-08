@@ -102,6 +102,8 @@
           'dialog.locationCategoryTitle': '选择 Location 分类',
           'common.cancel': '取消',
           'common.confirm': '确认',
+          'common.true': '是',
+          'common.false': '否',
           'workspace.upload': '上传图片',
           'workspace.imageAlt': '标注图片',
           'workspace.placeholder': '请上传一张图片开始标注',
@@ -174,6 +176,8 @@
           'event.name': 'Event',
           'event.switch': 'Event switch',
           'event.switchShort': 'es',
+          'event.replyRequired': '需要回复报文',
+          'event.replyUnknown': '未设置',
           'event.switchFunction': 'Event switch function',
           'event.unnamed': '未命名事件',
           'event.listTitle': '关联事件',
@@ -182,6 +186,7 @@
           'event.processStep': 'Process step',
           'event.processStepName': 'Process step name',
           'event.constraint': 'Constraint',
+          'event.module': 'Module',
           'event.command': 'Command',
           'event.commandTemplateName': 'Command template name',
           'event.deleteStep': '删除步骤',
@@ -197,6 +202,15 @@
           'materials.abbrev': '缩写',
           'materials.category': '分类',
           'materials.type': '类型',
+          'materials.image': '图片',
+          'materials.uploadImage': '上传图片',
+          'materials.replaceImage': '替换图片',
+          'materials.addToCanvas': '添加到画布',
+          'materials.removeFromCanvas': '移出画布',
+          'materials.linkLocation': '关联 Location',
+          'materials.clearLinks': '清除关联',
+          'materials.noImage': '未上传图片',
+          'materials.noLocations': '暂无可关联 Location',
           'materials.delete': '删除',
           'export.adminOnly': '只有管理员可以导出 JSON',
           'export.defaultName': 'mes-core-data-designer',
@@ -310,6 +324,8 @@
           'dialog.locationCategoryTitle': 'Choose Location category',
           'common.cancel': 'Cancel',
           'common.confirm': 'Confirm',
+          'common.true': 'Yes',
+          'common.false': 'No',
           'workspace.upload': 'Upload image',
           'workspace.imageAlt': 'Annotated image',
           'workspace.placeholder': 'Upload an image to start labeling',
@@ -382,6 +398,8 @@
           'event.name': 'Event',
           'event.switch': 'Event switch',
           'event.switchShort': 'es',
+          'event.replyRequired': 'Reply required',
+          'event.replyUnknown': 'Not set',
           'event.switchFunction': 'Event switch function',
           'event.unnamed': 'Unnamed event',
           'event.listTitle': 'Events',
@@ -390,6 +408,7 @@
           'event.processStep': 'Process step',
           'event.processStepName': 'Process step name',
           'event.constraint': 'Constraint',
+          'event.module': 'Module',
           'event.command': 'Command',
           'event.commandTemplateName': 'Command template name',
           'event.deleteStep': 'Delete step',
@@ -405,6 +424,15 @@
           'materials.abbrev': 'Abbrev.',
           'materials.category': 'Category',
           'materials.type': 'Type',
+          'materials.image': 'Image',
+          'materials.uploadImage': 'Upload image',
+          'materials.replaceImage': 'Replace image',
+          'materials.addToCanvas': 'Add to canvas',
+          'materials.removeFromCanvas': 'Remove from canvas',
+          'materials.linkLocation': 'Link Location',
+          'materials.clearLinks': 'Clear links',
+          'materials.noImage': 'No image',
+          'materials.noLocations': 'No Locations',
           'materials.delete': 'Delete',
           'export.adminOnly': 'Only admins can export JSON',
           'export.defaultName': 'mes-core-data-designer',
@@ -474,6 +502,10 @@
        *   abbreviation: short display text,
        *   category: string,
        *   type: string,
+       *   image?: data URL,
+       *   x/y?: normalized overlay center, may be outside 0..1,
+       *   width/height?: normalized overlay size,
+       *   locationLinks?: linked Location tag id[],
        *   processLinks: legacy linked tag id[]
        * }
        */
@@ -592,6 +624,7 @@
       const eventEditDialog = document.getElementById('eventEditDialog');
       const eventNameInput = document.getElementById('eventNameInput');
       const eventSwitchInput = document.getElementById('eventSwitchInput');
+      const eventSwitchReplyRequiredInput = document.getElementById('eventSwitchReplyRequiredInput');
       const eventSwitchFunctionInput = document.getElementById('eventSwitchFunctionInput');
       const addEventStepBtn = document.getElementById('addEventStepBtn');
       const eventStepsBody = document.getElementById('eventStepsBody');
@@ -851,14 +884,25 @@
 
       function serializeProjectData() {
         const cleanMaterials = materials.map(m => {
+          const normalized = normalizeMaterial(m);
           const material = {
-            name: m.name,
-            abbreviation: m.abbreviation,
-            category: m.category,
-            type: m.type
+            name: normalized.name,
+            abbreviation: normalized.abbreviation,
+            category: normalized.category,
+            type: normalized.type
           };
-          if (Array.isArray(m.processLinks) && m.processLinks.length > 0) {
-            material.processLinks = m.processLinks;
+          if (normalized.image) material.image = normalized.image;
+          if (normalized.x !== null && normalized.y !== null) {
+            material.x = +normalized.x.toFixed(4);
+            material.y = +normalized.y.toFixed(4);
+            material.width = +normalized.width.toFixed(4);
+            material.height = +normalized.height.toFixed(4);
+          }
+          if (Array.isArray(normalized.locationLinks) && normalized.locationLinks.length > 0) {
+            material.locationLinks = normalized.locationLinks;
+          }
+          if (Array.isArray(normalized.processLinks) && normalized.processLinks.length > 0) {
+            material.processLinks = normalized.processLinks;
           }
           return material;
         });
@@ -880,7 +924,13 @@
           name: t('materials.defaultName'),
           abbreviation: 'MA',
           category: t('materials.defaultCategory'),
-          type: t('materials.defaultType')
+          type: t('materials.defaultType'),
+          image: '',
+          x: null,
+          y: null,
+          width: 0.12,
+          height: 0.08,
+          locationLinks: []
         });
         tags = [];
         locationGroups = [];
@@ -919,15 +969,45 @@
         return String(value);
       }
 
+      function normalizeReplyRequired(value) {
+        if (value === true) return 'true';
+        if (value === false) return 'false';
+        if (value === null || value === undefined) return '';
+        const normalized = String(value).trim().toLowerCase();
+        return normalized === 'true' || normalized === 'false' ? normalized : '';
+      }
+
       function normalizeProcessSteps(value) {
         if (!Array.isArray(value)) return [];
         return value.map(step => ({
           processStep: step && step.processStep !== undefined && step.processStep !== null ? String(step.processStep) : '',
           processStepName: step && step.processStepName !== undefined && step.processStepName !== null ? String(step.processStepName) : '',
           constraint: step && step.constraint !== undefined && step.constraint !== null ? String(step.constraint) : '',
+          module: step && step.module !== undefined && step.module !== null ? String(step.module) : '',
           command: step && step.command !== undefined && step.command !== null ? String(step.command) : '',
           commandTemplateName: step && step.commandTemplateName !== undefined && step.commandTemplateName !== null ? String(step.commandTemplateName) : ''
         }));
+      }
+
+      function normalizeMaterial(material = {}) {
+        const normalized = {
+          name: material.name !== undefined && material.name !== null ? String(material.name) : '',
+          abbreviation: material.abbreviation !== undefined && material.abbreviation !== null ? String(material.abbreviation) : '',
+          category: material.category !== undefined && material.category !== null ? String(material.category) : '',
+          type: material.type !== undefined && material.type !== null ? String(material.type) : '',
+          image: material.image ? String(material.image) : '',
+          x: Number.isFinite(Number(material.x)) ? Number(material.x) : null,
+          y: Number.isFinite(Number(material.y)) ? Number(material.y) : null,
+          width: Number.isFinite(Number(material.width)) ? Math.max(0.02, Number(material.width)) : 0.12,
+          height: Number.isFinite(Number(material.height)) ? Math.max(0.02, Number(material.height)) : 0.08,
+          locationLinks: Array.isArray(material.locationLinks)
+            ? material.locationLinks.map(id => Number(id)).filter(id => Number.isFinite(id))
+            : []
+        };
+        if (Array.isArray(material.processLinks)) {
+          normalized.processLinks = material.processLinks.map(id => Number(id)).filter(id => Number.isFinite(id));
+        }
+        return normalized;
       }
 
       function cleanEventRecordForPersistence(record) {
@@ -940,6 +1020,7 @@
           process: record && record.process ? String(record.process) : '',
           event: record && record.event ? String(record.event) : '',
           eventSwitch: normalizeEventSwitch(record && record.eventSwitch),
+          eventSwitchReplyRequired: normalizeReplyRequired(record && record.eventSwitchReplyRequired),
           eventSwitchFunction: record && record.eventSwitchFunction ? String(record.eventSwitchFunction) : '',
           processSteps: normalizeProcessSteps(record && record.processSteps)
         };
@@ -1033,6 +1114,7 @@
           process: path.process,
           event: tag.text || '',
           eventSwitch: '',
+          eventSwitchReplyRequired: '',
           eventSwitchFunction: '',
           processSteps: []
         });
@@ -1094,7 +1176,7 @@
         ensureEventRecordsForTags();
         materials.length = 0;
         if (Array.isArray(data.materials)) {
-          materials.push(...data.materials);
+          materials.push(...data.materials.map(normalizeMaterial));
         }
         canvasHiddenBranchIds = [];
         collapsedTagIds.clear();
@@ -2017,6 +2099,7 @@
           <td><input type="text" class="event-step-input" data-field="processStep" value="${escapeHtml(step.processStep || '')}"></td>
           <td><input type="text" class="event-step-input" data-field="processStepName" value="${escapeHtml(step.processStepName || '')}"></td>
           <td><input type="text" class="event-step-input" data-field="constraint" value="${escapeHtml(step.constraint || '')}"></td>
+          <td><input type="text" class="event-step-input" data-field="module" value="${escapeHtml(step.module || '')}"></td>
           <td><input type="text" class="event-step-input" data-field="command" value="${escapeHtml(step.command || '')}"></td>
           <td><input type="text" class="event-step-input" data-field="commandTemplateName" value="${escapeHtml(step.commandTemplateName || '')}"></td>
           <td><button class="tag-node-action danger delete-event-step-btn" type="button" title="${escapeHtml(t('event.deleteStep'))}">×</button></td>
@@ -2041,6 +2124,7 @@
               processStep: '',
               processStepName: '',
               constraint: '',
+              module: '',
               command: '',
               commandTemplateName: ''
             };
@@ -2059,6 +2143,7 @@
         const record = getEventRecordForTag(tag);
         eventNameInput.value = record.event || tag.text || '';
         eventSwitchInput.value = normalizeEventSwitch(record.eventSwitch);
+        eventSwitchReplyRequiredInput.value = normalizeReplyRequired(record.eventSwitchReplyRequired);
         eventSwitchFunctionInput.value = record.eventSwitchFunction || '';
         renderEventStepsEditor(record.processSteps);
         const path = getTagBusinessPath(tag);
@@ -2073,6 +2158,7 @@
         eventEditDialog.style.display = 'none';
         eventNameInput.value = '';
         eventSwitchInput.value = '';
+        eventSwitchReplyRequiredInput.value = '';
         eventSwitchFunctionInput.value = '';
         eventStepsBody.innerHTML = '';
         eventPathPreview.textContent = '';
@@ -2090,6 +2176,7 @@
           const record = getEventRecordForTag(tag);
           record.event = eventNameInput.value;
           record.eventSwitch = normalizeEventSwitch(eventSwitchInput.value);
+          record.eventSwitchReplyRequired = normalizeReplyRequired(eventSwitchReplyRequiredInput.value);
           record.eventSwitchFunction = eventSwitchFunctionInput.value;
           record.processSteps = readEventStepsEditor();
           syncEventRecordPath(tag);
@@ -2515,19 +2602,87 @@
           const record = getEventRecordForTag(eventTag);
           const item = document.createElement('div');
           item.className = 'parent-event-item';
+          const replyText = normalizeReplyRequired(record.eventSwitchReplyRequired);
+          const replyMeta = replyText ? ` reply:${replyText}` : '';
           item.innerHTML = `
             <img src="./static/icons/event.svg" alt="Event">
-            <span>${escapeHtml(`${record.event || eventTag.text || t('event.unnamed')}(es: ${normalizeEventSwitch(record.eventSwitch)})`)}</span>
+            <span>${escapeHtml(`${record.event || eventTag.text || t('event.unnamed')}(es: ${normalizeEventSwitch(record.eventSwitch)}${replyMeta})`)}</span>
           `;
           popover.appendChild(item);
         });
         return popover;
       }
 
+      function placeMaterialOnCanvas(index) {
+        const material = materials[index];
+        if (!material || !material.image || !annotateImage.src) return;
+        const wrapperCenterX = imageWrapper.clientWidth / 2;
+        const wrapperCenterY = imageWrapper.clientHeight / 2;
+        const canvasX = (wrapperCenterX - panOffset.x) / zoomLevel;
+        const canvasY = (wrapperCenterY - panOffset.y) / zoomLevel;
+        material.x = canvasX / Math.max(1, annotationCanvas.offsetWidth);
+        material.y = canvasY / Math.max(1, annotationCanvas.offsetHeight);
+        material.width = Number.isFinite(Number(material.width)) ? Math.max(0.02, Number(material.width)) : 0.12;
+        material.height = Number.isFinite(Number(material.height)) ? Math.max(0.02, Number(material.height)) : 0.08;
+        renderAll();
+        markProjectDirty();
+      }
+
+      function renderMaterialOverlays(svg, markerPositions) {
+        materials.forEach((material, index) => {
+          const normalized = normalizeMaterial(material);
+          Object.assign(material, normalized);
+          if (!material.image || material.x === null || material.y === null) return;
+
+          const materialEl = document.createElement('div');
+          materialEl.className = 'material-overlay';
+          materialEl.style.left = `${(material.x - material.width / 2) * 100}%`;
+          materialEl.style.top = `${(material.y - material.height / 2) * 100}%`;
+          materialEl.style.width = `${material.width * 100}%`;
+          materialEl.style.height = `${material.height * 100}%`;
+          materialEl.dataset.materialIndex = String(index);
+          materialEl.innerHTML = `
+            <img src="${escapeHtml(material.image)}" alt="${escapeHtml(material.name || t('materials.image'))}">
+            <span class="material-overlay-label">${escapeHtml(material.abbreviation || material.name || t('materials.image'))}</span>
+            <button class="material-resize-handle" type="button" aria-label="${escapeHtml(t('groups.resize'))}"></button>
+          `;
+          materialEl.addEventListener('mousedown', event => startMaterialDrag(index, event));
+          materialEl.querySelector('.material-resize-handle').addEventListener('mousedown', event => startMaterialResize(index, event));
+          annotationCanvas.appendChild(materialEl);
+
+          const materialCenter = {
+            x: material.x * annotationCanvas.offsetWidth,
+            y: material.y * annotationCanvas.offsetHeight
+          };
+          material.locationLinks.forEach(locationId => {
+            const location = findTagById(locationId);
+            if (!location || !hasAssignedCoordinates(location)) return;
+            const target = markerPositions[location.id] || {
+              x: Number(location.x) * annotationCanvas.offsetWidth,
+              y: Number(location.y) * annotationCanvas.offsetHeight
+            };
+            drawConnectionLine(svg, materialCenter, target, 'material-link');
+          });
+        });
+      }
+
+      function drawConnectionLine(svg, from, to, extraClass = '') {
+        ['connection-line-halo', 'connection-line'].forEach(className => {
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', from.x);
+          line.setAttribute('y1', from.y);
+          line.setAttribute('x2', to.x);
+          line.setAttribute('y2', to.y);
+          line.setAttribute('class', `${className}${extraClass ? ` ${extraClass}` : ''}`);
+          svg.appendChild(line);
+        });
+      }
+
       function renderMarkers() {
         // Markers and connector lines are rebuilt from tag state on each render.
         // Marker positions use normalized tag.x/tag.y values, not screen pixels.
         annotationCanvas.querySelectorAll('.tag-marker').forEach(el => el.remove());
+        annotationCanvas.querySelectorAll('.material-overlay').forEach(el => el.remove());
         
         // 清除旧的SVG
         const oldSvg = annotationCanvas.querySelector('#connectionSvg');
@@ -2628,18 +2783,10 @@
           if (tag._parentId && markerPositions[tag._parentId] && markerPositions[tag._id]) {
             const parent = markerPositions[tag._parentId];
             const child = markerPositions[tag._id];
-            
-            ['connection-line-halo', 'connection-line'].forEach(className => {
-              const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-              line.setAttribute('x1', parent.x);
-              line.setAttribute('y1', parent.y);
-              line.setAttribute('x2', child.x);
-              line.setAttribute('y2', child.y);
-              line.setAttribute('class', className);
-              svg.appendChild(line);
-            });
+            drawConnectionLine(svg, parent, child);
           }
         });
+        renderMaterialOverlays(svg, markerPositions);
 
         applyPanTransform();
       }
@@ -2682,6 +2829,7 @@
           tag.locationCategory || '',
           eventRecord ? eventRecord.event : '',
           eventRecord ? eventRecord.eventSwitchFunction : '',
+          eventRecord ? normalizeReplyRequired(eventRecord.eventSwitchReplyRequired) : '',
           eventRecord ? `${normalizeEventSwitch(eventRecord.eventSwitch)}` : '',
           eventRecord ? normalizeProcessSteps(eventRecord.processSteps).map(step => Object.values(step).join(' ')).join(' ') : '',
           getTypeAbbreviation(type ? type.name : 'Tag'),
@@ -2824,7 +2972,10 @@
         const parentMeta = parentTag ? ` · ${t('tags.parent', { name: parentTag.text || getTypeAbbreviation(tagTypes[parentTag.typeIndex]?.name || 'Tag') })}` : '';
         const childMeta = childCount ? ` · ${t('tags.children', { count: childCount })}` : '';
         const locationMeta = isLocationTag(tag) ? ` · ${tag.locationCategory === 'equipment' ? t('tags.locationEquipment') : t('tags.locationProcess')}` : '';
-        const eventMeta = eventRecord ? ` · es: ${normalizeEventSwitch(eventRecord.eventSwitch)}` : '';
+        const replyMeta = eventRecord && normalizeReplyRequired(eventRecord.eventSwitchReplyRequired)
+          ? ` · reply: ${normalizeReplyRequired(eventRecord.eventSwitchReplyRequired)}`
+          : '';
+        const eventMeta = eventRecord ? ` · es: ${normalizeEventSwitch(eventRecord.eventSwitch)}${replyMeta}` : '';
         const unassignedMeta = !isEventNode && !hasAssignedCoordinates(tag) ? ` · ${t('tags.unassignedCoordinate')}` : '';
         const canAddChild = canAddChildTag(tag);
         const canAssignCoordinate = type && type.name.includes('Station') && !hasAssignedCoordinates(tag);
@@ -2961,6 +3112,9 @@
               }
             });
           }
+          materials.forEach(material => {
+            material.locationLinks = (material.locationLinks || []).filter(id => !isSameTagId(id, tag.id));
+          });
           // 递归清理子标签
           if (tag.children && tag.children.length > 0) {
             tag.children.forEach(cleanTagMaterialLinks);
@@ -3094,6 +3248,10 @@
         fixLinks(tags);
         materials.forEach(material => {
           material.processLinks = (material.processLinks || []).filter(pid => findTagById(pid));
+          material.locationLinks = (material.locationLinks || []).filter(id => {
+            const tag = findTagById(id);
+            return tag && isLocationTag(tag);
+          });
         });
       }
 
@@ -3104,7 +3262,25 @@
           return;
         }
 
+        const locationOptions = getAllTagsFlattened()
+          .map(flatTag => findTagById(flatTag._id))
+          .filter(tag => tag && isLocationTag(tag));
+
         materials.forEach((material, index) => {
+          materials[index] = normalizeMaterial(material);
+          material = materials[index];
+          const hasImage = !!material.image;
+          const isOnCanvas = material.x !== null && material.y !== null;
+          const linkedLocations = material.locationLinks
+            .map(id => findTagById(id))
+            .filter(Boolean)
+            .map(tag => getTagDisplayName(tag))
+            .join(', ');
+          const locationSelectHtml = locationOptions.length > 0
+            ? `<select class="material-location-select" data-index="${index}">
+                ${locationOptions.map(tag => `<option value="${tag.id}">${escapeHtml(getTagDisplayName(tag))}</option>`).join('')}
+              </select>`
+            : `<select class="material-location-select" data-index="${index}" disabled><option>${escapeHtml(t('materials.noLocations'))}</option></select>`;
           const materialDiv = document.createElement('div');
           materialDiv.className = 'material-item';
           materialDiv.innerHTML = `
@@ -3113,6 +3289,17 @@
                 <input type="text" class="material-name-input" data-index="${index}" value="${escapeHtml(material.name)}" placeholder="${escapeHtml(t('materials.namePlaceholder'))}" style="width:100%; font-weight:600;">
               </div>
               <button class="btn btn-danger btn-sm delete-material-btn" data-index="${index}">${escapeHtml(t('materials.delete'))}</button>
+            </div>
+            <div class="material-image-row">
+              <div class="material-thumb ${hasImage ? '' : 'empty'}">
+                ${hasImage ? `<img src="${escapeHtml(material.image)}" alt="${escapeHtml(material.name || t('materials.image'))}">` : `<span>${escapeHtml(t('materials.noImage'))}</span>`}
+              </div>
+              <div class="material-image-actions">
+                <input type="file" class="material-image-input" data-index="${index}" accept="image/*" style="display:none;">
+                <button class="btn btn-sm material-upload-image-btn" type="button" data-index="${index}">${escapeHtml(hasImage ? t('materials.replaceImage') : t('materials.uploadImage'))}</button>
+                <button class="btn btn-sm material-place-btn" type="button" data-index="${index}" ${hasImage ? '' : 'disabled'}>${escapeHtml(t('materials.addToCanvas'))}</button>
+                <button class="btn btn-sm material-remove-canvas-btn" type="button" data-index="${index}" ${isOnCanvas ? '' : 'disabled'}>${escapeHtml(t('materials.removeFromCanvas'))}</button>
+              </div>
             </div>
             
             <div class="material-edit-row">
@@ -3132,6 +3319,12 @@
                 <input type="text" class="material-type-input" data-index="${index}" value="${escapeHtml(material.type)}" placeholder="${escapeHtml(t('materials.type'))}">
               </div>
             </div>
+            <div class="material-link-row">
+              ${locationSelectHtml}
+              <button class="btn btn-sm material-link-location-btn" type="button" data-index="${index}" ${locationOptions.length > 0 ? '' : 'disabled'}>${escapeHtml(t('materials.linkLocation'))}</button>
+              <button class="btn btn-sm material-clear-links-btn" type="button" data-index="${index}" ${material.locationLinks.length > 0 ? '' : 'disabled'}>${escapeHtml(t('materials.clearLinks'))}</button>
+            </div>
+            ${linkedLocations ? `<div class="material-linked-summary">${escapeHtml(linkedLocations)}</div>` : ''}
             
           `;
           materialListContainer.appendChild(materialDiv);
@@ -3169,6 +3362,75 @@
           input.addEventListener('input', (e) => {
             const index = parseInt(e.target.dataset.index);
             materials[index].type = e.target.value;
+            markProjectDirty();
+          });
+        });
+
+        document.querySelectorAll('.material-upload-image-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            const input = materialListContainer.querySelector(`.material-image-input[data-index="${index}"]`);
+            if (input) input.click();
+          });
+        });
+
+        document.querySelectorAll('.material-image-input').forEach(input => {
+          input.addEventListener('change', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            const file = e.target.files[0];
+            if (!file || !materials[index]) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+              materials[index].image = ev.target.result;
+              if (!Number.isFinite(Number(materials[index].width))) materials[index].width = 0.12;
+              if (!Number.isFinite(Number(materials[index].height))) materials[index].height = 0.08;
+              renderAll();
+              markProjectDirty();
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+          });
+        });
+
+        document.querySelectorAll('.material-place-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            placeMaterialOnCanvas(index);
+          });
+        });
+
+        document.querySelectorAll('.material-remove-canvas-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            if (!materials[index]) return;
+            materials[index].x = null;
+            materials[index].y = null;
+            renderAll();
+            markProjectDirty();
+          });
+        });
+
+        document.querySelectorAll('.material-link-location-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            const select = materialListContainer.querySelector(`.material-location-select[data-index="${index}"]`);
+            const locationId = select ? Number(select.value) : NaN;
+            if (!materials[index] || !Number.isFinite(locationId)) return;
+            if (!Array.isArray(materials[index].locationLinks)) materials[index].locationLinks = [];
+            if (!materials[index].locationLinks.some(id => isSameTagId(id, locationId))) {
+              materials[index].locationLinks.push(locationId);
+            }
+            renderAll();
+            markProjectDirty();
+          });
+        });
+
+        document.querySelectorAll('.material-clear-links-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            if (!materials[index]) return;
+            materials[index].locationLinks = [];
+            renderAll();
             markProjectDirty();
           });
         });
@@ -3366,6 +3628,8 @@
       let dragStartPos = { x: 0, y: 0 };
       let markerDragMoved = false;
       let markerDragRenderPending = false;
+      let materialDragState = null;
+      let materialResizeState = null;
 
       function scheduleMarkerDragRender() {
         if (markerDragRenderPending) return;
@@ -3428,6 +3692,92 @@
         isDraggingTag = false;
         window.removeEventListener('mousemove', onDrag);
         window.removeEventListener('mouseup', stopDrag);
+      }
+
+      function startMaterialDrag(index, event) {
+        if (event.button !== 0 || event.target.closest('.material-resize-handle')) return;
+        const material = materials[index];
+        if (!material) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const point = getCanvasPointFromEvent(event);
+        materialDragState = {
+          index,
+          startPoint: point,
+          start: {
+            x: Number(material.x) || 0,
+            y: Number(material.y) || 0
+          }
+        };
+        window.addEventListener('mousemove', onMaterialDrag);
+        window.addEventListener('mouseup', stopMaterialDrag);
+      }
+
+      function onMaterialDrag(event) {
+        if (!materialDragState) return;
+        const material = materials[materialDragState.index];
+        if (!material) return;
+        const point = getCanvasPointFromEvent(event);
+        material.x = materialDragState.start.x + (point.x - materialDragState.startPoint.x) / Math.max(1, annotationCanvas.offsetWidth);
+        material.y = materialDragState.start.y + (point.y - materialDragState.startPoint.y) / Math.max(1, annotationCanvas.offsetHeight);
+        scheduleMarkerDragRender();
+      }
+
+      function stopMaterialDrag() {
+        if (materialDragState) {
+          materialDragState = null;
+          markProjectDirty();
+          renderAll();
+        }
+        window.removeEventListener('mousemove', onMaterialDrag);
+        window.removeEventListener('mouseup', stopMaterialDrag);
+      }
+
+      function startMaterialResize(index, event) {
+        if (event.button !== 0) return;
+        const material = materials[index];
+        if (!material) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const point = getCanvasPointFromEvent(event);
+        materialResizeState = {
+          index,
+          startPoint: point,
+          start: {
+            x: Number(material.x) || 0,
+            y: Number(material.y) || 0,
+            width: Number(material.width) || 0.12,
+            height: Number(material.height) || 0.08
+          }
+        };
+        window.addEventListener('mousemove', onMaterialResize);
+        window.addEventListener('mouseup', stopMaterialResize);
+      }
+
+      function onMaterialResize(event) {
+        if (!materialResizeState) return;
+        const material = materials[materialResizeState.index];
+        if (!material) return;
+        const point = getCanvasPointFromEvent(event);
+        const dx = (point.x - materialResizeState.startPoint.x) / Math.max(1, annotationCanvas.offsetWidth);
+        const dy = (point.y - materialResizeState.startPoint.y) / Math.max(1, annotationCanvas.offsetHeight);
+        const left = materialResizeState.start.x - materialResizeState.start.width / 2;
+        const top = materialResizeState.start.y - materialResizeState.start.height / 2;
+        material.width = Math.max(0.02, materialResizeState.start.width + dx);
+        material.height = Math.max(0.02, materialResizeState.start.height + dy);
+        material.x = left + material.width / 2;
+        material.y = top + material.height / 2;
+        scheduleMarkerDragRender();
+      }
+
+      function stopMaterialResize() {
+        if (materialResizeState) {
+          materialResizeState = null;
+          markProjectDirty();
+          renderAll();
+        }
+        window.removeEventListener('mousemove', onMaterialResize);
+        window.removeEventListener('mouseup', stopMaterialResize);
       }
 
       // ---------- 图片拖拽平移功能 ----------
@@ -3552,6 +3902,7 @@
         if (e.button !== 0) return;
         // 如果点击的是标记点，则不进行平移
         if (e.target.closest('.tag-marker')) return;
+        if (e.target.closest('.material-overlay')) return;
         if (e.target.closest('.canvas-controls')) return;
         
         isPanning = true;
@@ -3640,7 +3991,13 @@
           name: t('materials.newName'),
           abbreviation: t('materials.newAbbrev'),
           category: t('materials.defaultCategory'),
-          type: t('materials.defaultType')
+          type: t('materials.defaultType'),
+          image: '',
+          x: null,
+          y: null,
+          width: 0.12,
+          height: 0.08,
+          locationLinks: []
         };
         materials.push(newMaterial);
         renderMaterialList();
@@ -3656,7 +4013,10 @@
         collapsedTypeGroupIds.clear();
         displayedEventParentIds.clear();
         hoveredTagId = null;
-        materials.forEach(m => m.processLinks = []); // 清空旧项目的关联标签
+        materials.forEach(m => {
+          m.processLinks = [];
+          m.locationLinks = [];
+        }); // 清空旧项目的关联标签
         renderAll();
         markProjectDirty();
       });

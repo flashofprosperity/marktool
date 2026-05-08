@@ -68,7 +68,8 @@ function buildProjectFromRows(rows) {
     const eventKey = [
       eventName,
       clean(row.eventSwitch),
-      clean(row.eventSwitchResponse),
+      clean(row.eventSwitchReplyRequired),
+      clean(row.eventSwitchFunction),
       clean(row.eventSwitchPostfix)
     ].join('\u001f');
     let eventTag = locationTag._eventMap.get(eventKey);
@@ -94,6 +95,7 @@ function buildProjectFromRows(rows) {
         process: clean(row.process),
         event: eventName,
         eventSwitch: clean(row.eventSwitch),
+        eventSwitchReplyRequired: clean(row.eventSwitchReplyRequired),
         eventSwitchFunction: buildEventSwitchFunction(row),
         processSteps: []
       });
@@ -126,10 +128,8 @@ function clean(value) {
 }
 
 function buildEventSwitchFunction(row) {
-  return [
-    clean(row.eventSwitchResponse),
-    clean(row.eventSwitchPostfix)
-  ].filter(Boolean).join(' ');
+  const parts = [clean(row.eventSwitchFunction), clean(row.eventSwitchPostfix)].filter(Boolean);
+  return Array.from(new Set(parts)).join(' ');
 }
 
 function buildProcessStep(row) {
@@ -137,6 +137,7 @@ function buildProcessStep(row) {
     processStep: clean(row.processStep),
     processStepName: clean(row.processApplication),
     constraint: clean(row.constraint),
+    module: clean(row.module),
     command: clean(row.command),
     commandTemplateName: clean(row.commandTemplateName)
   };
@@ -295,7 +296,9 @@ function eventMergeKey(data, eventTag, record = null) {
   const eventRecord = record || findEventRecord(data, eventTag && eventTag.eventRecordId);
   return [
     clean(eventTag && eventTag.text),
-    clean(eventRecord && eventRecord.eventSwitch)
+    clean(eventRecord && eventRecord.eventSwitch),
+    clean(eventRecord && eventRecord.eventSwitchReplyRequired),
+    clean(eventRecord && eventRecord.eventSwitchFunction)
   ].join('\u001f');
 }
 

@@ -1009,6 +1009,7 @@
       transform-origin: 0 0;
       will-change: transform;
       backface-visibility: hidden;
+      overflow: visible;
       box-shadow: 0 12px 28px rgba(16,17,18,0.16);
       background: #fff;
     }
@@ -1020,6 +1021,7 @@
       height: 100%;
       pointer-events: none;
       z-index: 1;
+      overflow: visible;
     }
     .connection-line-halo {
       stroke: rgba(255,255,255,0.92);
@@ -1033,6 +1035,13 @@
       stroke-linecap: round;
       stroke-dasharray: 6 4;
       opacity: 0.88;
+    }
+    .connection-line.material-link {
+      stroke: rgba(0,123,192,0.86);
+      stroke-dasharray: 4 5;
+    }
+    .connection-line-halo.material-link {
+      stroke: rgba(255,255,255,0.96);
     }
     .annotate-image {
       display: block;
@@ -1148,6 +1157,59 @@
       box-shadow:
         0 0 0 2px rgba(17,24,39,0.86),
         0 10px 22px rgba(17,24,39,0.36);
+    }
+    .material-overlay {
+      position: absolute;
+      z-index: 90;
+      min-width: 24px;
+      min-height: 24px;
+      border: 1px solid rgba(0,123,192,0.42);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.92);
+      box-shadow: 0 8px 18px rgba(16,17,18,0.22);
+      cursor: grab;
+      user-select: none;
+    }
+    .material-overlay:active {
+      cursor: grabbing;
+    }
+    .material-overlay img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+    .material-overlay-label {
+      position: absolute;
+      left: 50%;
+      bottom: -22px;
+      transform: translateX(-50%);
+      max-width: 160px;
+      padding: 2px 6px;
+      border: 1px solid rgba(0,123,192,0.24);
+      border-radius: 4px;
+      background: rgba(255,255,255,0.94);
+      color: var(--color-blue-50);
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 16px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      pointer-events: none;
+    }
+    .material-resize-handle {
+      position: absolute;
+      right: -5px;
+      bottom: -5px;
+      width: 12px;
+      height: 12px;
+      border: 1px solid rgba(0,123,192,0.58);
+      border-radius: 3px;
+      background: #fff;
+      cursor: nwse-resize;
+      padding: 0;
     }
     .tag-marker.hover-root {
       z-index: 200;
@@ -1962,6 +2024,39 @@
       margin-bottom: 8px;
       gap: 8px;
     }
+    .material-image-row {
+      display: grid;
+      grid-template-columns: 76px minmax(0, 1fr);
+      gap: 8px;
+      align-items: stretch;
+      margin-bottom: 8px;
+    }
+    .material-thumb {
+      width: 76px;
+      height: 56px;
+      border: 1px solid rgba(0,123,192,0.22);
+      border-radius: 6px;
+      background: #f7f9fc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      color: #909399;
+      font-size: 11px;
+      text-align: center;
+    }
+    .material-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #fff;
+    }
+    .material-image-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-content: flex-start;
+    }
     .material-edit-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1986,6 +2081,29 @@
     .material-field-group {
       display: flex;
       flex-direction: column;
+    }
+    .material-link-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 6px;
+      align-items: center;
+      margin-top: 6px;
+    }
+    .material-link-row select {
+      min-width: 0;
+      padding: 5px 6px;
+      border: 1px solid #dcdfe6;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .material-linked-summary {
+      margin-top: 5px;
+      color: #606266;
+      font-size: 11px;
+      line-height: 1.35;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .no-materials {
       color: #999;
@@ -2017,6 +2135,11 @@
       color: #606266;
       font-size: 12px;
       font-weight: 600;
+    }
+    .event-field-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(160px, 0.42fr);
+      gap: 10px;
     }
     .event-switch-input {
       margin-bottom: 0;
@@ -2053,7 +2176,7 @@
     }
     .event-steps-table {
       width: 100%;
-      min-width: 760px;
+      min-width: 900px;
       border-collapse: collapse;
       table-layout: fixed;
     }

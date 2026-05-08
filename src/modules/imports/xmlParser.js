@@ -262,6 +262,9 @@ function buildRows(lookups) {
 
 function buildRow(values) {
   const processApplication = values.lookups.ddlStation.get(values.processingStep.refApplication);
+  const moduleName = values.lookups.ddlProcess.get(values.processingStep.refProcessModule)
+    || values.lookups.ddlCommModules.get(values.processingStep.refProcessModule)
+    || '';
   return {
     lineName: values.lineName,
     station: values.stationNo,
@@ -269,10 +272,12 @@ function buildRow(values) {
     location: values.locationId,
     event: values.eventName,
     eventSwitch: values.parsedSwitch.eventSwitch,
-    eventSwitchResponse: values.parsedSwitch.eventSwitchResponse,
+    eventSwitchReplyRequired: values.parsedSwitch.eventSwitchReplyRequired,
+    eventSwitchFunction: values.parsedSwitch.eventSwitchFunction,
     eventSwitchPostfix: values.eventSwitchPostfix,
     constraint: values.processingStep.constraint,
-    process: values.lookups.ddlProcess.get(values.processingStep.refProcessModule) || '',
+    process: moduleName,
+    module: moduleName,
     processApplication: processApplication ? processApplication.name : '',
     processStep: values.processingStep.executionStep,
     command: values.commandName || '',
@@ -316,9 +321,12 @@ function parseEventSwitchName(name) {
   if (parts[0] && parts[0].toLowerCase() === 'eventswitch') {
     parts = parts.slice(1);
   }
+  const replyRequired = parts[1] && /^(true|false)$/i.test(parts[1]) ? parts[1].toLowerCase() : '';
+  const functionStartIndex = replyRequired ? 2 : 1;
   return {
     eventSwitch: parts[0] || '',
-    eventSwitchResponse: parts[1] || ''
+    eventSwitchReplyRequired: replyRequired,
+    eventSwitchFunction: parts.slice(functionStartIndex).join(' ')
   };
 }
 

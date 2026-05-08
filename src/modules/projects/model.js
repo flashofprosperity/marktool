@@ -14,7 +14,13 @@ const emptyProjectData = {
       name: '物料A',
       abbreviation: 'MA',
       category: '原材料',
-      type: 'a料'
+      type: 'a料',
+      image: '',
+      x: null,
+      y: null,
+      width: 0.12,
+      height: 0.08,
+      locationLinks: []
     }
   ]
 };
@@ -51,6 +57,7 @@ function normalizeProcessSteps(value) {
     processStep: step && step.processStep !== undefined && step.processStep !== null ? String(step.processStep) : '',
     processStepName: step && step.processStepName !== undefined && step.processStepName !== null ? String(step.processStepName) : '',
     constraint: step && step.constraint !== undefined && step.constraint !== null ? String(step.constraint) : '',
+    module: step && step.module !== undefined && step.module !== null ? String(step.module) : '',
     command: step && step.command !== undefined && step.command !== null ? String(step.command) : '',
     commandTemplateName: step && step.commandTemplateName !== undefined && step.commandTemplateName !== null ? String(step.commandTemplateName) : ''
   }));
@@ -66,9 +73,18 @@ function normalizeEventRecord(record) {
     process: record && record.process ? String(record.process) : '',
     event: record && record.event ? String(record.event) : '',
     eventSwitch: normalizeEventSwitch(record && record.eventSwitch),
+    eventSwitchReplyRequired: normalizeReplyRequired(record && record.eventSwitchReplyRequired),
     eventSwitchFunction: record && record.eventSwitchFunction ? String(record.eventSwitchFunction) : '',
     processSteps: normalizeProcessSteps(record && record.processSteps)
   };
+}
+
+function normalizeReplyRequired(value) {
+  if (value === true) return 'true';
+  if (value === false) return 'false';
+  if (value === null || value === undefined) return '';
+  const normalized = String(value).trim().toLowerCase();
+  return normalized === 'true' || normalized === 'false' ? normalized : '';
 }
 
 function normalizeProjectEventRecords(data) {
