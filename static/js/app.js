@@ -1390,6 +1390,14 @@
         document.querySelectorAll('.project-edit-menu[open]').forEach(menu => {
           if (menu !== exceptMenu) menu.removeAttribute('open');
         });
+        syncProjectCardMenuState();
+      }
+
+      function syncProjectCardMenuState() {
+        document.querySelectorAll('.project-card').forEach(card => {
+          const hasOpenMenu = !!card.querySelector('.project-edit-menu[open]');
+          card.classList.toggle('project-card-menu-open', hasOpenMenu);
+        });
       }
 
       function markProjectDirty() {
@@ -1662,6 +1670,7 @@
         const menuSummary = e.target.closest('.project-edit-menu summary');
         if (menuSummary) {
           closeProjectEditMenus(menu);
+          requestAnimationFrame(syncProjectCardMenuState);
           return;
         }
         const openBtn = e.target.closest('.open-project-btn');
