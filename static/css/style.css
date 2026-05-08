@@ -1000,7 +1000,7 @@
       transform: translate(var(--pan-x), var(--pan-y)) scale(var(--zoom));
       transform-origin: 0 0;
       will-change: transform;
-      transition: transform 0.03s linear;
+      backface-visibility: hidden;
       box-shadow: 0 12px 28px rgba(16,17,18,0.16);
       background: #fff;
     }

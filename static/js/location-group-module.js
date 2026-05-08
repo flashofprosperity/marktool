@@ -108,7 +108,7 @@
   }
 
   function locateTag(tagId) {
-    if (api.highlightTagInList) api.highlightTagInList(Number(tagId));
+    if (api.highlightTagInList) api.highlightTagInList(tagId);
   }
 
   function toggleEventList(locationId) {

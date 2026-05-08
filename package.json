@@ -1,6 +1,6 @@
 {
   "name": "image-annotation-workshop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Server-backed image annotation tool with SQLite persistence.",
   "main": "server.js",

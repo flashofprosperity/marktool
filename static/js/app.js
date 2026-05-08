@@ -2408,14 +2408,18 @@
         return canvasHiddenBranchIds.includes(String(tag.id)) || isCanvasBranchHiddenByAncestor(tag);
       }
 
+      function isSameTagId(left, right) {
+        return String(left) === String(right);
+      }
+
       function containsTagId(rootTag, targetId) {
         if (!rootTag.children || rootTag.children.length === 0) return false;
-        return rootTag.children.some(child => child.id === targetId || containsTagId(child, targetId));
+        return rootTag.children.some(child => isSameTagId(child.id, targetId) || containsTagId(child, targetId));
       }
 
       function findTagById(id, list = tags) {
         for (let tag of list) {
-          if (tag.id === id) return tag;
+          if (isSameTagId(tag.id, id)) return tag;
           if (tag.children && tag.children.length > 0) {
             const found = findTagById(id, tag.children);
             if (found) return found;
@@ -2426,7 +2430,7 @@
 
       function findParentTag(targetId, list = tags, parent = null) {
         for (let tag of list) {
-          if (tag.id === targetId) return parent;
+          if (isSameTagId(tag.id, targetId)) return parent;
           if (tag.children && tag.children.length > 0) {
             const found = findParentTag(targetId, tag.children, tag);
             if (found) return found;
@@ -2836,14 +2840,23 @@
         node.appendChild(row);
         container.appendChild(node);
 
-        row.addEventListener('dblclick', (e) => {
+        const canLocateFromTree = (
+          hasAssignedCoordinates(tag)
+          && !(type && type.name.includes('Event'))
+        );
+
+        const handleRowDoubleClick = (e) => {
           e.stopPropagation();
-          if (isEventTag(tag)) {
+          if (e.target.closest('.tag-node-action, .tag-node-toggle')) return;
+          if (canLocateFromTree) {
+            highlightTagInList(tag.id);
+          } else if (isEventTag(tag)) {
             showEventEditDialog(tag.id);
           } else {
             showTextEditDialog(tag.id);
           }
-        });
+        };
+        row.addEventListener('dblclick', handleRowDoubleClick);
         row.addEventListener('contextmenu', (e) => {
           showContextMenu(e, tag.id);
         });
@@ -3291,7 +3304,8 @@
         });
 
         // 通过data-tag-id属性找到对应的节点行
-        const targetEditor = tagListContainer.querySelector(`.tag-node-row[data-tag-id="${tagId}"]`);
+        const escapedTagId = escapeSelectorValue(tagId);
+        const targetEditor = tagListContainer.querySelector(`.tag-node-row[data-tag-id="${escapedTagId}"]`);
         
         if (targetEditor) {
           // 高亮显示
@@ -3310,6 +3324,12 @@
             targetEditor.classList.remove('highlighted');
           }, 3000);
         }
+      }
+
+      function escapeSelectorValue(value) {
+        return window.CSS && typeof window.CSS.escape === 'function'
+          ? window.CSS.escape(String(value))
+          : String(value).replace(/"/g, '\\"');
       }
 
       // ---------- Canvas interaction ----------
@@ -3335,6 +3355,7 @@
       let dragTag = null;
       let dragStartMouse = { x: 0, y: 0 };
       let dragStartPos = { x: 0, y: 0 };
+      let markerDragMoved = false;
       let markerDragRenderPending = false;
 
       function scheduleMarkerDragRender() {
@@ -3356,7 +3377,8 @@
         const originalTag = findTagById(flatTag._id);
         if (!originalTag) return;
 
-        isDraggingTag = true;
+        isDraggingTag = false;
+        markerDragMoved = false;
         hoveredTagId = null;
         updateMarkerHoverState();
         dragTag = originalTag;
@@ -3371,9 +3393,15 @@
 
       function onDrag(e) {
         if (!dragTag) return;
+        const mouseDx = e.clientX - dragStartMouse.x;
+        const mouseDy = e.clientY - dragStartMouse.y;
+        if (!markerDragMoved && Math.hypot(mouseDx, mouseDy) < 3) return;
+
+        markerDragMoved = true;
+        isDraggingTag = true;
         // Convert screen-pixel mouse movement back into normalized image space.
-        const dx = (e.clientX - dragStartMouse.x) / (annotationCanvas.offsetWidth * zoomLevel);
-        const dy = (e.clientY - dragStartMouse.y) / (annotationCanvas.offsetHeight * zoomLevel);
+        const dx = mouseDx / (annotationCanvas.offsetWidth * zoomLevel);
+        const dy = mouseDy / (annotationCanvas.offsetHeight * zoomLevel);
 
         dragTag.x = Math.min(1, Math.max(0, dragStartPos.x + dx));
         dragTag.y = Math.min(1, Math.max(0, dragStartPos.y + dy));
@@ -3382,12 +3410,13 @@
       }
 
       function stopDrag() {
-        if (dragTag) {
+        if (dragTag && markerDragMoved) {
           markProjectDirty();
+          renderAll();
         }
         dragTag = null;
+        markerDragMoved = false;
         isDraggingTag = false;
-        renderAll();
         window.removeEventListener('mousemove', onDrag);
         window.removeEventListener('mouseup', stopDrag);
       }
@@ -3397,6 +3426,7 @@
       let panStartMouse = { x: 0, y: 0 };
       let panOffset = { x: 0, y: 0 };
       let zoomLevel = 1;
+      let panTransformFramePending = false;
 
       function fitCanvasToImage() {
         // The image is rendered at a fitted display size, while tag coordinates
@@ -3415,7 +3445,7 @@
         annotationCanvas.style.height = `${height}px`;
       }
 
-      function applyPanTransform() {
+      function flushPanTransform() {
         imageWrapper.style.setProperty('--pan-x', `${panOffset.x}px`);
         imageWrapper.style.setProperty('--pan-y', `${panOffset.y}px`);
         imageWrapper.style.setProperty('--zoom', zoomLevel.toFixed(4));
@@ -3425,13 +3455,27 @@
         runRenderHooks('transform');
       }
 
+      function applyPanTransform(immediate = false) {
+        if (immediate) {
+          panTransformFramePending = false;
+          flushPanTransform();
+          return;
+        }
+        if (panTransformFramePending) return;
+        panTransformFramePending = true;
+        requestAnimationFrame(() => {
+          panTransformFramePending = false;
+          flushPanTransform();
+        });
+      }
+
       function resetView() {
         zoomLevel = 1;
         panOffset = {
           x: Math.round((imageWrapper.clientWidth - annotationCanvas.offsetWidth) / 2),
           y: Math.round((imageWrapper.clientHeight - annotationCanvas.offsetHeight) / 2)
         };
-        applyPanTransform();
+        applyPanTransform(true);
       }
 
       function getCanvasPointFromEvent(e) {
