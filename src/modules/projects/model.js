@@ -13,8 +13,11 @@ const emptyProjectData = {
     {
       name: '物料A',
       abbreviation: 'MA',
-      category: '原材料',
+      category: 'raw material-A',
       type: 'a料',
+      primaryTagValue: '',
+      primaryIdType: 'lot',
+      primaryIdGeneration: 'null',
       image: '',
       x: null,
       y: null,
@@ -59,7 +62,8 @@ function normalizeProcessSteps(value) {
     constraint: step && step.constraint !== undefined && step.constraint !== null ? String(step.constraint) : '',
     module: step && step.module !== undefined && step.module !== null ? String(step.module) : '',
     command: step && step.command !== undefined && step.command !== null ? String(step.command) : '',
-    commandTemplateName: step && step.commandTemplateName !== undefined && step.commandTemplateName !== null ? String(step.commandTemplateName) : ''
+    commandTemplateName: step && step.commandTemplateName !== undefined && step.commandTemplateName !== null ? String(step.commandTemplateName) : '',
+    functionDescription: step && step.functionDescription !== undefined && step.functionDescription !== null ? String(step.functionDescription) : ''
   }));
 }
 

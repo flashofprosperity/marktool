@@ -37,6 +37,8 @@ function buildProjectFromRows(rows) {
         id: nextTagId(),
         typeIndex: stationTypeIndex,
         text: stationName,
+        description: '',
+        stationSubtype: 'normal',
         x: null,
         y: null,
         children: []
@@ -52,6 +54,9 @@ function buildProjectFromRows(rows) {
         id: nextTagId(),
         typeIndex: locationTypeIndex,
         text: locationName,
+        description: '',
+        usageStatus: 'normal',
+        usageNote: '',
         x: null,
         y: null,
         locationCategory: row.locationCategory === 'equipment' ? 'equipment' : 'process',
@@ -139,7 +144,8 @@ function buildProcessStep(row) {
     constraint: clean(row.constraint),
     module: clean(row.module),
     command: clean(row.command),
-    commandTemplateName: clean(row.commandTemplateName)
+    commandTemplateName: clean(row.commandTemplateName),
+    functionDescription: ''
   };
   return Object.values(step).some(Boolean) ? step : null;
 }

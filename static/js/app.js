@@ -91,6 +91,8 @@
           'menu.showText': '显示文本',
           'menu.hideText': '隐藏文本',
           'menu.editText': '修改文本',
+          'menu.setInactive': '从画布移除',
+          'menu.setActive': '恢复到画布',
           'menu.editEvent': '查看/编辑事件信息',
           'menu.showEvents': '显示事件',
           'menu.hideEvents': '隐藏事件',
@@ -144,11 +146,15 @@
           'groups.searchHit': '搜索命中',
           'groups.byStation': '按 Station 分类',
           'groups.resize': '调整大小',
+          'groups.occupiedBy': '已被“{name}”使用',
+          'groups.selectionConflict': '以下 Location 已被其他 Group 使用：{names}',
+          'groups.selectionConflictShort': '占用冲突',
+          'groups.inactive': 'Inactive',
           'panel.searchPlaceholder': '搜索标签、类型、坐标',
           'panel.clearSearch': '清空搜索',
           'panel.canvasDisplay': '画布显示',
           'panel.treeMode': '树状结构',
-          'panel.typeMode': '按类型',
+          'panel.inactiveMode': 'Inactive 管理',
           'panel.collapseAll': '全部折叠',
           'panel.allNodes': '全部节点',
           'panel.selectedNodes': '已选 {count} 个节点',
@@ -170,8 +176,25 @@
           'tags.unassignedCoordinate': '未定位',
           'tags.noChildType': '无法创建子标签：当前层级仅支持 Station > Location > Event。',
           'tags.locationCategory': 'Location 分类',
+          'tags.locationName': 'Location 名称',
+          'tags.stationSubtype': 'Station 类型',
+          'tags.stationSubtypeNormal': '普通 Station',
+          'tags.stationSubtypeDdl': 'DDL Station',
           'tags.locationEquipment': '设备',
           'tags.locationProcess': '工序',
+          'tags.description': '描述',
+          'tags.usageStatus': '使用状态',
+          'tags.usageStatusNormal': '正常',
+          'tags.usageStatusUnused': '疑似未使用',
+          'tags.usageStatusInvalid': '疑似无效',
+          'tags.usageStatusUnknown': '待确认',
+          'tags.usageNote': '使用说明',
+          'tags.usageNotePlaceholder': '记录人工判断依据',
+          'tags.inactive': 'Inactive',
+          'tags.inactiveInherited': '继承 Inactive',
+          'tags.inactiveSection': '已移出画布',
+          'tags.unassignedSection': '未分配节点',
+          'tags.unassignedSectionHint': '这些节点未定位，但仍保留在结构中，可直接切换为 inactive。',
           'tags.chooseLocationCategory': '请选择 Location 分类',
           'event.name': 'Event',
           'event.switch': 'Event switch',
@@ -189,13 +212,42 @@
           'event.module': 'Module',
           'event.command': 'Command',
           'event.commandTemplateName': 'Command template name',
+          'event.stepFunction': '功能说明',
           'event.deleteStep': '删除步骤',
+          'event.searchPlaceholder': '搜索事件',
+          'event.pathProject': '项目',
+          'event.pathStation': 'Station',
+          'event.pathLocation': 'Location',
+          'event.pathProcess': 'Process',
+          'event.noSelection': '请选择一个 Event 进行编辑',
+          'dialog.locationEditTitle': 'Location 详情',
           'materials.title': '物料管理',
           'materials.empty': '暂无物料',
           'materials.add': '+ 添加物料',
           'materials.defaultName': '物料A',
           'materials.defaultCategory': '原材料',
           'materials.defaultType': 'a料',
+          'materials.primaryTagValue': '主要识别码',
+          'materials.primaryIdType': 'Tag 类型',
+          'materials.primaryIdGeneration': '码生成方式',
+          'materials.categoryRawA': '原料 A',
+          'materials.categoryRawB': '原料 B',
+          'materials.categoryRawAB': '原料 AB',
+          'materials.categoryFinishGood': '成品',
+          'materials.categorySemiFinishGood': '半成品',
+          'materials.categoryWpc': 'WPC',
+          'materials.categoryPacking': '包装',
+          'materials.categoryOther': '其他',
+          'materials.idTypeLot': 'Lot',
+          'materials.idTypeSinglePart': 'Single part',
+          'materials.idGenerationBarcode': 'Barcode',
+          'materials.idGenerationTransponder': 'Transponder',
+          'materials.idGenerationRfid': 'RFID',
+          'materials.idGenerationFingerprint': 'Fingerprint',
+          'materials.idGenerationOcr': 'OCR',
+          'materials.idGenerationVirtualIdentification': 'Virtual identification',
+          'materials.idGenerationOther': 'Other',
+          'materials.idGenerationNull': 'Null',
           'materials.newName': '新物料',
           'materials.newAbbrev': 'NM',
           'materials.namePlaceholder': '物料名称',
@@ -207,10 +259,14 @@
           'materials.replaceImage': '替换图片',
           'materials.addToCanvas': '添加到画布',
           'materials.removeFromCanvas': '移出画布',
+          'materials.showCanvasInfo': '显示画布信息',
+          'materials.hideCanvasInfo': '隐藏画布信息',
           'materials.linkLocation': '关联 Location',
           'materials.clearLinks': '清除关联',
           'materials.noImage': '未上传图片',
           'materials.noLocations': '暂无可关联 Location',
+          'materials.usedInGroups': '使用于 Group',
+          'materials.notGrouped': '未进入 Group',
           'materials.delete': '删除',
           'export.adminOnly': '只有管理员可以导出 JSON',
           'export.defaultName': 'mes-core-data-designer',
@@ -313,6 +369,8 @@
           'menu.showText': 'Show text',
           'menu.hideText': 'Hide text',
           'menu.editText': 'Edit text',
+          'menu.setInactive': 'Remove from canvas',
+          'menu.setActive': 'Restore to canvas',
           'menu.editEvent': 'View/edit event info',
           'menu.showEvents': 'Show events',
           'menu.hideEvents': 'Hide events',
@@ -366,11 +424,15 @@
           'groups.searchHit': 'Search match',
           'groups.byStation': 'Group by Station',
           'groups.resize': 'Resize',
+          'groups.occupiedBy': 'Already used by "{name}"',
+          'groups.selectionConflict': 'These Locations are already used by other Groups: {names}',
+          'groups.selectionConflictShort': 'Conflict',
+          'groups.inactive': 'Inactive',
           'panel.searchPlaceholder': 'Search labels, types, coordinates',
           'panel.clearSearch': 'Clear search',
           'panel.canvasDisplay': 'Canvas',
           'panel.treeMode': 'Tree',
-          'panel.typeMode': 'By type',
+          'panel.inactiveMode': 'Inactive manager',
           'panel.collapseAll': 'Collapse all',
           'panel.allNodes': 'All nodes',
           'panel.selectedNodes': '{count} nodes selected',
@@ -392,8 +454,25 @@
           'tags.unassignedCoordinate': 'Unlocated',
           'tags.noChildType': 'Cannot create child label: the current hierarchy supports Station > Location > Event.',
           'tags.locationCategory': 'Location category',
+          'tags.locationName': 'Location name',
+          'tags.stationSubtype': 'Station subtype',
+          'tags.stationSubtypeNormal': 'Normal Station',
+          'tags.stationSubtypeDdl': 'DDL Station',
           'tags.locationEquipment': 'Equipment',
           'tags.locationProcess': 'Process',
+          'tags.description': 'Description',
+          'tags.usageStatus': 'Usage status',
+          'tags.usageStatusNormal': 'Normal',
+          'tags.usageStatusUnused': 'Suspicious unused',
+          'tags.usageStatusInvalid': 'Suspicious invalid',
+          'tags.usageStatusUnknown': 'Needs review',
+          'tags.usageNote': 'Usage note',
+          'tags.usageNotePlaceholder': 'Record the manual judgment basis',
+          'tags.inactive': 'Inactive',
+          'tags.inactiveInherited': 'Inherited inactive',
+          'tags.inactiveSection': 'Removed from canvas',
+          'tags.unassignedSection': 'Unassigned nodes',
+          'tags.unassignedSectionHint': 'These nodes are unlocated but still kept in the structure and can be switched to inactive directly.',
           'tags.chooseLocationCategory': 'Choose Location category',
           'event.name': 'Event',
           'event.switch': 'Event switch',
@@ -411,13 +490,42 @@
           'event.module': 'Module',
           'event.command': 'Command',
           'event.commandTemplateName': 'Command template name',
+          'event.stepFunction': 'Function',
           'event.deleteStep': 'Delete step',
+          'event.searchPlaceholder': 'Search events',
+          'event.pathProject': 'Project',
+          'event.pathStation': 'Station',
+          'event.pathLocation': 'Location',
+          'event.pathProcess': 'Process',
+          'event.noSelection': 'Select an Event to edit',
+          'dialog.locationEditTitle': 'Location details',
           'materials.title': 'Materials',
           'materials.empty': 'No materials',
           'materials.add': '+ Add material',
           'materials.defaultName': 'Material A',
           'materials.defaultCategory': 'Raw material',
           'materials.defaultType': 'Type A',
+          'materials.primaryTagValue': 'Primary tag',
+          'materials.primaryIdType': 'Tag type',
+          'materials.primaryIdGeneration': 'Code generation',
+          'materials.categoryRawA': 'Raw material - A',
+          'materials.categoryRawB': 'Raw material - B',
+          'materials.categoryRawAB': 'Raw material - AB',
+          'materials.categoryFinishGood': 'Finish good',
+          'materials.categorySemiFinishGood': 'Semi-finish good',
+          'materials.categoryWpc': 'WPC',
+          'materials.categoryPacking': 'Packing',
+          'materials.categoryOther': 'Other',
+          'materials.idTypeLot': 'Lot',
+          'materials.idTypeSinglePart': 'Single part',
+          'materials.idGenerationBarcode': 'Barcode',
+          'materials.idGenerationTransponder': 'Transponder',
+          'materials.idGenerationRfid': 'RFID',
+          'materials.idGenerationFingerprint': 'Fingerprint',
+          'materials.idGenerationOcr': 'OCR',
+          'materials.idGenerationVirtualIdentification': 'Virtual identification',
+          'materials.idGenerationOther': 'Other',
+          'materials.idGenerationNull': 'Null',
           'materials.newName': 'New material',
           'materials.newAbbrev': 'NM',
           'materials.namePlaceholder': 'Material name',
@@ -429,10 +537,14 @@
           'materials.replaceImage': 'Replace image',
           'materials.addToCanvas': 'Add to canvas',
           'materials.removeFromCanvas': 'Remove from canvas',
+          'materials.showCanvasInfo': 'Show canvas info',
+          'materials.hideCanvasInfo': 'Hide canvas info',
           'materials.linkLocation': 'Link Location',
           'materials.clearLinks': 'Clear links',
           'materials.noImage': 'No image',
           'materials.noLocations': 'No Locations',
+          'materials.usedInGroups': 'Used in groups',
+          'materials.notGrouped': 'Not grouped',
           'materials.delete': 'Delete',
           'export.adminOnly': 'Only admins can export JSON',
           'export.defaultName': 'mes-core-data-designer',
@@ -509,12 +621,38 @@
        *   processLinks: legacy linked tag id[]
        * }
        */
+      const MATERIAL_CATEGORY_OPTIONS = [
+        'raw material-A',
+        'raw material-B',
+        'raw material-AB',
+        'finish good',
+        'semi-finish good',
+        'WPC',
+        'packing',
+        'other'
+      ];
+      const MATERIAL_ID_TYPE_OPTIONS = ['lot', 'single part'];
+      const MATERIAL_ID_GENERATION_OPTIONS = [
+        'barcode',
+        'transponder',
+        'rfid',
+        'fingerprint',
+        'ocr',
+        'virtual identification',
+        'other',
+        'null'
+      ];
+      const LOCATION_USAGE_STATUS_OPTIONS = ['normal', 'suspicious-unused', 'suspicious-invalid', 'unknown'];
+      const STATION_SUBTYPE_OPTIONS = ['normal', 'ddl'];
       const materials = [
-        {
+       {
           name: t('materials.defaultName'),
           abbreviation: 'MA',
-          category: t('materials.defaultCategory'),
-          type: t('materials.defaultType')
+          category: MATERIAL_CATEGORY_OPTIONS[0],
+          type: t('materials.defaultType'),
+          primaryTagValue: '',
+          primaryIdType: MATERIAL_ID_TYPE_OPTIONS[0],
+          primaryIdGeneration: 'null'
         },
       ];
       /*
@@ -609,6 +747,7 @@
       const createTagMenuItem = document.getElementById('createTagMenuItem');
       const toggleTextMenuItem = document.getElementById('toggleTextMenuItem');
       const editTextMenuItem = document.getElementById('editTextMenuItem');
+      const toggleInactiveMenuItem = document.getElementById('toggleInactiveMenuItem');
       const editEventMenuItem = document.getElementById('editEventMenuItem');
       const showEventsMenuItem = document.getElementById('showEventsMenuItem');
       const addChildMenuItem = document.getElementById('addChildMenuItem');
@@ -617,6 +756,10 @@
       // 文本编辑对话框元素
       const textEditDialog = document.getElementById('textEditDialog');
       const textEditInput = document.getElementById('textEditInput');
+      const tagDescriptionField = document.getElementById('tagDescriptionField');
+      const tagDescriptionInput = document.getElementById('tagDescriptionInput');
+      const stationSubtypeField = document.getElementById('stationSubtypeField');
+      const stationSubtypeSelect = document.getElementById('stationSubtypeSelect');
       const locationEditCategoryField = document.getElementById('locationEditCategoryField');
       const locationEditCategorySelect = document.getElementById('locationEditCategorySelect');
       const textEditConfirm = document.getElementById('textEditConfirm');
@@ -631,6 +774,25 @@
       const eventPathPreview = document.getElementById('eventPathPreview');
       const eventEditConfirm = document.getElementById('eventEditConfirm');
       const eventEditCancel = document.getElementById('eventEditCancel');
+      const locationEditDialog = document.getElementById('locationEditDialog');
+      const locationPathPreview = document.getElementById('locationPathPreview');
+      const locationDialogNameInput = document.getElementById('locationDialogNameInput');
+      const locationDialogCategorySelect = document.getElementById('locationDialogCategorySelect');
+      const locationDialogDescriptionInput = document.getElementById('locationDialogDescriptionInput');
+      const locationUsageStatusSelect = document.getElementById('locationUsageStatusSelect');
+      const locationUsageNoteInput = document.getElementById('locationUsageNoteInput');
+      const locationEventSearchInput = document.getElementById('locationEventSearchInput');
+      const locationEventList = document.getElementById('locationEventList');
+      const locationCurrentEventLabel = document.getElementById('locationCurrentEventLabel');
+      const locationEventNameInput = document.getElementById('locationEventNameInput');
+      const locationEventSwitchInput = document.getElementById('locationEventSwitchInput');
+      const locationEventSwitchReplyRequiredInput = document.getElementById('locationEventSwitchReplyRequiredInput');
+      const locationEventSwitchFunctionInput = document.getElementById('locationEventSwitchFunctionInput');
+      const locationAddEventStepBtn = document.getElementById('locationAddEventStepBtn');
+      const locationEventStepsBody = document.getElementById('locationEventStepsBody');
+      const locationEventPathPreview = document.getElementById('locationEventPathPreview');
+      const locationEditConfirm = document.getElementById('locationEditConfirm');
+      const locationEditCancel = document.getElementById('locationEditCancel');
       const locationCategoryDialog = document.getElementById('locationCategoryDialog');
       const locationCategoryCancel = document.getElementById('locationCategoryCancel');
       
@@ -656,16 +818,19 @@
       let allProjects = [];
       let projectSearchQuery = '';
       let projectTagFilter = '';
-      let projectGroupMode = 'list';
-      let projectSortMode = 'updated';
+      let projectGroupMode = 'tag';
+      let projectSortMode = 'name';
       let pendingJsonImportMode = 'update-current';
       let pendingXmlImportMode = 'update-current';
       let pendingXmlUpdateProjectId = null;
       let currentSaveStatusKey = 'projects.choose';
+      let latestMarkerPositions = {};
       let displayedEventParentIds = new Set();
       let hoveredTagId = null;
       let isDraggingTag = false;
       let pendingLocationCategoryResolve = null;
+      let activeLocationEditorEventId = null;
+      let locationEditorEventDrafts = new Map();
       let lastContextMenuOpenedAt = 0;
       const renderHooks = [];
 
@@ -686,6 +851,8 @@
         });
         if (languageSelect) languageSelect.value = currentLanguage;
         if (markerRenderModeSelect) markerRenderModeSelect.value = markerRenderMode;
+        if (projectGroupSelect) projectGroupSelect.value = projectGroupMode;
+        if (projectSortSelect) projectSortSelect.value = projectSortMode;
         setSaveStatus(saveStatus.className.replace('save-status ', '') || 'idle', t(currentSaveStatusKey));
       }
 
@@ -759,6 +926,8 @@
         const panelVisible = isWorkspaceVisible && !panelRight.classList.contains('is-hidden') && !panelRight.classList.contains('hidden');
         panelCenter.classList.toggle('with-side-panel', panelVisible);
         panelCenter.classList.toggle('without-side-panel', !panelVisible);
+        panelCenter.classList.toggle('panel-open', panelVisible);
+        panelCenter.classList.toggle('panel-hidden', !panelVisible);
       }
 
       function setWorkspaceVisible(isVisible) {
@@ -810,7 +979,7 @@
         panelRight.classList.add('is-hidden');
         document.body.classList.remove('project-home-view', 'workspace-view');
         document.body.classList.add('login-view');
-        if (toolbar) toolbar.classList.add('is-hidden');
+        if (toolbar) toolbar.classList.remove('is-hidden');
         updateAuthUi();
       }
 
@@ -831,10 +1000,18 @@
           id: tag.id,
           typeIndex: tag.typeIndex,
           text: tag.text,
+          description: normalizeTagDescription(tag.description),
           x: hasCoordinates ? +Number(tag.x).toFixed(4) : null,
           y: hasCoordinates ? +Number(tag.y).toFixed(4) : null
         };
+        if (normalizeTagInactive(tag.inactive)) newTag.inactive = true;
         if (tag.locationCategory) newTag.locationCategory = tag.locationCategory;
+        if (isStationTag(tag)) newTag.stationSubtype = normalizeStationSubtype(tag.stationSubtype);
+        if (isLocationTag(tag)) {
+          newTag.usageStatus = normalizeLocationUsageStatus(tag.usageStatus);
+          const usageNote = normalizeTagDescription(tag.usageNote);
+          if (usageNote) newTag.usageNote = usageNote;
+        }
         if (tag.eventRecordId) newTag.eventRecordId = tag.eventRecordId;
         if (tag.materialLinks && tag.materialLinks.length > 0) {
           newTag.materialLinks = tag.materialLinks;
@@ -855,6 +1032,43 @@
           && tag.y !== ''
           && Number.isFinite(Number(tag.x))
           && Number.isFinite(Number(tag.y));
+      }
+
+      function normalizeTagDescription(value) {
+        return value === undefined || value === null ? '' : String(value);
+      }
+
+      function normalizeStationSubtype(value) {
+        return STATION_SUBTYPE_OPTIONS.includes(value) ? value : 'normal';
+      }
+
+      function normalizeLocationUsageStatus(value) {
+        return LOCATION_USAGE_STATUS_OPTIONS.includes(value) ? value : 'normal';
+      }
+
+      function normalizeTagInactive(value) {
+        return value === true || value === 'true';
+      }
+
+      function normalizeMaterialCategory(value) {
+        const legacyMap = {
+          '原材料': 'raw material-A',
+          'Raw material': 'raw material-A',
+          '成品': 'finish good',
+          '半成品': 'semi-finish good',
+          '包装': 'packing',
+          '其他': 'other'
+        };
+        const normalized = legacyMap[value] || value;
+        return MATERIAL_CATEGORY_OPTIONS.includes(normalized) ? normalized : MATERIAL_CATEGORY_OPTIONS[0];
+      }
+
+      function normalizeMaterialIdType(value) {
+        return MATERIAL_ID_TYPE_OPTIONS.includes(value) ? value : MATERIAL_ID_TYPE_OPTIONS[0];
+      }
+
+      function normalizeMaterialIdGeneration(value) {
+        return MATERIAL_ID_GENERATION_OPTIONS.includes(value) ? value : 'null';
       }
 
       function cleanLocationGroupForPersistence(group) {
@@ -878,7 +1092,8 @@
             height: Number.isFinite(Number(panel.height)) ? +Number(panel.height).toFixed(4) : 0.22
           },
           iconSize: Number.isFinite(Number(group && group.iconSize)) ? Number(group.iconSize) : 48,
-          collapsed: group && group.collapsed !== undefined ? !!group.collapsed : true
+          collapsed: group && group.collapsed !== undefined ? !!group.collapsed : true,
+          inactive: normalizeTagInactive(group && group.inactive)
         };
       }
 
@@ -889,7 +1104,11 @@
             name: normalized.name,
             abbreviation: normalized.abbreviation,
             category: normalized.category,
-            type: normalized.type
+            type: normalized.type,
+            primaryTagValue: normalized.primaryTagValue,
+            primaryIdType: normalized.primaryIdType,
+            primaryIdGeneration: normalized.primaryIdGeneration,
+            showLabelOnCanvas: normalized.showLabelOnCanvas
           };
           if (normalized.image) material.image = normalized.image;
           if (normalized.x !== null && normalized.y !== null) {
@@ -923,9 +1142,13 @@
         materials.push({
           name: t('materials.defaultName'),
           abbreviation: 'MA',
-          category: t('materials.defaultCategory'),
+          category: MATERIAL_CATEGORY_OPTIONS[0],
           type: t('materials.defaultType'),
+          primaryTagValue: '',
+          primaryIdType: MATERIAL_ID_TYPE_OPTIONS[0],
+          primaryIdGeneration: 'null',
           image: '',
+          showLabelOnCanvas: true,
           x: null,
           y: null,
           width: 0.12,
@@ -985,19 +1208,30 @@
           constraint: step && step.constraint !== undefined && step.constraint !== null ? String(step.constraint) : '',
           module: step && step.module !== undefined && step.module !== null ? String(step.module) : '',
           command: step && step.command !== undefined && step.command !== null ? String(step.command) : '',
-          commandTemplateName: step && step.commandTemplateName !== undefined && step.commandTemplateName !== null ? String(step.commandTemplateName) : ''
+          commandTemplateName: step && step.commandTemplateName !== undefined && step.commandTemplateName !== null ? String(step.commandTemplateName) : '',
+          functionDescription: step && step.functionDescription !== undefined && step.functionDescription !== null ? String(step.functionDescription) : ''
         }));
       }
 
       function normalizeMaterial(material = {}) {
+        const normalizedX = material.x === null || material.x === undefined || material.x === ''
+          ? null
+          : (Number.isFinite(Number(material.x)) ? Number(material.x) : null);
+        const normalizedY = material.y === null || material.y === undefined || material.y === ''
+          ? null
+          : (Number.isFinite(Number(material.y)) ? Number(material.y) : null);
         const normalized = {
           name: material.name !== undefined && material.name !== null ? String(material.name) : '',
           abbreviation: material.abbreviation !== undefined && material.abbreviation !== null ? String(material.abbreviation) : '',
-          category: material.category !== undefined && material.category !== null ? String(material.category) : '',
+          category: normalizeMaterialCategory(material.category),
           type: material.type !== undefined && material.type !== null ? String(material.type) : '',
+          primaryTagValue: material.primaryTagValue !== undefined && material.primaryTagValue !== null ? String(material.primaryTagValue) : '',
+          primaryIdType: normalizeMaterialIdType(material.primaryIdType),
+          primaryIdGeneration: normalizeMaterialIdGeneration(material.primaryIdGeneration),
           image: material.image ? String(material.image) : '',
-          x: Number.isFinite(Number(material.x)) ? Number(material.x) : null,
-          y: Number.isFinite(Number(material.y)) ? Number(material.y) : null,
+          showLabelOnCanvas: material.showLabelOnCanvas !== false,
+          x: normalizedX,
+          y: normalizedY,
           width: Number.isFinite(Number(material.width)) ? Math.max(0.02, Number(material.width)) : 0.12,
           height: Number.isFinite(Number(material.height)) ? Math.max(0.02, Number(material.height)) : 0.08,
           locationLinks: Array.isArray(material.locationLinks)
@@ -1008,6 +1242,125 @@
           normalized.processLinks = material.processLinks.map(id => Number(id)).filter(id => Number.isFinite(id));
         }
         return normalized;
+      }
+
+      const MATERIAL_COLOR_PALETTE = [
+        '#007bc0',
+        '#00884a',
+        '#ed0007',
+        '#ff8c00',
+        '#6f42c1',
+        '#0097a7',
+        '#c2185b',
+        '#795548'
+      ];
+
+      function getMaterialAccentColor(index) {
+        return MATERIAL_COLOR_PALETTE[((Number(index) % MATERIAL_COLOR_PALETTE.length) + MATERIAL_COLOR_PALETTE.length) % MATERIAL_COLOR_PALETTE.length];
+      }
+
+      function hexToRgba(hex, alpha = 1) {
+        const normalized = String(hex || '').replace('#', '');
+        if (normalized.length !== 6) return `rgba(0, 123, 192, ${alpha})`;
+        const int = Number.parseInt(normalized, 16);
+        const r = (int >> 16) & 255;
+        const g = (int >> 8) & 255;
+        const b = int & 255;
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+
+      function getMaterialDisplayName(material, index) {
+        return material.abbreviation || material.name || `${t('materials.title')} ${index + 1}`;
+      }
+
+      function getMaterialCategoryLabel(value) {
+        const mapping = {
+          'raw material-A': 'materials.categoryRawA',
+          'raw material-B': 'materials.categoryRawB',
+          'raw material-AB': 'materials.categoryRawAB',
+          'finish good': 'materials.categoryFinishGood',
+          'semi-finish good': 'materials.categorySemiFinishGood',
+          'WPC': 'materials.categoryWpc',
+          'packing': 'materials.categoryPacking',
+          'other': 'materials.categoryOther'
+        };
+        return t(mapping[value] || 'materials.categoryOther');
+      }
+
+      function getMaterialIdTypeLabel(value) {
+        return t(value === 'single part' ? 'materials.idTypeSinglePart' : 'materials.idTypeLot');
+      }
+
+      function getMaterialIdGenerationLabel(value) {
+        const mapping = {
+          'barcode': 'materials.idGenerationBarcode',
+          'transponder': 'materials.idGenerationTransponder',
+          'rfid': 'materials.idGenerationRfid',
+          'fingerprint': 'materials.idGenerationFingerprint',
+          'ocr': 'materials.idGenerationOcr',
+          'virtual identification': 'materials.idGenerationVirtualIdentification',
+          'other': 'materials.idGenerationOther',
+          'null': 'materials.idGenerationNull'
+        };
+        return t(mapping[value] || 'materials.idGenerationNull');
+      }
+
+      function getStationSubtypeLabel(value) {
+        return t(normalizeStationSubtype(value) === 'ddl' ? 'tags.stationSubtypeDdl' : 'tags.stationSubtypeNormal');
+      }
+
+      function getLocationUsageStatusLabel(value) {
+        const normalized = normalizeLocationUsageStatus(value);
+        const mapping = {
+          'normal': 'tags.usageStatusNormal',
+          'suspicious-unused': 'tags.usageStatusUnused',
+          'suspicious-invalid': 'tags.usageStatusInvalid',
+          'unknown': 'tags.usageStatusUnknown'
+        };
+        return t(mapping[normalized] || 'tags.usageStatusNormal');
+      }
+
+      function buildSelectOptionsHtml(options, selectedValue, labelGetter) {
+        return options.map(value => `
+          <option value="${escapeHtml(value)}" ${value === selectedValue ? 'selected' : ''}>${escapeHtml(labelGetter(value))}</option>
+        `).join('');
+      }
+
+      function getLinkedMaterialsForLocation(locationId) {
+        const normalizedLocationId = Number(locationId);
+        return materials
+          .map((material, index) => ({ material: normalizeMaterial(material), index }))
+          .filter(({ material }) => material.locationLinks.some(id => Number(id) === normalizedLocationId))
+          .map(({ material, index }) => ({
+            index,
+            color: getMaterialAccentColor(index),
+            label: getMaterialDisplayName(material, index)
+          }));
+      }
+
+      function getMaterialLinkOffset(locationId, materialIndex) {
+        const linkedMaterials = getLinkedMaterialsForLocation(locationId);
+        const position = linkedMaterials.findIndex(item => item.index === materialIndex);
+        if (position === -1) return { x: 0, y: 0 };
+        const spread = (position - ((linkedMaterials.length - 1) / 2)) * 8;
+        return {
+          x: spread,
+          y: linkedMaterials.length > 1 ? Math.abs(spread) * 0.35 : 0
+        };
+      }
+
+      function getLinkedGroupNamesForMaterial(index) {
+        const material = normalizeMaterial(materials[index] || {});
+        const groupNames = new Set();
+        locationGroups.forEach(group => {
+          if (!Array.isArray(group.locationIds) || !Array.isArray(material.locationLinks)) return;
+          if (group.locationIds.some(locationId => material.locationLinks.some(linkId => Number(linkId) === Number(locationId)))) {
+            const station = findTagById(group.stationId);
+            const groupName = group.name && group.name.trim() ? group.name.trim() : t('groups.defaultName');
+            groupNames.add(`${station ? getTagDisplayName(station) : t('groups.noStations')} - ${groupName}`);
+          }
+        });
+        return Array.from(groupNames);
       }
 
       function cleanEventRecordForPersistence(record) {
@@ -1067,6 +1420,11 @@
         return !!(type && type.name.includes('Location'));
       }
 
+      function isStationTag(tag) {
+        const type = tagTypes[tag.typeIndex];
+        return !!(type && type.name.includes('Station'));
+      }
+
       function getDirectEventChildren(tag) {
         if (!tag || !Array.isArray(tag.children)) return [];
         return tag.children.filter(child => isEventTag(child));
@@ -1077,9 +1435,18 @@
           if (!Array.isArray(tag.children)) tag.children = [];
           tag.x = hasAssignedCoordinates(tag) ? Number(tag.x) : null;
           tag.y = hasAssignedCoordinates(tag) ? Number(tag.y) : null;
+          tag.description = normalizeTagDescription(tag.description);
+          tag.inactive = normalizeTagInactive(tag.inactive);
           const type = tagTypes[tag.typeIndex];
           if (type && type.name.includes('Location') && !tag.locationCategory) {
             tag.locationCategory = 'process';
+          }
+          if (type && type.name.includes('Location')) {
+            tag.usageStatus = normalizeLocationUsageStatus(tag.usageStatus);
+            tag.usageNote = normalizeTagDescription(tag.usageNote);
+          }
+          if (type && type.name.includes('Station')) {
+            tag.stationSubtype = normalizeStationSubtype(tag.stationSubtype);
           }
           normalizeImportedTags(tag.children);
         });
@@ -1268,21 +1635,31 @@
         });
       }
 
+      function getPrimaryProjectTag(project) {
+        const tags = Array.isArray(project && project.tags) ? project.tags : [];
+        return tags.length > 0 ? String(tags[0]) : t('projects.uncategorized');
+      }
+
+      function getProjectTagAccent(tag) {
+        const palette = ['#007bc0', '#00884a', '#9e2896', '#1d62a1', '#c92a2a', '#ff8c00', '#795548'];
+        const text = String(tag || '');
+        let hash = 0;
+        for (let i = 0; i < text.length; i += 1) hash = ((hash * 31) + text.charCodeAt(i)) >>> 0;
+        return palette[hash % palette.length];
+      }
+
       function renderProjectGroups(projects) {
         const groups = new Map();
         projects.forEach(project => {
-          const tags = Array.isArray(project.tags) && project.tags.length > 0
-            ? project.tags
-            : [t('projects.uncategorized')];
-          tags.forEach(tag => {
-            if (!groups.has(tag)) groups.set(tag, []);
-            groups.get(tag).push(project);
-          });
+          const primaryTag = getPrimaryProjectTag(project);
+          if (!groups.has(primaryTag)) groups.set(primaryTag, []);
+          groups.get(primaryTag).push(project);
         });
         Array.from(groups.keys()).sort((a, b) => a.localeCompare(b)).forEach(tag => {
           const group = document.createElement('section');
           group.className = 'project-group';
-          group.innerHTML = `<h3 class="project-group-title">${escapeHtml(tag)}</h3>`;
+          group.style.setProperty('--project-group-accent', getProjectTagAccent(tag));
+          group.innerHTML = `<h3 class="project-group-title">${escapeHtml(tag)}<span>${groups.get(tag).length}</span></h3>`;
           groups.get(tag).forEach(project => group.appendChild(createProjectCard(project)));
           projectList.appendChild(group);
         });
@@ -1836,8 +2213,13 @@
 
       // 右侧面板隐藏/显示（浮动覆盖模式）
       toggleRightBtn.addEventListener('click', () => {
+        const previousWrapperSize = {
+          width: imageWrapper.clientWidth,
+          height: imageWrapper.clientHeight
+        };
         panelRight.classList.toggle('hidden');
         updateWorkspaceLayoutMode();
+        relayoutWorkspaceCanvas(previousWrapperSize);
       });
 
       // 右键菜单功能
@@ -1895,6 +2277,9 @@
           const isEvent = tag ? isEventTag(tag) : false;
           const canShowEvents = tag ? getDirectEventChildren(tag).length > 0 : false;
           const canToggleText = !!tag && !isEvent;
+          if (tag) {
+            toggleInactiveMenuItem.textContent = isTagInactive(tag) ? t('menu.setActive') : t('menu.setInactive');
+          }
           if (canToggleText) {
             // 检查当前节点及其子节点是否全部隐藏文本
             const allHidden = checkAllTextHidden(tag);
@@ -1903,6 +2288,7 @@
           setMenuItemVisible(createTagItem, false);
           setMenuItemVisible(toggleTextMenuItem, canToggleText);
           setMenuItemVisible(editTextMenuItem, !isEvent);
+          setMenuItemVisible(toggleInactiveMenuItem, !!tag);
           setMenuItemVisible(editEventMenuItem, isEvent);
           showEventsMenuItem.textContent = displayedEventParentIds.has(tagId) ? t('menu.hideEvents') : t('menu.showEvents');
           setMenuItemVisible(showEventsMenuItem, canShowEvents);
@@ -1913,6 +2299,7 @@
           setMenuItemVisible(createTagItem, true);
           setMenuItemVisible(toggleTextMenuItem, false);
           setMenuItemVisible(editTextMenuItem, false);
+          setMenuItemVisible(toggleInactiveMenuItem, false);
           setMenuItemVisible(editEventMenuItem, false);
           setMenuItemVisible(showEventsMenuItem, false);
           setMenuItemVisible(addChildMenuItem, false);
@@ -1935,7 +2322,7 @@
         if (Date.now() - lastContextMenuOpenedAt < 250) return;
         if (e.target.closest('#contextMenu')) return;
         // 如果点击的不是文本编辑对话框，则关闭菜单
-        if (!e.target.closest('#textEditDialog') && !e.target.closest('#eventEditDialog') && !e.target.closest('#locationCategoryDialog')) {
+        if (!e.target.closest('#textEditDialog') && !e.target.closest('#eventEditDialog') && !e.target.closest('#locationEditDialog') && !e.target.closest('#locationCategoryDialog')) {
           hideContextMenu();
         }
       });
@@ -1946,6 +2333,7 @@
           hideContextMenu();
           hideTextEditDialog();
           hideEventEditDialog();
+          hideLocationEditDialog();
           hideLocationCategoryDialog();
         }
       });
@@ -1967,7 +2355,24 @@
       // 修改文本菜单项
       editTextMenuItem.addEventListener('click', () => {
         if (contextMenuTagId) {
-          showTextEditDialog(contextMenuTagId);
+          const tag = findTagById(contextMenuTagId);
+          if (tag && isLocationTag(tag)) {
+            showLocationEditDialog(contextMenuTagId);
+          } else {
+            showTextEditDialog(contextMenuTagId);
+          }
+          hideContextMenu();
+        }
+      });
+
+      toggleInactiveMenuItem.addEventListener('click', () => {
+        if (contextMenuTagId) {
+          const tag = findTagById(contextMenuTagId);
+          if (tag) {
+            tag.inactive = !isTagInactive(tag);
+            renderAll();
+            markProjectDirty();
+          }
           hideContextMenu();
         }
       });
@@ -2021,6 +2426,20 @@
         if (!tag) return;
         
         textEditInput.value = tag.text || '';
+        if ((isStationTag(tag) || isLocationTag(tag)) && tagDescriptionField && tagDescriptionInput) {
+          tagDescriptionField.classList.remove('is-hidden');
+          tagDescriptionInput.value = getTagDescription(tag);
+        } else if (tagDescriptionField && tagDescriptionInput) {
+          tagDescriptionField.classList.add('is-hidden');
+          tagDescriptionInput.value = '';
+        }
+        if (isStationTag(tag) && stationSubtypeField && stationSubtypeSelect) {
+          stationSubtypeField.classList.remove('is-hidden');
+          stationSubtypeSelect.value = normalizeStationSubtype(tag.stationSubtype);
+        } else if (stationSubtypeField && stationSubtypeSelect) {
+          stationSubtypeField.classList.add('is-hidden');
+          stationSubtypeSelect.value = 'normal';
+        }
         if (isLocationTag(tag) && locationEditCategoryField && locationEditCategorySelect) {
           locationEditCategoryField.classList.remove('is-hidden');
           locationEditCategorySelect.value = tag.locationCategory === 'equipment' ? 'equipment' : 'process';
@@ -2028,8 +2447,7 @@
           locationEditCategoryField.classList.add('is-hidden');
         }
         textEditDialog.style.display = 'flex';
-        textEditInput.focus();
-        textEditInput.select();
+        focusWithoutScroll(textEditInput, true);
         
         // 保存当前编辑的标签ID
         textEditDialog.dataset.tagId = tagId;
@@ -2038,6 +2456,10 @@
       function hideTextEditDialog() {
         textEditDialog.style.display = 'none';
         textEditInput.value = '';
+        if (tagDescriptionField) tagDescriptionField.classList.add('is-hidden');
+        if (tagDescriptionInput) tagDescriptionInput.value = '';
+        if (stationSubtypeField) stationSubtypeField.classList.add('is-hidden');
+        if (stationSubtypeSelect) stationSubtypeSelect.value = 'normal';
         if (locationEditCategoryField) locationEditCategoryField.classList.add('is-hidden');
         if (locationEditCategorySelect) locationEditCategorySelect.value = 'process';
         delete textEditDialog.dataset.tagId;
@@ -2050,6 +2472,12 @@
           const tag = findTagById(tagId);
           if (tag) {
             tag.text = textEditInput.value;
+            if ((isStationTag(tag) || isLocationTag(tag)) && tagDescriptionInput) {
+              tag.description = normalizeTagDescription(tagDescriptionInput.value);
+            }
+            if (isStationTag(tag) && stationSubtypeSelect) {
+              tag.stationSubtype = normalizeStationSubtype(stationSubtypeSelect.value);
+            }
             if (isLocationTag(tag) && locationEditCategorySelect) {
               const nextCategory = locationEditCategorySelect.value === 'equipment' ? 'equipment' : 'process';
               if (tag.locationCategory !== nextCategory) {
@@ -2102,6 +2530,7 @@
           <td><input type="text" class="event-step-input" data-field="module" value="${escapeHtml(step.module || '')}"></td>
           <td><input type="text" class="event-step-input" data-field="command" value="${escapeHtml(step.command || '')}"></td>
           <td><input type="text" class="event-step-input" data-field="commandTemplateName" value="${escapeHtml(step.commandTemplateName || '')}"></td>
+          <td><input type="text" class="event-step-input" data-field="functionDescription" value="${escapeHtml(step.functionDescription || '')}"></td>
           <td><button class="tag-node-action danger delete-event-step-btn" type="button" title="${escapeHtml(t('event.deleteStep'))}">×</button></td>
         `;
         row.querySelector('.delete-event-step-btn').addEventListener('click', () => {
@@ -2110,15 +2539,15 @@
         return row;
       }
 
-      function renderEventStepsEditor(steps = []) {
-        eventStepsBody.innerHTML = '';
+      function renderEventStepsEditor(targetBody, steps = []) {
+        targetBody.innerHTML = '';
         normalizeProcessSteps(steps).forEach(step => {
-          eventStepsBody.appendChild(createEventStepRow(step));
+          targetBody.appendChild(createEventStepRow(step));
         });
       }
 
-      function readEventStepsEditor() {
-        return Array.from(eventStepsBody.querySelectorAll('tr'))
+      function readEventStepsEditor(targetBody) {
+        return Array.from(targetBody.querySelectorAll('tr'))
           .map(row => {
             const step = {
               processStep: '',
@@ -2126,7 +2555,8 @@
               constraint: '',
               module: '',
               command: '',
-              commandTemplateName: ''
+              commandTemplateName: '',
+              functionDescription: ''
             };
             row.querySelectorAll('.event-step-input').forEach(input => {
               step[input.dataset.field] = input.value;
@@ -2136,22 +2566,84 @@
           .filter(step => Object.values(step).some(value => value.trim() !== ''));
       }
 
+      const eventDialogEditorControls = {
+        nameInput: eventNameInput,
+        switchInput: eventSwitchInput,
+        replyInput: eventSwitchReplyRequiredInput,
+        switchFunctionInput: eventSwitchFunctionInput,
+        stepsBody: eventStepsBody,
+        pathPreview: eventPathPreview
+      };
+
+      const locationDialogEventControls = {
+        nameInput: locationEventNameInput,
+        switchInput: locationEventSwitchInput,
+        replyInput: locationEventSwitchReplyRequiredInput,
+        switchFunctionInput: locationEventSwitchFunctionInput,
+        stepsBody: locationEventStepsBody,
+        pathPreview: locationEventPathPreview
+      };
+
+      function createEventDraftForTag(tag) {
+        const record = getEventRecordForTag(tag);
+        return {
+          event: record.event || tag.text || '',
+          eventSwitch: normalizeEventSwitch(record.eventSwitch),
+          eventSwitchReplyRequired: normalizeReplyRequired(record.eventSwitchReplyRequired),
+          eventSwitchFunction: record.eventSwitchFunction || '',
+          processSteps: normalizeProcessSteps(record.processSteps).map(step => ({ ...step }))
+        };
+      }
+
+      function populateEventEditorControls(controls, eventTag, draft = null) {
+        if (!controls) return;
+        if (!eventTag) {
+          controls.nameInput.value = '';
+          controls.switchInput.value = '';
+          controls.replyInput.value = '';
+          controls.switchFunctionInput.value = '';
+          renderEventStepsEditor(controls.stepsBody, []);
+          controls.pathPreview.textContent = t('event.noSelection');
+          return;
+        }
+        syncEventRecordPath(eventTag);
+        const nextDraft = draft || createEventDraftForTag(eventTag);
+        controls.nameInput.value = nextDraft.event || '';
+        controls.switchInput.value = normalizeEventSwitch(nextDraft.eventSwitch);
+        controls.replyInput.value = normalizeReplyRequired(nextDraft.eventSwitchReplyRequired);
+        controls.switchFunctionInput.value = nextDraft.eventSwitchFunction || '';
+        renderEventStepsEditor(controls.stepsBody, nextDraft.processSteps);
+        controls.pathPreview.textContent = formatEventPathPreview(getTagBusinessPath(eventTag));
+      }
+
+      function readEventEditorDraftFromControls(controls) {
+        return {
+          event: controls.nameInput.value,
+          eventSwitch: normalizeEventSwitch(controls.switchInput.value),
+          eventSwitchReplyRequired: normalizeReplyRequired(controls.replyInput.value),
+          eventSwitchFunction: controls.switchFunctionInput.value,
+          processSteps: readEventStepsEditor(controls.stepsBody)
+        };
+      }
+
+      function applyEventDraftToTag(eventTag, draft) {
+        const record = getEventRecordForTag(eventTag);
+        record.event = draft.event;
+        record.eventSwitch = normalizeEventSwitch(draft.eventSwitch);
+        record.eventSwitchReplyRequired = normalizeReplyRequired(draft.eventSwitchReplyRequired);
+        record.eventSwitchFunction = draft.eventSwitchFunction;
+        record.processSteps = normalizeProcessSteps(draft.processSteps).map(step => ({ ...step }));
+        eventTag.text = record.event;
+        syncEventRecordPath(eventTag);
+      }
+
       function showEventEditDialog(tagId) {
         const tag = findTagById(tagId);
         if (!tag || !isEventTag(tag)) return;
-        syncEventRecordPath(tag);
-        const record = getEventRecordForTag(tag);
-        eventNameInput.value = record.event || tag.text || '';
-        eventSwitchInput.value = normalizeEventSwitch(record.eventSwitch);
-        eventSwitchReplyRequiredInput.value = normalizeReplyRequired(record.eventSwitchReplyRequired);
-        eventSwitchFunctionInput.value = record.eventSwitchFunction || '';
-        renderEventStepsEditor(record.processSteps);
-        const path = getTagBusinessPath(tag);
-        eventPathPreview.textContent = [path.lineName, path.station, path.location, path.process].filter(Boolean).join(' / ');
+        populateEventEditorControls(eventDialogEditorControls, tag);
         eventEditDialog.dataset.tagId = tagId;
         eventEditDialog.style.display = 'flex';
-        eventNameInput.focus();
-        eventNameInput.select();
+        focusWithoutScroll(eventNameInput, true);
       }
 
       function hideEventEditDialog() {
@@ -2173,14 +2665,7 @@
         const tagId = parseInt(eventEditDialog.dataset.tagId);
         const tag = tagId ? findTagById(tagId) : null;
         if (tag && isEventTag(tag)) {
-          const record = getEventRecordForTag(tag);
-          record.event = eventNameInput.value;
-          record.eventSwitch = normalizeEventSwitch(eventSwitchInput.value);
-          record.eventSwitchReplyRequired = normalizeReplyRequired(eventSwitchReplyRequiredInput.value);
-          record.eventSwitchFunction = eventSwitchFunctionInput.value;
-          record.processSteps = readEventStepsEditor();
-          syncEventRecordPath(tag);
-          tag.text = record.event;
+          applyEventDraftToTag(tag, readEventEditorDraftFromControls(eventDialogEditorControls));
           renderAll();
           markProjectDirty();
         }
@@ -2197,11 +2682,165 @@
         if (e.target === eventEditDialog) hideEventEditDialog();
       });
 
+      function stashLocationEditorDraft() {
+        if (!activeLocationEditorEventId) return;
+        locationEditorEventDrafts.set(Number(activeLocationEditorEventId), readEventEditorDraftFromControls(locationDialogEventControls));
+      }
+
+      function renderLocationEditorEventList(locationTag) {
+        if (!locationEventList || !locationTag) return;
+        const searchQuery = normalizeSearchText(locationEventSearchInput ? locationEventSearchInput.value : '');
+        const events = getDirectEventChildren(locationTag);
+        const visibleEvents = events.filter(eventTag => {
+          const draft = locationEditorEventDrafts.get(Number(eventTag.id)) || createEventDraftForTag(eventTag);
+          return !searchQuery || matchesSearchText([
+            draft.event,
+            draft.eventSwitch,
+            draft.eventSwitchReplyRequired,
+            draft.eventSwitchFunction,
+            getTagDisplayName(eventTag)
+          ], searchQuery);
+        });
+        if (visibleEvents.length === 0) {
+          locationEventList.innerHTML = `<div class="location-edit-event-empty">${escapeHtml(t('tags.noMatch'))}</div>`;
+          return;
+        }
+        locationEventList.innerHTML = visibleEvents.map(eventTag => {
+          const draft = locationEditorEventDrafts.get(Number(eventTag.id)) || createEventDraftForTag(eventTag);
+          const isActive = Number(activeLocationEditorEventId) === Number(eventTag.id);
+          return `
+            <button class="location-edit-event-item ${isActive ? 'active' : ''}" type="button" data-event-id="${eventTag.id}">
+              <strong>${escapeHtml(draft.event || getTagDisplayName(eventTag))}</strong>
+              <span>${escapeHtml(`es: ${normalizeEventSwitch(draft.eventSwitch) || '-'}`)}</span>
+            </button>
+          `;
+        }).join('');
+        locationEventList.querySelectorAll('.location-edit-event-item').forEach(button => {
+          button.addEventListener('click', () => {
+            stashLocationEditorDraft();
+            activeLocationEditorEventId = Number(button.dataset.eventId);
+            renderLocationEditorActiveEvent(locationTag);
+            renderLocationEditorEventList(locationTag);
+          });
+        });
+      }
+
+      function renderLocationEditorActiveEvent(locationTag) {
+        if (!locationTag) return;
+        const activeEventTag = activeLocationEditorEventId ? findTagById(activeLocationEditorEventId) : null;
+        if (!activeEventTag || !isEventTag(activeEventTag)) {
+          activeLocationEditorEventId = null;
+          if (locationCurrentEventLabel) locationCurrentEventLabel.textContent = t('event.noSelection');
+          populateEventEditorControls(locationDialogEventControls, null);
+          return;
+        }
+        const draft = locationEditorEventDrafts.get(Number(activeEventTag.id)) || createEventDraftForTag(activeEventTag);
+        if (locationCurrentEventLabel) {
+          locationCurrentEventLabel.textContent = draft.event || getTagDisplayName(activeEventTag);
+        }
+        populateEventEditorControls(locationDialogEventControls, activeEventTag, draft);
+      }
+
+      function showLocationEditDialog(locationId, preferredEventId = null) {
+        const locationTag = findTagById(locationId);
+        if (!locationTag || !isLocationTag(locationTag) || !locationEditDialog) return;
+        const events = getDirectEventChildren(locationTag);
+        locationEditorEventDrafts = new Map(events.map(eventTag => [Number(eventTag.id), createEventDraftForTag(eventTag)]));
+        activeLocationEditorEventId = preferredEventId && findTagById(preferredEventId)
+          ? Number(preferredEventId)
+          : (events[0] ? Number(events[0].id) : null);
+        locationEditDialog.dataset.locationId = String(locationTag.id);
+        locationDialogNameInput.value = locationTag.text || '';
+        locationDialogCategorySelect.value = locationTag.locationCategory === 'equipment' ? 'equipment' : 'process';
+        locationDialogDescriptionInput.value = getTagDescription(locationTag);
+        if (locationUsageStatusSelect) locationUsageStatusSelect.value = normalizeLocationUsageStatus(locationTag.usageStatus);
+        if (locationUsageNoteInput) locationUsageNoteInput.value = normalizeTagDescription(locationTag.usageNote);
+        if (locationEventSearchInput) locationEventSearchInput.value = '';
+        locationPathPreview.textContent = formatEventPathPreview(getTagBusinessPath(locationTag));
+        renderLocationEditorEventList(locationTag);
+        renderLocationEditorActiveEvent(locationTag);
+        locationEditDialog.style.display = 'flex';
+        focusWithoutScroll(locationDialogNameInput, true);
+      }
+
+      function hideLocationEditDialog() {
+        if (!locationEditDialog) return;
+        locationEditDialog.style.display = 'none';
+        delete locationEditDialog.dataset.locationId;
+        activeLocationEditorEventId = null;
+        locationEditorEventDrafts = new Map();
+        if (locationEventList) locationEventList.innerHTML = '';
+        if (locationCurrentEventLabel) locationCurrentEventLabel.textContent = '';
+        if (locationPathPreview) locationPathPreview.textContent = '';
+        if (locationEventPathPreview) locationEventPathPreview.textContent = '';
+        if (locationDialogNameInput) locationDialogNameInput.value = '';
+        if (locationDialogCategorySelect) locationDialogCategorySelect.value = 'process';
+        if (locationDialogDescriptionInput) locationDialogDescriptionInput.value = '';
+        if (locationUsageStatusSelect) locationUsageStatusSelect.value = 'normal';
+        if (locationUsageNoteInput) locationUsageNoteInput.value = '';
+        if (locationEventSearchInput) locationEventSearchInput.value = '';
+        populateEventEditorControls(locationDialogEventControls, null);
+      }
+
+      if (locationAddEventStepBtn) {
+        locationAddEventStepBtn.addEventListener('click', () => {
+          locationEventStepsBody.appendChild(createEventStepRow());
+        });
+      }
+
+      if (locationEventSearchInput) {
+        locationEventSearchInput.addEventListener('input', () => {
+          const locationTag = findTagById(Number(locationEditDialog.dataset.locationId));
+          if (locationTag) renderLocationEditorEventList(locationTag);
+        });
+      }
+
+      if (locationEditConfirm) {
+        locationEditConfirm.addEventListener('click', () => {
+          const locationTag = findTagById(Number(locationEditDialog.dataset.locationId));
+          if (!locationTag || !isLocationTag(locationTag)) {
+            hideLocationEditDialog();
+            return;
+          }
+          stashLocationEditorDraft();
+          const nextCategory = locationDialogCategorySelect.value === 'equipment' ? 'equipment' : 'process';
+          if (locationTag.locationCategory !== nextCategory) {
+            if (!canLocationKeepChildrenForCategory(locationTag)) {
+              alert(t('tags.noChildType'));
+              return;
+            }
+            locationTag.locationCategory = nextCategory;
+          }
+          locationTag.text = locationDialogNameInput.value;
+          locationTag.description = normalizeTagDescription(locationDialogDescriptionInput.value);
+          locationTag.usageStatus = normalizeLocationUsageStatus(locationUsageStatusSelect ? locationUsageStatusSelect.value : locationTag.usageStatus);
+          locationTag.usageNote = normalizeTagDescription(locationUsageNoteInput ? locationUsageNoteInput.value : locationTag.usageNote);
+          getDirectEventChildren(locationTag).forEach(eventTag => {
+            const draft = locationEditorEventDrafts.get(Number(eventTag.id));
+            if (draft) applyEventDraftToTag(eventTag, draft);
+          });
+          syncEventRecordPathsForBranch(locationTag);
+          renderAll();
+          markProjectDirty();
+          hideLocationEditDialog();
+        });
+      }
+
+      if (locationEditCancel) {
+        locationEditCancel.addEventListener('click', hideLocationEditDialog);
+      }
+
+      if (locationEditDialog) {
+        locationEditDialog.addEventListener('click', (e) => {
+          if (e.target === locationEditDialog) hideLocationEditDialog();
+        });
+      }
+
       function showLocationCategoryDialog() {
         if (!locationCategoryDialog) return Promise.resolve('process');
         locationCategoryDialog.style.display = 'flex';
         const firstChoice = locationCategoryDialog.querySelector('.location-category-choice');
-        if (firstChoice) firstChoice.focus();
+        focusWithoutScroll(firstChoice);
         return new Promise(resolve => {
           pendingLocationCategoryResolve = resolve;
         });
@@ -2318,7 +2957,7 @@
         });
       }
       tagSearchInput.addEventListener('input', (e) => {
-        tagSearchQuery = e.target.value.trim().toLowerCase();
+        tagSearchQuery = normalizeSearchText(e.target.value);
         updateCanvasBranchFilterOptions();
         renderTagList();
         runRenderHooks('overlay');
@@ -2390,7 +3029,29 @@
         return tag.text && tag.text.trim() ? tag.text.trim() : fallback;
       }
 
+      function getTagDescription(tag) {
+        return tag ? normalizeTagDescription(tag.description).trim() : '';
+      }
+
+      function isTagInactive(tag) {
+        return !!(tag && normalizeTagInactive(tag.inactive));
+      }
+
+      function isTagInactiveByAncestor(tag) {
+        let parent = findParentTag(tag && tag.id);
+        while (parent) {
+          if (isTagInactive(parent)) return true;
+          parent = findParentTag(parent.id);
+        }
+        return false;
+      }
+
+      function isTagInactiveSelfOrAncestor(tag) {
+        return isTagInactive(tag) || isTagInactiveByAncestor(tag);
+      }
+
       function updateCanvasBranchFilterOptions() {
+        const hasGroupOption = locationGroups.length > 0;
         const optionTags = getCanvasBranchOptionTags();
         canvasHiddenBranchIds = canvasHiddenBranchIds
           .filter(id => findTagById(parseInt(id)));
@@ -2402,14 +3063,16 @@
 
         canvasBranchFilterMenu.innerHTML = '';
 
-        if (optionTags.length > 0) {
+        if (optionTags.length > 0 || hasGroupOption) {
           const visibleIds = optionTags.map(tag => String(tag.id));
-          const allVisibleChecked = optionTags.every(tag => !isCanvasBranchHiddenBySelfOrAncestor(tag));
+          const allTagsVisible = optionTags.every(tag => !isCanvasBranchHiddenBySelfOrAncestor(tag));
+          const allVisibleChecked = allTagsVisible && (!hasGroupOption || locationGroupRenderEnabled);
+          const totalCount = visibleIds.length + (hasGroupOption ? 1 : 0);
           const bulk = document.createElement('div');
           bulk.className = 'canvas-filter-bulk';
           bulk.innerHTML = `
             <span><input type="checkbox" ${allVisibleChecked ? 'checked' : ''}> ${escapeHtml(t('panel.selectAll'))}</span>
-            <span>${visibleIds.length}</span>
+            <span>${totalCount}</span>
           `;
           bulk.addEventListener('click', (e) => {
             e.preventDefault();
@@ -2417,21 +3080,43 @@
               const nextIds = new Set(canvasHiddenBranchIds);
               visibleIds.forEach(id => nextIds.add(id));
               canvasHiddenBranchIds = Array.from(nextIds);
+              if (hasGroupOption) locationGroupRenderEnabled = false;
             } else {
               canvasHiddenBranchIds = canvasHiddenBranchIds.filter(id => !visibleIds.includes(id));
+              if (hasGroupOption) locationGroupRenderEnabled = true;
+            }
+            if (hasGroupOption) {
+              setLocationGroupRenderEnabled(locationGroupRenderEnabled);
+            } else {
+              renderMarkers();
             }
             updateCanvasBranchFilterOptions();
-            renderMarkers();
             renderTagList();
           });
           canvasBranchFilterMenu.appendChild(bulk);
         }
 
-        if (optionTags.length === 0 && missingHiddenTags.length === 0) {
+        if (optionTags.length === 0 && missingHiddenTags.length === 0 && !hasGroupOption) {
           const empty = document.createElement('div');
           empty.className = 'canvas-filter-empty';
           empty.textContent = tags.length === 0 ? t('panel.noNodes') : t('panel.noMatchingNodes');
           canvasBranchFilterMenu.appendChild(empty);
+        }
+
+        if (hasGroupOption) {
+          const groupLabel = document.createElement('label');
+          groupLabel.className = 'canvas-filter-option';
+          groupLabel.innerHTML = `
+            <input type="checkbox" value="__location-groups__" ${locationGroupRenderEnabled ? 'checked' : ''}>
+            <span>${escapeHtml(t('groups.title'))}</span>
+          `;
+          const groupCheckbox = groupLabel.querySelector('input');
+          groupCheckbox.addEventListener('change', () => {
+            setLocationGroupRenderEnabled(groupCheckbox.checked);
+            updateCanvasBranchFilterOptions();
+            renderTagList();
+          });
+          canvasBranchFilterMenu.appendChild(groupLabel);
         }
 
         function appendOption(tag, prefix = '') {
@@ -2472,23 +3157,37 @@
           }
         });
 
-        if (canvasHiddenBranchIds.length === 0) {
+        if (canvasHiddenBranchIds.length === 0 && (!hasGroupOption || locationGroupRenderEnabled)) {
           canvasBranchFilterLabel.textContent = t('panel.allNodes');
         } else {
-          const visibleCount = getAllTagsFlattened(getCanvasVisibleRootTags()).length;
+          const visibleCount = getAllTagsFlattened(getCanvasVisibleRootTags()).length + (locationGroupRenderEnabled && hasGroupOption ? 1 : 0);
           canvasBranchFilterLabel.textContent = t('panel.selectedNodes', { count: visibleCount });
         }
       }
 
       function getCanvasVisibleRootTags() {
-        if (canvasHiddenBranchIds.length === 0) return tags;
+        if (canvasHiddenBranchIds.length === 0) {
+          return tags.filter(tag => !isTagInactive(tag)).map(tag => ({
+            ...tag,
+            children: tag.children && tag.children.length > 0 ? getActiveTagChildren(tag.children) : []
+          }));
+        }
         const cloneVisible = tagList => tagList
-          .filter(tag => !canvasHiddenBranchIds.includes(String(tag.id)))
+          .filter(tag => !canvasHiddenBranchIds.includes(String(tag.id)) && !isTagInactive(tag))
           .map(tag => ({
             ...tag,
             children: tag.children && tag.children.length > 0 ? cloneVisible(tag.children) : []
           }));
         return cloneVisible(tags);
+      }
+
+      function getActiveTagChildren(tagList) {
+        return tagList
+          .filter(tag => !isTagInactive(tag))
+          .map(tag => ({
+            ...tag,
+            children: tag.children && tag.children.length > 0 ? getActiveTagChildren(tag.children) : []
+          }));
       }
 
       function isCanvasBranchHiddenByAncestor(tag) {
@@ -2563,6 +3262,18 @@
         return path;
       }
 
+      function formatEventPathPreview(path) {
+        return [
+          [t('event.pathProject'), path.lineName],
+          [t('event.pathStation'), path.station],
+          [t('event.pathLocation'), path.location],
+          [t('event.pathProcess'), path.process]
+        ]
+          .filter(([, value]) => value)
+          .map(([label, value]) => `${label}: ${value}`)
+          .join(' / ');
+      }
+
       function setHoveredTag(tagId) {
         if (isDraggingTag) return;
         hoveredTagId = tagId;
@@ -2602,11 +3313,10 @@
           const record = getEventRecordForTag(eventTag);
           const item = document.createElement('div');
           item.className = 'parent-event-item';
-          const replyText = normalizeReplyRequired(record.eventSwitchReplyRequired);
-          const replyMeta = replyText ? ` reply:${replyText}` : '';
+          const eventLabel = (record && record.event) || eventTag.text || t('event.unnamed');
           item.innerHTML = `
             <img src="./static/icons/event.svg" alt="Event">
-            <span>${escapeHtml(`${record.event || eventTag.text || t('event.unnamed')}(es: ${normalizeEventSwitch(record.eventSwitch)}${replyMeta})`)}</span>
+            <span title="${escapeHtml(eventLabel)}">${escapeHtml(eventLabel)}</span>
           `;
           popover.appendChild(item);
         });
@@ -2628,6 +3338,59 @@
         markProjectDirty();
       }
 
+      function getMaterialLinkTarget(locationId, markerPositions) {
+        const groupTargetResolver = window.MESDesignerApi && typeof window.MESDesignerApi.getLocationGroupLinkTarget === 'function'
+          ? window.MESDesignerApi.getLocationGroupLinkTarget
+          : null;
+        if (groupTargetResolver) {
+          const groupTarget = groupTargetResolver(locationId);
+          if (groupTarget && Number.isFinite(groupTarget.x) && Number.isFinite(groupTarget.y)) {
+            return groupTarget;
+          }
+        }
+        const location = findTagById(locationId);
+        if (!location || !hasAssignedCoordinates(location) || isTagInactiveSelfOrAncestor(location)) return null;
+        return markerPositions[location.id] || {
+          x: Number(location.x) * annotationCanvas.offsetWidth,
+          y: Number(location.y) * annotationCanvas.offsetHeight
+        };
+      }
+
+      function clearMaterialLinkLines(svg) {
+        svg.querySelectorAll('.material-link').forEach(line => line.remove());
+      }
+
+      function renderMaterialLinkLines(svg, markerPositions = latestMarkerPositions) {
+        if (!svg) return;
+        clearMaterialLinkLines(svg);
+        materials.forEach((material, index) => {
+          const normalized = normalizeMaterial(material);
+          Object.assign(material, normalized);
+          if (!material.image || material.x === null || material.y === null) return;
+          const accentColor = getMaterialAccentColor(index);
+          const materialCenter = {
+            x: material.x * annotationCanvas.offsetWidth,
+            y: material.y * annotationCanvas.offsetHeight
+          };
+          material.locationLinks.forEach(locationId => {
+            const target = getMaterialLinkTarget(locationId, markerPositions);
+            if (!target) return;
+            const offset = getMaterialLinkOffset(locationId, index);
+            drawConnectionLine(svg, materialCenter, target, {
+              extraClass: 'material-link',
+              color: accentColor,
+              toOffset: offset
+            });
+          });
+        });
+      }
+
+      function refreshMaterialLinkLines() {
+        const svg = annotationCanvas.querySelector('#connectionSvg');
+        if (!svg) return;
+        renderMaterialLinkLines(svg, latestMarkerPositions);
+      }
+
       function renderMaterialOverlays(svg, markerPositions) {
         materials.forEach((material, index) => {
           const normalized = normalizeMaterial(material);
@@ -2640,40 +3403,40 @@
           materialEl.style.top = `${(material.y - material.height / 2) * 100}%`;
           materialEl.style.width = `${material.width * 100}%`;
           materialEl.style.height = `${material.height * 100}%`;
+          const accentColor = getMaterialAccentColor(index);
+          materialEl.style.setProperty('--material-accent', accentColor);
+          materialEl.style.setProperty('--material-accent-soft', hexToRgba(accentColor, 0.16));
+          materialEl.style.setProperty('--material-accent-line', hexToRgba(accentColor, 0.45));
           materialEl.dataset.materialIndex = String(index);
           materialEl.innerHTML = `
             <img src="${escapeHtml(material.image)}" alt="${escapeHtml(material.name || t('materials.image'))}">
-            <span class="material-overlay-label">${escapeHtml(material.abbreviation || material.name || t('materials.image'))}</span>
+            <span class="material-overlay-label${material.showLabelOnCanvas ? '' : ' is-hidden'}">${escapeHtml(material.abbreviation || material.name || t('materials.image'))}</span>
             <button class="material-resize-handle" type="button" aria-label="${escapeHtml(t('groups.resize'))}"></button>
           `;
           materialEl.addEventListener('mousedown', event => startMaterialDrag(index, event));
           materialEl.querySelector('.material-resize-handle').addEventListener('mousedown', event => startMaterialResize(index, event));
           annotationCanvas.appendChild(materialEl);
-
-          const materialCenter = {
-            x: material.x * annotationCanvas.offsetWidth,
-            y: material.y * annotationCanvas.offsetHeight
-          };
-          material.locationLinks.forEach(locationId => {
-            const location = findTagById(locationId);
-            if (!location || !hasAssignedCoordinates(location)) return;
-            const target = markerPositions[location.id] || {
-              x: Number(location.x) * annotationCanvas.offsetWidth,
-              y: Number(location.y) * annotationCanvas.offsetHeight
-            };
-            drawConnectionLine(svg, materialCenter, target, 'material-link');
-          });
         });
       }
 
-      function drawConnectionLine(svg, from, to, extraClass = '') {
+      function drawConnectionLine(svg, from, to, options = {}) {
+        const resolvedOptions = typeof options === 'string'
+          ? { extraClass: options }
+          : (options || {});
+        const extraClass = resolvedOptions.extraClass || '';
+        const color = resolvedOptions.color || '';
         ['connection-line-halo', 'connection-line'].forEach(className => {
           const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
           line.setAttribute('x1', from.x);
           line.setAttribute('y1', from.y);
-          line.setAttribute('x2', to.x);
-          line.setAttribute('y2', to.y);
+          line.setAttribute('x2', to.x + Number(resolvedOptions.toOffset?.x || 0));
+          line.setAttribute('y2', to.y + Number(resolvedOptions.toOffset?.y || 0));
           line.setAttribute('class', `${className}${extraClass ? ` ${extraClass}` : ''}`);
+          if (color) {
+            line.style.stroke = className.includes('halo')
+              ? hexToRgba(color, 0.26)
+              : color;
+          }
           svg.appendChild(line);
         });
       }
@@ -2714,6 +3477,10 @@
           if (tag._isChild) marker.classList.add('child-marker');
           if (originalTag && displayedEventParentIds.has(originalTag.id)) {
             marker.classList.add('has-event-popover');
+          }
+          if (originalTag && isLocationTag(originalTag)) {
+            const usageStatus = normalizeLocationUsageStatus(originalTag.usageStatus);
+            if (usageStatus !== 'normal') marker.classList.add(`location-usage-${usageStatus}`);
           }
 
           marker.style.left = `${tag.x * 100}%`;
@@ -2771,6 +3538,7 @@
             e.stopPropagation();
             highlightTagInList(tag._id);
             if (originalTag && isEventTag(originalTag)) showEventEditDialog(tag._id);
+            if (originalTag && isLocationTag(originalTag)) showLocationEditDialog(tag._id);
           });
         });
         
@@ -2786,7 +3554,9 @@
             drawConnectionLine(svg, parent, child);
           }
         });
+        latestMarkerPositions = markerPositions;
         renderMaterialOverlays(svg, markerPositions);
+        renderMaterialLinkLines(svg, markerPositions);
 
         applyPanTransform();
       }
@@ -2820,26 +3590,90 @@
         return getChildTypeIndexForParent(tag) !== -1;
       }
 
-      function getTagSearchText(tag) {
+      function normalizeSearchText(text) {
+        return String(text || '')
+          .toLowerCase()
+          .replace(/\s+/g, ' ')
+          .trim();
+      }
+
+      function tokenizeSearchQuery(query = tagSearchQuery) {
+        const normalized = normalizeSearchText(query);
+        return normalized ? normalized.split(' ').filter(Boolean) : [];
+      }
+
+      function fuzzyIncludes(haystack, needle) {
+        if (!needle) return true;
+        if (!haystack) return false;
+        let matchIndex = 0;
+        for (let i = 0; i < haystack.length && matchIndex < needle.length; i++) {
+          if (haystack[i] === needle[matchIndex]) matchIndex += 1;
+        }
+        return matchIndex === needle.length;
+      }
+
+      function matchesSearchText(parts, query = tagSearchQuery) {
+        const terms = tokenizeSearchQuery(query);
+        if (terms.length === 0) return true;
+        const haystack = normalizeSearchText(Array.isArray(parts) ? parts.join(' ') : parts);
+        if (!haystack) return false;
+        return terms.every(term => haystack.includes(term) || fuzzyIncludes(haystack, term));
+      }
+
+      function getTagSearchParts(tag) {
         const type = tagTypes[tag.typeIndex];
         const eventRecord = isEventTag(tag) ? getEventRecordForTag(tag) : null;
+        const businessPath = getTagBusinessPath(tag);
+        const processStepText = eventRecord
+          ? normalizeProcessSteps(eventRecord.processSteps)
+            .map(step => [
+              step.processStep,
+              step.processStepName,
+              step.constraint,
+              step.module,
+              step.command,
+              step.commandTemplateName,
+              step.functionDescription
+            ].filter(Boolean).join(' '))
+            .join(' ')
+          : '';
+        const parentNames = [];
+        let parent = findParentTag(tag.id);
+        while (parent) {
+          parentNames.push(parent.text || '');
+          parent = findParentTag(parent.id);
+        }
         return [
           tag.text || '',
+          getTagDescription(tag),
           type ? type.name : '',
+          isTagInactive(tag) ? t('tags.inactive') : '',
+          isTagInactiveByAncestor(tag) ? t('tags.inactiveInherited') : '',
+          isStationTag(tag) ? getStationSubtypeLabel(tag.stationSubtype) : '',
           tag.locationCategory || '',
+          isLocationTag(tag) ? getLocationUsageStatusLabel(tag.usageStatus) : '',
+          isLocationTag(tag) ? normalizeTagDescription(tag.usageNote) : '',
           eventRecord ? eventRecord.event : '',
+          businessPath.station,
+          businessPath.location,
+          businessPath.process,
           eventRecord ? eventRecord.eventSwitchFunction : '',
           eventRecord ? normalizeReplyRequired(eventRecord.eventSwitchReplyRequired) : '',
           eventRecord ? `${normalizeEventSwitch(eventRecord.eventSwitch)}` : '',
-          eventRecord ? normalizeProcessSteps(eventRecord.processSteps).map(step => Object.values(step).join(' ')).join(' ') : '',
+          processStepText,
           getTypeAbbreviation(type ? type.name : 'Tag'),
+          parentNames.join(' '),
           hasAssignedCoordinates(tag) ? `${(tag.x * 100).toFixed(1)}` : (isEventTag(tag) ? '' : t('tags.unassignedCoordinate')),
           hasAssignedCoordinates(tag) ? `${(tag.y * 100).toFixed(1)}` : ''
-        ].join(' ').toLowerCase();
+        ];
+      }
+
+      function getTagSearchText(tag) {
+        return normalizeSearchText(getTagSearchParts(tag).join(' '));
       }
 
       function doesTagMatchSearch(tag) {
-        return !tagSearchQuery || getTagSearchText(tag).includes(tagSearchQuery);
+        return !tagSearchQuery || matchesSearchText(getTagSearchParts(tag));
       }
 
       function tagHasSearchMatch(tag) {
@@ -2847,97 +3681,216 @@
         return !!(tag.children && tag.children.some(tagHasSearchMatch));
       }
 
-      function renderTagList() {
-        // The right panel can render either as a tree or grouped by tag type.
-        tagListContainer.innerHTML = '';
-        tagTreeModeBtn.classList.toggle('active', tagListMode === 'tree');
-        tagTypeModeBtn.classList.toggle('active', tagListMode === 'type');
-        if (tagGroupModeBtn) tagGroupModeBtn.classList.toggle('active', tagListMode === 'group');
-        tagSearchInput.value = tagSearchQuery;
-
-        if (tags.length === 0) {
-          tagListContainer.innerHTML = `<div class="no-tags">${escapeHtml(t('tags.empty'))}</div>`;
+      function withPreservedElementScroll(element, renderFn) {
+        if (!element) {
+          renderFn();
           return;
         }
+        const previousScrollTop = element.scrollTop;
+        const previousScrollLeft = element.scrollLeft;
+        renderFn();
+        element.scrollTop = previousScrollTop;
+        element.scrollLeft = previousScrollLeft;
+      }
 
-        if (tagListMode === 'tree') {
-          let renderedCount = 0;
-          tags.forEach(tag => {
-            if (!tagSearchQuery || tagHasSearchMatch(tag)) {
-              renderTagNode(tag, tagListContainer, { includeChildren: true, filterBySearch: !!tagSearchQuery });
-              renderedCount++;
-            }
+      function focusWithoutScroll(element, shouldSelect = false) {
+        if (!element || typeof element.focus !== 'function') return;
+        try {
+          element.focus({ preventScroll: true });
+        } catch (error) {
+          element.focus();
+        }
+        if (shouldSelect && typeof element.select === 'function') {
+          element.select();
+        }
+      }
+
+      function branchHasTagMatch(tag, predicate) {
+        if (!tag) return false;
+        if (predicate(tag)) return true;
+        return !!(tag.children && tag.children.some(child => branchHasTagMatch(child, predicate)));
+      }
+
+      function renderTagBranchSection(sectionId, title, predicate, options = {}) {
+        const matchingRoots = tags.filter(tag => {
+          if (!branchHasTagMatch(tag, predicate)) return false;
+          return !tagSearchQuery || tagHasSearchMatch(tag);
+        });
+        if (matchingRoots.length === 0) return false;
+
+        const collapseDiv = document.createElement('div');
+        collapseDiv.className = `tag-list-group ${options.groupClass || ''}`.trim();
+
+        const header = document.createElement('div');
+        header.className = 'tag-list-group-header';
+        header.innerHTML = `
+          <span>${escapeHtml(title)}</span>
+          <span class="collapse-icon">▼</span>
+        `;
+
+        const content = document.createElement('div');
+        content.className = 'tag-list-group-body';
+        if (options.description) {
+          const description = document.createElement('div');
+          description.className = 'tag-list-group-note';
+          description.textContent = options.description;
+          content.appendChild(description);
+        }
+
+        matchingRoots.forEach(rootTag => {
+          renderTagNode(rootTag, content, {
+            includeChildren: true,
+            filterBySearch: !!tagSearchQuery,
+            childFilter: child => branchHasTagMatch(child, predicate)
           });
-          if (renderedCount === 0) {
-            tagListContainer.innerHTML = `<div class="no-tags">${escapeHtml(t('tags.noMatch'))}</div>`;
+        });
+
+        collapseDiv.appendChild(header);
+        collapseDiv.appendChild(content);
+        tagListContainer.appendChild(collapseDiv);
+
+        const isCollapsed = collapsedTypeGroupIds.has(sectionId);
+        content.classList.toggle('collapsed', isCollapsed);
+        header.querySelector('.collapse-icon').classList.toggle('collapsed', isCollapsed);
+        header.addEventListener('click', () => {
+          if (collapsedTypeGroupIds.has(sectionId)) {
+            collapsedTypeGroupIds.delete(sectionId);
+          } else {
+            collapsedTypeGroupIds.add(sectionId);
           }
-          return;
-        }
-
-        const tagsByType = {};
-        tagTypes.forEach((type, index) => {
-          tagsByType[index] = [];
+          renderTagList();
         });
-        getAllTagsFlattened().forEach(flatTag => {
-          const originalTag = findTagById(flatTag._id);
-          if (tagSearchQuery && originalTag && !doesTagMatchSearch(originalTag)) return;
-          if (!tagsByType[flatTag.typeIndex]) tagsByType[flatTag.typeIndex] = [];
-          tagsByType[flatTag.typeIndex].push(flatTag);
-        });
+        return true;
+      }
 
-        // 为每个类型创建折叠区域
+      function renderInactiveManagerList() {
         let renderedGroups = 0;
-        tagTypes.forEach((type, typeIndex) => {
-          const typeTags = tagsByType[typeIndex] || [];
-          if (typeTags.length === 0) return;
-          renderedGroups++;
+        renderedGroups += renderTagBranchSection(
+          'inactive:self',
+          t('tags.inactiveSection'),
+          tag => isTagInactive(tag),
+          { groupClass: 'inactive-manager-group inactive-manager-self' }
+        ) ? 1 : 0;
+        renderedGroups += renderTagBranchSection(
+          'inactive:unassigned',
+          t('tags.unassignedSection'),
+          tag => !isTagInactiveSelfOrAncestor(tag) && !isEventTag(tag) && !hasAssignedCoordinates(tag),
+          {
+            groupClass: 'inactive-manager-group inactive-manager-unassigned',
+            description: t('tags.unassignedSectionHint')
+          }
+        ) ? 1 : 0;
 
-          const collapseDiv = document.createElement('div');
-          collapseDiv.className = 'tag-list-group';
-
-          const header = document.createElement('div');
-          header.className = 'tag-list-group-header';
-          header.innerHTML = `
-            <span>
-              <span class="tag-color-dot" style="background:${type.color}"></span>
-              ${escapeHtml(type.name)} (${typeTags.length})
-            </span>
-            <span class="collapse-icon">▼</span>
-          `;
-
-          const content = document.createElement('div');
-          content.className = 'tag-list-group-body';
-
-          typeTags.forEach(flatTag => {
-            const originalTag = findTagById(flatTag._id);
-            if (originalTag) {
-              renderTagNode(originalTag, content, {
-                includeChildren: false,
-                parentId: flatTag._parentId,
-                filterBySearch: !!tagSearchQuery
-              });
-            }
-          });
-
-          collapseDiv.appendChild(header);
-          collapseDiv.appendChild(content);
-          tagListContainer.appendChild(collapseDiv);
-
-          const groupId = String(typeIndex);
-          const isCollapsed = collapsedTypeGroupIds.has(groupId);
-          content.classList.toggle('collapsed', isCollapsed);
-          header.querySelector('.collapse-icon').classList.toggle('collapsed', isCollapsed);
-          header.addEventListener('click', () => {
-            if (collapsedTypeGroupIds.has(groupId)) {
-              collapsedTypeGroupIds.delete(groupId);
-            } else {
-              collapsedTypeGroupIds.add(groupId);
-            }
-            renderTagList();
-          });
-        });
         if (renderedGroups === 0) {
           tagListContainer.innerHTML = `<div class="no-tags">${escapeHtml(t('tags.noMatch'))}</div>`;
+        }
+      }
+
+      function renderTagList(options = {}) {
+        const preserveScroll = options.preserveScroll !== false;
+        // The right panel can render either as a tree or grouped by tag type.
+        const doRender = () => {
+          tagListContainer.innerHTML = '';
+          tagTreeModeBtn.classList.toggle('active', tagListMode === 'tree');
+          tagTypeModeBtn.classList.toggle('active', tagListMode === 'type');
+          if (tagGroupModeBtn) tagGroupModeBtn.classList.toggle('active', tagListMode === 'group');
+          tagSearchInput.value = tagSearchQuery;
+
+          if (tags.length === 0) {
+            tagListContainer.innerHTML = `<div class="no-tags">${escapeHtml(t('tags.empty'))}</div>`;
+            return;
+          }
+
+          if (tagListMode === 'tree') {
+            let renderedCount = 0;
+            tags.forEach(tag => {
+              if (!tagSearchQuery || tagHasSearchMatch(tag)) {
+                renderTagNode(tag, tagListContainer, { includeChildren: true, filterBySearch: !!tagSearchQuery });
+                renderedCount++;
+              }
+            });
+            if (renderedCount === 0) {
+              tagListContainer.innerHTML = `<div class="no-tags">${escapeHtml(t('tags.noMatch'))}</div>`;
+            }
+            return;
+          }
+
+          if (tagListMode === 'type') {
+            renderInactiveManagerList();
+            return;
+          }
+
+          const tagsByType = {};
+          tagTypes.forEach((type, index) => {
+            tagsByType[index] = [];
+          });
+          getAllTagsFlattened().forEach(flatTag => {
+            const originalTag = findTagById(flatTag._id);
+            if (tagSearchQuery && originalTag && !doesTagMatchSearch(originalTag)) return;
+            if (!tagsByType[flatTag.typeIndex]) tagsByType[flatTag.typeIndex] = [];
+            tagsByType[flatTag.typeIndex].push(flatTag);
+          });
+
+          // 为每个类型创建折叠区域
+          let renderedGroups = 0;
+          tagTypes.forEach((type, typeIndex) => {
+            const typeTags = tagsByType[typeIndex] || [];
+            if (typeTags.length === 0) return;
+            renderedGroups++;
+
+            const collapseDiv = document.createElement('div');
+            collapseDiv.className = 'tag-list-group';
+
+            const header = document.createElement('div');
+            header.className = 'tag-list-group-header';
+            header.innerHTML = `
+              <span>
+                <span class="tag-color-dot" style="background:${type.color}"></span>
+                ${escapeHtml(type.name)} (${typeTags.length})
+              </span>
+              <span class="collapse-icon">▼</span>
+            `;
+
+            const content = document.createElement('div');
+            content.className = 'tag-list-group-body';
+
+            typeTags.forEach(flatTag => {
+              const originalTag = findTagById(flatTag._id);
+              if (originalTag) {
+                renderTagNode(originalTag, content, {
+                  includeChildren: false,
+                  parentId: flatTag._parentId,
+                  filterBySearch: !!tagSearchQuery
+                });
+              }
+            });
+
+            collapseDiv.appendChild(header);
+            collapseDiv.appendChild(content);
+            tagListContainer.appendChild(collapseDiv);
+
+            const groupId = String(typeIndex);
+            const isCollapsed = collapsedTypeGroupIds.has(groupId);
+            content.classList.toggle('collapsed', isCollapsed);
+            header.querySelector('.collapse-icon').classList.toggle('collapsed', isCollapsed);
+            header.addEventListener('click', () => {
+              if (collapsedTypeGroupIds.has(groupId)) {
+                collapsedTypeGroupIds.delete(groupId);
+              } else {
+                collapsedTypeGroupIds.add(groupId);
+              }
+              renderTagList();
+            });
+          });
+          if (renderedGroups === 0) {
+            tagListContainer.innerHTML = `<div class="no-tags">${escapeHtml(t('tags.noMatch'))}</div>`;
+          }
+        };
+
+        if (preserveScroll) {
+          withPreservedElementScroll(tagListContainer, doRender);
+        } else {
+          doRender();
         }
       }
 
@@ -2945,8 +3898,10 @@
         // One tag row in the side panel. Event handlers here mutate tag state
         // through helper functions and then refresh the affected UI.
         const includeChildren = options.includeChildren !== false;
-        const parentId = options.parentId || null;
+        const parentId = options.parentId ?? null;
         const filterBySearch = options.filterBySearch === true;
+        const childFilter = typeof options.childFilter === 'function' ? options.childFilter : null;
+        const canReorderInTree = tagListMode === 'tree' && !filterBySearch;
         const type = tagTypes[tag.typeIndex];
         const hasChildren = tag.children && tag.children.length > 0;
         const node = document.createElement('div');
@@ -2958,25 +3913,54 @@
         if (isCanvasBranchHiddenBySelfOrAncestor(tag)) {
           row.classList.add('canvas-filter-hidden');
         }
+        if (isTagInactive(tag)) {
+          row.classList.add('tag-inactive');
+        } else if (isTagInactiveByAncestor(tag)) {
+          row.classList.add('tag-inactive-inherited');
+        }
         const isEventNode = isEventTag(tag);
+        if (isEventNode) row.classList.add('event-node');
         if (!isEventNode && !hasAssignedCoordinates(tag)) row.classList.add('coordinate-unassigned');
+        if (canReorderInTree) row.classList.add('reorder-enabled');
         row.setAttribute('data-tag-id', tag.id);
-        row.title = t('tags.rowTitle');
+        row.setAttribute('data-parent-id', parentId === null ? '' : String(parentId));
+        row.draggable = canReorderInTree;
+        const displayText = getTagDisplayName(tag);
+        const businessPath = getTagBusinessPath(tag);
+        if (isEventNode) {
+          row.title = displayText;
+        } else {
+          const titleParts = [
+            `${t('tags.rowTitle')}: ${getTagDisplayName(tag)}`,
+            [businessPath.station, businessPath.location, businessPath.process].filter(Boolean).join(' / '),
+            isStationTag(tag) ? getStationSubtypeLabel(tag.stationSubtype) : '',
+            isLocationTag(tag) ? getLocationUsageStatusLabel(tag.usageStatus) : '',
+            isLocationTag(tag) ? normalizeTagDescription(tag.usageNote) : '',
+            isTagInactive(tag) ? t('tags.inactive') : '',
+            isTagInactiveByAncestor(tag) ? t('tags.inactiveInherited') : '',
+            getTagDescription(tag)
+          ].filter(Boolean);
+          row.title = titleParts.join('\n');
+        }
 
         const childCount = hasChildren ? tag.children.length : 0;
         const eventRecord = isEventNode ? getEventRecordForTag(tag) : null;
-        const displayText = eventRecord
-          ? (eventRecord.event || tag.text || t('event.unnamed'))
-          : (tag.text && tag.text.trim() ? tag.text.trim() : t('tags.unnamed'));
-        const parentTag = parentId ? findTagById(parentId) : null;
-        const parentMeta = parentTag ? ` · ${t('tags.parent', { name: parentTag.text || getTypeAbbreviation(tagTypes[parentTag.typeIndex]?.name || 'Tag') })}` : '';
-        const childMeta = childCount ? ` · ${t('tags.children', { count: childCount })}` : '';
+        const stationMeta = isStationTag(tag) && normalizeStationSubtype(tag.stationSubtype) === 'ddl'
+          ? ` · ${getStationSubtypeLabel(tag.stationSubtype)}`
+          : '';
         const locationMeta = isLocationTag(tag) ? ` · ${tag.locationCategory === 'equipment' ? t('tags.locationEquipment') : t('tags.locationProcess')}` : '';
+        const usageMeta = isLocationTag(tag) && normalizeLocationUsageStatus(tag.usageStatus) !== 'normal'
+          ? ` · ${getLocationUsageStatusLabel(tag.usageStatus)}`
+          : '';
+        const inactiveMeta = isTagInactive(tag)
+          ? ` · ${t('tags.inactive')}`
+          : (isTagInactiveByAncestor(tag) ? ` · ${t('tags.inactiveInherited')}` : '');
         const replyMeta = eventRecord && normalizeReplyRequired(eventRecord.eventSwitchReplyRequired)
           ? ` · reply: ${normalizeReplyRequired(eventRecord.eventSwitchReplyRequired)}`
           : '';
         const eventMeta = eventRecord ? ` · es: ${normalizeEventSwitch(eventRecord.eventSwitch)}${replyMeta}` : '';
         const unassignedMeta = !isEventNode && !hasAssignedCoordinates(tag) ? ` · ${t('tags.unassignedCoordinate')}` : '';
+        const childMeta = childCount ? ` · ${t('tags.children', { count: childCount })}` : '';
         const canAddChild = canAddChildTag(tag);
         const canAssignCoordinate = type && type.name.includes('Station') && !hasAssignedCoordinates(tag);
         const isCollapsed = hasChildren && includeChildren && collapsedTagIds.has(String(tag.id));
@@ -2986,13 +3970,14 @@
           <div class="tag-node-main">
             <span class="tag-node-dot" style="background:${type ? type.color : '#999'}"></span>
             <span class="tag-node-text">${escapeHtml(displayText)}</span>
-            <span class="tag-node-meta">${escapeHtml(`${getTypeAbbreviation(type ? type.name : 'Tag')}${locationMeta}${eventMeta}${unassignedMeta}${childMeta}${parentMeta}`)}</span>
+            <span class="tag-node-meta">${escapeHtml(`${getTypeAbbreviation(type ? type.name : 'Tag')}${stationMeta}${locationMeta}${usageMeta}${inactiveMeta}${eventMeta}${unassignedMeta}${childMeta}`)}</span>
           </div>
           <div class="tag-node-actions">
             ${canAssignCoordinate ? `<button class="tag-node-action assign-coordinate-btn" type="button" title="${escapeHtml(t('csv.assignButtonTitle'))}">⌖</button>` : ''}
             <button class="tag-node-action edit-tag-btn" type="button" title="${escapeHtml(t('tags.editTitle'))}">✎</button>
             ${eventRecord ? `<button class="tag-node-action edit-event-btn" type="button" title="${escapeHtml(t('menu.editEvent'))}">!</button>` : ''}
             ${canAddChild ? `<button class="tag-node-action add-child-node-btn" type="button" title="${escapeHtml(t('tags.addChildTitle'))}">+</button>` : ''}
+            <button class="tag-node-action toggle-inactive-btn" type="button" title="${escapeHtml(isTagInactive(tag) ? t('menu.setActive') : t('menu.setInactive'))}">${isTagInactive(tag) ? '↺' : '⊘'}</button>
             <button class="tag-node-action danger delete-tag-btn" type="button" title="${escapeHtml(t('tags.deleteTitle'))}">×</button>
           </div>
         `;
@@ -3012,6 +3997,8 @@
             highlightTagInList(tag.id);
           } else if (isEventTag(tag)) {
             showEventEditDialog(tag.id);
+          } else if (isLocationTag(tag)) {
+            showLocationEditDialog(tag.id);
           } else {
             showTextEditDialog(tag.id);
           }
@@ -3020,6 +4007,22 @@
         row.addEventListener('contextmenu', (e) => {
           showContextMenu(e, tag.id);
         });
+        if (canReorderInTree) {
+          row.addEventListener('dragstart', (e) => {
+            if (e.target.closest('.tag-node-action, .tag-node-toggle')) {
+              e.preventDefault();
+              return;
+            }
+            startTagTreeReorderDrag(tag.id, parentId, row, e);
+          });
+          row.addEventListener('dragover', (e) => {
+            handleTagTreeReorderDragOver(tag.id, parentId, row, e);
+          });
+          row.addEventListener('drop', (e) => {
+            handleTagTreeReorderDrop(tag.id, parentId, row, e);
+          });
+          row.addEventListener('dragend', clearTagTreeReorderState);
+        }
 
         const assignCoordinateBtn = row.querySelector('.assign-coordinate-btn');
         if (assignCoordinateBtn) {
@@ -3033,7 +4036,11 @@
 
         row.querySelector('.edit-tag-btn').addEventListener('click', (e) => {
           e.stopPropagation();
-          showTextEditDialog(tag.id);
+          if (isLocationTag(tag)) {
+            showLocationEditDialog(tag.id);
+          } else {
+            showTextEditDialog(tag.id);
+          }
         });
 
         const editEventBtn = row.querySelector('.edit-event-btn');
@@ -3057,12 +4064,27 @@
           });
         }
 
+        const toggleInactiveBtn = row.querySelector('.toggle-inactive-btn');
+        if (toggleInactiveBtn) {
+          toggleInactiveBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            tag.inactive = !isTagInactive(tag);
+            renderAll();
+            markProjectDirty();
+          });
+        }
+
         if (hasChildren && includeChildren) {
           const childrenContent = document.createElement('div');
           childrenContent.className = 'tag-tree-children';
           tag.children.forEach(child => {
-            if (!filterBySearch || tagHasSearchMatch(child)) {
-              renderTagNode(child, childrenContent, { includeChildren: true, filterBySearch });
+            if ((!filterBySearch || tagHasSearchMatch(child)) && (!childFilter || childFilter(child))) {
+              renderTagNode(child, childrenContent, {
+                includeChildren: true,
+                parentId: tag.id,
+                filterBySearch,
+                childFilter
+              });
             }
           });
           node.appendChild(childrenContent);
@@ -3200,14 +4222,21 @@
           id: Date.now(),
           typeIndex: childTypeIndex,
           text: '',
+          description: '',
+          inactive: false,
           x: newX,
           y: newY,
           children: []
         };
+        if (childType && childType.name.includes('Station')) {
+          newChild.stationSubtype = 'normal';
+        }
         if (childType && childType.name.includes('Location')) {
           const selectedCategory = await showLocationCategoryDialog();
           if (!selectedCategory) return;
           newChild.locationCategory = selectedCategory;
+          newChild.usageStatus = 'normal';
+          newChild.usageNote = '';
         }
         if (childType && childType.name.includes('Event')) {
           const record = createEventRecordFromTag(newChild);
@@ -3218,6 +4247,95 @@
         parentTag.children.push(newChild);
         if (childType && childType.name.includes('Event')) syncEventRecordPath(newChild);
         renderAll();
+        markProjectDirty();
+      }
+
+      let tagTreeReorderState = null;
+
+      function getSiblingTagList(parentId = null) {
+        if (parentId === null || parentId === '') return tags;
+        const parentTag = findTagById(Number(parentId));
+        if (!parentTag) return null;
+        if (!Array.isArray(parentTag.children)) parentTag.children = [];
+        return parentTag.children;
+      }
+
+      function clearTagTreeReorderIndicators() {
+        document.querySelectorAll('.tag-node-row.reorder-dragging, .tag-node-row.reorder-drop-before, .tag-node-row.reorder-drop-after')
+          .forEach(row => {
+            row.classList.remove('reorder-dragging', 'reorder-drop-before', 'reorder-drop-after');
+          });
+      }
+
+      function clearTagTreeReorderState() {
+        clearTagTreeReorderIndicators();
+        tagTreeReorderState = null;
+      }
+
+      function startTagTreeReorderDrag(tagId, parentId, row, event) {
+        const siblings = getSiblingTagList(parentId);
+        if (!siblings || siblings.length < 2) {
+          event.preventDefault();
+          return;
+        }
+        tagTreeReorderState = {
+          dragTagId: Number(tagId),
+          parentId: parentId === null ? null : Number(parentId)
+        };
+        row.classList.add('reorder-dragging');
+        if (event.dataTransfer) {
+          event.dataTransfer.effectAllowed = 'move';
+          event.dataTransfer.setData('text/plain', String(tagId));
+        }
+      }
+
+      function handleTagTreeReorderDragOver(tagId, parentId, row, event) {
+        if (!tagTreeReorderState) return;
+        const normalizedParentId = parentId === null ? null : Number(parentId);
+        if (normalizedParentId !== tagTreeReorderState.parentId) return;
+        if (Number(tagId) === tagTreeReorderState.dragTagId) return;
+        event.preventDefault();
+        const rect = row.getBoundingClientRect();
+        const placement = (event.clientY - rect.top) >= rect.height / 2 ? 'after' : 'before';
+        clearTagTreeReorderIndicators();
+        const dragRow = tagListContainer.querySelector(`.tag-node-row[data-tag-id="${escapeSelectorValue(tagTreeReorderState.dragTagId)}"]`);
+        if (dragRow) dragRow.classList.add('reorder-dragging');
+        row.classList.add(placement === 'after' ? 'reorder-drop-after' : 'reorder-drop-before');
+      }
+
+      function reorderSiblingTags(dragTagId, targetTagId, parentId, placement) {
+        const siblings = getSiblingTagList(parentId);
+        if (!siblings || siblings.length < 2) return false;
+        const dragIndex = siblings.findIndex(tag => Number(tag.id) === Number(dragTagId));
+        const targetIndex = siblings.findIndex(tag => Number(tag.id) === Number(targetTagId));
+        if (dragIndex === -1 || targetIndex === -1 || dragIndex === targetIndex) return false;
+        const [draggedTag] = siblings.splice(dragIndex, 1);
+        const adjustedTargetIndex = siblings.findIndex(tag => Number(tag.id) === Number(targetTagId));
+        if (adjustedTargetIndex === -1) {
+          siblings.splice(dragIndex, 0, draggedTag);
+          return false;
+        }
+        const insertIndex = placement === 'after' ? adjustedTargetIndex + 1 : adjustedTargetIndex;
+        siblings.splice(insertIndex, 0, draggedTag);
+        return siblings.findIndex(tag => Number(tag.id) === Number(dragTagId)) !== dragIndex;
+      }
+
+      function handleTagTreeReorderDrop(tagId, parentId, row, event) {
+        if (!tagTreeReorderState) return;
+        event.preventDefault();
+        const normalizedParentId = parentId === null ? null : Number(parentId);
+        const dragTagId = Number(tagTreeReorderState.dragTagId);
+        if (normalizedParentId !== tagTreeReorderState.parentId || Number(tagId) === dragTagId) {
+          clearTagTreeReorderState();
+          return;
+        }
+        const rect = row.getBoundingClientRect();
+        const placement = (event.clientY - rect.top) >= rect.height / 2 ? 'after' : 'before';
+        const didReorder = reorderSiblingTags(dragTagId, tagId, normalizedParentId, placement);
+        clearTagTreeReorderState();
+        if (!didReorder) return;
+        renderAll();
+        highlightTagInList(dragTagId);
         markProjectDirty();
       }
 
@@ -3271,11 +4389,16 @@
           material = materials[index];
           const hasImage = !!material.image;
           const isOnCanvas = material.x !== null && material.y !== null;
+          const accentColor = getMaterialAccentColor(index);
           const linkedLocations = material.locationLinks
             .map(id => findTagById(id))
             .filter(Boolean)
             .map(tag => getTagDisplayName(tag))
             .join(', ');
+          const linkedGroups = getLinkedGroupNamesForMaterial(index).join(', ');
+          const categoryOptionsHtml = buildSelectOptionsHtml(MATERIAL_CATEGORY_OPTIONS, material.category, getMaterialCategoryLabel);
+          const idTypeOptionsHtml = buildSelectOptionsHtml(MATERIAL_ID_TYPE_OPTIONS, material.primaryIdType, getMaterialIdTypeLabel);
+          const idGenerationOptionsHtml = buildSelectOptionsHtml(MATERIAL_ID_GENERATION_OPTIONS, material.primaryIdGeneration, getMaterialIdGenerationLabel);
           const locationSelectHtml = locationOptions.length > 0
             ? `<select class="material-location-select" data-index="${index}">
                 ${locationOptions.map(tag => `<option value="${tag.id}">${escapeHtml(getTagDisplayName(tag))}</option>`).join('')}
@@ -3283,11 +4406,15 @@
             : `<select class="material-location-select" data-index="${index}" disabled><option>${escapeHtml(t('materials.noLocations'))}</option></select>`;
           const materialDiv = document.createElement('div');
           materialDiv.className = 'material-item';
+          materialDiv.style.setProperty('--material-accent', accentColor);
+          materialDiv.style.setProperty('--material-accent-soft', hexToRgba(accentColor, 0.14));
+          const canvasInfoLabel = material.showLabelOnCanvas ? t('materials.hideCanvasInfo') : t('materials.showCanvasInfo');
           materialDiv.innerHTML = `
             <div class="material-header">
               <div style="flex:1;">
                 <input type="text" class="material-name-input" data-index="${index}" value="${escapeHtml(material.name)}" placeholder="${escapeHtml(t('materials.namePlaceholder'))}" style="width:100%; font-weight:600;">
               </div>
+              <span class="material-color-chip" title="${escapeHtml(getMaterialDisplayName(material, index))}"></span>
               <button class="btn btn-danger btn-sm delete-material-btn" data-index="${index}">${escapeHtml(t('materials.delete'))}</button>
             </div>
             <div class="material-image-row">
@@ -3297,8 +4424,9 @@
               <div class="material-image-actions">
                 <input type="file" class="material-image-input" data-index="${index}" accept="image/*" style="display:none;">
                 <button class="btn btn-sm material-upload-image-btn" type="button" data-index="${index}">${escapeHtml(hasImage ? t('materials.replaceImage') : t('materials.uploadImage'))}</button>
-                <button class="btn btn-sm material-place-btn" type="button" data-index="${index}" ${hasImage ? '' : 'disabled'}>${escapeHtml(t('materials.addToCanvas'))}</button>
+                <button class="btn btn-sm material-place-btn" type="button" data-index="${index}" ${hasImage && !isOnCanvas ? '' : 'disabled'}>${escapeHtml(t('materials.addToCanvas'))}</button>
                 <button class="btn btn-sm material-remove-canvas-btn" type="button" data-index="${index}" ${isOnCanvas ? '' : 'disabled'}>${escapeHtml(t('materials.removeFromCanvas'))}</button>
+                <button class="btn btn-sm material-toggle-info-btn" type="button" data-index="${index}" ${isOnCanvas ? '' : 'disabled'}>${escapeHtml(canvasInfoLabel)}</button>
               </div>
             </div>
             
@@ -3309,7 +4437,7 @@
               </div>
               <div class="material-field-group">
                 <label>${escapeHtml(t('materials.category'))}</label>
-                <input type="text" class="material-category-input" data-index="${index}" value="${escapeHtml(material.category)}" placeholder="${escapeHtml(t('materials.category'))}">
+                <select class="material-category-select" data-index="${index}">${categoryOptionsHtml}</select>
               </div>
             </div>
             
@@ -3319,12 +4447,29 @@
                 <input type="text" class="material-type-input" data-index="${index}" value="${escapeHtml(material.type)}" placeholder="${escapeHtml(t('materials.type'))}">
               </div>
             </div>
+            <div class="material-edit-row">
+              <div class="material-field-group">
+                <label>${escapeHtml(t('materials.primaryTagValue'))}</label>
+                <input type="text" class="material-primary-tag-input" data-index="${index}" value="${escapeHtml(material.primaryTagValue)}" placeholder="${escapeHtml(t('materials.primaryTagValue'))}">
+              </div>
+              <div class="material-field-group">
+                <label>${escapeHtml(t('materials.primaryIdType'))}</label>
+                <select class="material-id-type-select" data-index="${index}">${idTypeOptionsHtml}</select>
+              </div>
+            </div>
+            <div class="material-edit-row full">
+              <div class="material-field-group">
+                <label>${escapeHtml(t('materials.primaryIdGeneration'))}</label>
+                <select class="material-id-generation-select" data-index="${index}">${idGenerationOptionsHtml}</select>
+              </div>
+            </div>
             <div class="material-link-row">
               ${locationSelectHtml}
               <button class="btn btn-sm material-link-location-btn" type="button" data-index="${index}" ${locationOptions.length > 0 ? '' : 'disabled'}>${escapeHtml(t('materials.linkLocation'))}</button>
               <button class="btn btn-sm material-clear-links-btn" type="button" data-index="${index}" ${material.locationLinks.length > 0 ? '' : 'disabled'}>${escapeHtml(t('materials.clearLinks'))}</button>
             </div>
             ${linkedLocations ? `<div class="material-linked-summary">${escapeHtml(linkedLocations)}</div>` : ''}
+            <div class="material-group-summary ${linkedGroups ? '' : 'empty'}">${escapeHtml(t('materials.usedInGroups'))}: ${escapeHtml(linkedGroups || t('materials.notGrouped'))}</div>
             
           `;
           materialListContainer.appendChild(materialDiv);
@@ -3349,10 +4494,10 @@
         });
 
         // 绑定分类编辑事件
-        document.querySelectorAll('.material-category-input').forEach(input => {
-          input.addEventListener('input', (e) => {
+        document.querySelectorAll('.material-category-select').forEach(input => {
+          input.addEventListener('change', (e) => {
             const index = parseInt(e.target.dataset.index);
-            materials[index].category = e.target.value;
+            materials[index].category = normalizeMaterialCategory(e.target.value);
             markProjectDirty();
           });
         });
@@ -3362,6 +4507,30 @@
           input.addEventListener('input', (e) => {
             const index = parseInt(e.target.dataset.index);
             materials[index].type = e.target.value;
+            markProjectDirty();
+          });
+        });
+
+        document.querySelectorAll('.material-primary-tag-input').forEach(input => {
+          input.addEventListener('input', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            materials[index].primaryTagValue = e.target.value;
+            markProjectDirty();
+          });
+        });
+
+        document.querySelectorAll('.material-id-type-select').forEach(input => {
+          input.addEventListener('change', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            materials[index].primaryIdType = normalizeMaterialIdType(e.target.value);
+            markProjectDirty();
+          });
+        });
+
+        document.querySelectorAll('.material-id-generation-select').forEach(input => {
+          input.addEventListener('change', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            materials[index].primaryIdGeneration = normalizeMaterialIdGeneration(e.target.value);
             markProjectDirty();
           });
         });
@@ -3395,6 +4564,7 @@
         document.querySelectorAll('.material-place-btn').forEach(btn => {
           btn.addEventListener('click', (e) => {
             const index = parseInt(e.target.dataset.index);
+            if (!materials[index] || materials[index].x !== null || materials[index].y !== null) return;
             placeMaterialOnCanvas(index);
           });
         });
@@ -3405,6 +4575,16 @@
             if (!materials[index]) return;
             materials[index].x = null;
             materials[index].y = null;
+            renderAll();
+            markProjectDirty();
+          });
+        });
+
+        document.querySelectorAll('.material-toggle-info-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            if (!materials[index] || materials[index].x === null || materials[index].y === null) return;
+            materials[index].showLabelOnCanvas = materials[index].showLabelOnCanvas === false;
             renderAll();
             markProjectDirty();
           });
@@ -3495,10 +4675,13 @@
           id: Date.now(),
           typeIndex: getRootTagTypeIndex(),
           text: '',
+          description: '',
+          inactive: false,
           x: x,
           y: y,
           children: []
         };
+        if (isStationTag(newTag)) newTag.stationSubtype = 'normal';
         tags.push(newTag);
         renderAll();
         markProjectDirty();
@@ -3556,18 +4739,24 @@
       }
 
       // 在右侧列表中高亮定位标签
-      function highlightTagInList(tagId) {
-        sidePanelView = 'tags';
-        tagListMode = 'tree';
-        renderSidePanelView();
-        let parentTag = findParentTag(tagId);
-        while (parentTag) {
-          collapsedTagIds.delete(String(parentTag.id));
-          parentTag = findParentTag(parentTag.id);
+      function highlightTagInList(tagId, options = {}) {
+        const revealInList = options.revealInList === true;
+        const preserveListState = options.preserveListState !== false;
+        if (!preserveListState) {
+          sidePanelView = 'tags';
+          tagListMode = 'tree';
+          renderSidePanelView();
+          let parentTag = findParentTag(tagId);
+          while (parentTag) {
+            collapsedTagIds.delete(String(parentTag.id));
+            parentTag = findParentTag(parentTag.id);
+          }
+          const tag = findTagById(tagId);
+          if (tag) collapsedTypeGroupIds.delete(String(tag.typeIndex));
+        } else if (sidePanelView !== 'tags') {
+          return;
         }
-        const tag = findTagById(tagId);
-        if (tag) collapsedTypeGroupIds.delete(String(tag.typeIndex));
-        renderTagList();
+        renderTagList({ preserveScroll: !revealInList });
 
         // 清除之前的高亮
         document.querySelectorAll('.tag-node-row.highlighted').forEach(el => {
@@ -3582,19 +4771,57 @@
           // 高亮显示
           targetEditor.classList.add('highlighted');
           
-          // 滚动到可视区域
-          setTimeout(() => {
-            targetEditor.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'center' 
-            });
-          }, 100);
+          if (revealInList) {
+            setTimeout(() => {
+              targetEditor.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+              });
+            }, 100);
+          }
           
           // 3秒后移除高亮
           setTimeout(() => {
             targetEditor.classList.remove('highlighted');
           }, 3000);
         }
+      }
+
+      function focusCanvasPoint(x, y) {
+        if (!annotateImage.src) return false;
+        if (!Number.isFinite(Number(x)) || !Number.isFinite(Number(y))) return false;
+        const wrapperWidth = Math.max(1, imageWrapper.clientWidth);
+        const wrapperHeight = Math.max(1, imageWrapper.clientHeight);
+        const canvasWidth = Math.max(1, annotationCanvas.offsetWidth);
+        const canvasHeight = Math.max(1, annotationCanvas.offsetHeight);
+        panOffset.x = Math.round(wrapperWidth / 2 - Number(x) * canvasWidth * zoomLevel);
+        panOffset.y = Math.round(wrapperHeight / 2 - Number(y) * canvasHeight * zoomLevel);
+        applyPanTransform(true);
+        return true;
+      }
+
+      function focusTagOnCanvas(tagId, options = {}) {
+        const tag = findTagById(tagId);
+        if (!tag || !hasAssignedCoordinates(tag) || !annotateImage.src || isTagInactiveSelfOrAncestor(tag)) return false;
+        const shouldHighlightList = options.highlightList !== false;
+        if (shouldHighlightList) {
+          highlightTagInList(tagId, {
+            preserveListState: options.preserveListState !== false,
+            revealInList: options.revealInList === true
+          });
+        }
+        if (!focusCanvasPoint(tag.x, tag.y)) return false;
+        hoveredTagId = tag.id;
+        applyPanTransform(true);
+        updateMarkerHoverState();
+        window.clearTimeout(focusTagOnCanvas.clearHoverTimer);
+        focusTagOnCanvas.clearHoverTimer = window.setTimeout(() => {
+          if (hoveredTagId === tag.id) {
+            hoveredTagId = null;
+            updateMarkerHoverState();
+          }
+        }, 1800);
+        return true;
       }
 
       function escapeSelectorValue(value) {
@@ -3804,6 +5031,21 @@
         annotationCanvas.style.height = `${height}px`;
       }
 
+      function relayoutWorkspaceCanvas(previousWrapperSize = null) {
+        if (!annotateImage.src || imageWrapper.style.display === 'none') return;
+        requestAnimationFrame(() => {
+          fitCanvasToImage();
+          if (!previousWrapperSize || zoomLevel === 1) {
+            resetView();
+          } else {
+            panOffset.x += Math.round((imageWrapper.clientWidth - previousWrapperSize.width) / 2);
+            panOffset.y += Math.round((imageWrapper.clientHeight - previousWrapperSize.height) / 2);
+            applyPanTransform(true);
+          }
+          renderMarkers();
+        });
+      }
+
       function flushPanTransform() {
         imageWrapper.style.setProperty('--pan-x', `${panOffset.x}px`);
         imageWrapper.style.setProperty('--pan-y', `${panOffset.y}px`);
@@ -3990,9 +5232,13 @@
         const newMaterial = {
           name: t('materials.newName'),
           abbreviation: t('materials.newAbbrev'),
-          category: t('materials.defaultCategory'),
+          category: MATERIAL_CATEGORY_OPTIONS[0],
           type: t('materials.defaultType'),
+          primaryTagValue: '',
+          primaryIdType: MATERIAL_ID_TYPE_OPTIONS[0],
+          primaryIdGeneration: 'null',
           image: '',
+          showLabelOnCanvas: true,
           x: null,
           y: null,
           width: 0.12,
@@ -4152,6 +5398,7 @@
         getTags: () => tags,
         getTagTypes: () => tagTypes,
         getLocationGroups: () => locationGroups,
+        getLinkedMaterialsForLocation,
         createLocationGroupId,
         getTypeIndexByName,
         getAllTagsFlattened,
@@ -4162,8 +5409,16 @@
         hasAssignedCoordinates,
         isLocationGrouped,
         setLocationGroupRenderEnabled,
+        isLocationGroupRenderEnabled: () => locationGroupRenderEnabled,
+        getTagDisplayName,
+        getTagDescription,
+        isTagInactive,
+        isTagInactiveSelfOrAncestor,
         highlightTagInList,
+        focusCanvasPoint,
+        focusTagOnCanvas,
         showEventEditDialog,
+        showLocationEditDialog,
         getCanvasPointFromEvent,
         getAnnotationCanvas: () => annotationCanvas,
         getImageWrapper: () => imageWrapper,
@@ -4171,6 +5426,8 @@
         hasOpenProject: () => !!currentProjectId,
         hasImage: () => !!annotateImage.src,
         getTagSearchQuery: () => tagSearchQuery,
+        matchesSearchText,
+        refreshMaterialLinkLines,
         registerRenderHook,
         renderAll,
         markProjectDirty

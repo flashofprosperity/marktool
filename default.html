@@ -11,7 +11,7 @@
 <body>
   <div class="toolbar">
     <div class="toolbar-left">
-      <h1 id="appTitle">MES Core Data Designer<span class="app-version-badge">v1.0.2</span></h1>
+      <h1 id="appTitle">MES Core Data Designer<span class="app-version-badge">v1.0.3</span></h1>
       <button class="btn" id="backToProjectsBtn" type="button" data-i18n="nav.projects">项目列表</button>
       <div class="project-status">
         <span class="project-name" id="currentProjectName">未打开项目</span>
@@ -94,11 +94,11 @@
         </select>
         <select class="project-filter-select" id="projectGroupSelect" aria-label="Project group mode">
           <option value="list" data-i18n="projects.groupList">默认列表</option>
-          <option value="tag" data-i18n="projects.groupByTag">按标签分组</option>
+          <option value="tag" data-i18n="projects.groupByTag" selected>按标签分组</option>
         </select>
         <select class="project-filter-select" id="projectSortSelect" aria-label="Project sort">
           <option value="updated" data-i18n="projects.sortByUpdated">按时间排序</option>
-          <option value="name" data-i18n="projects.sortByName">按首字母排序</option>
+          <option value="name" data-i18n="projects.sortByName" selected>按首字母排序</option>
         </select>
       </div>
       <div class="project-list" id="projectList">
@@ -115,6 +115,8 @@
     <div class="context-menu-divider"></div>
     <div class="context-menu-item" id="editTextMenuItem" data-i18n="menu.editText">修改文本</div>
     <div class="context-menu-divider"></div>
+    <div class="context-menu-item" id="toggleInactiveMenuItem" data-i18n="menu.setInactive">设为 inactive</div>
+    <div class="context-menu-divider"></div>
     <div class="context-menu-item" id="editEventMenuItem" data-i18n="menu.editEvent">查看/编辑事件信息</div>
     <div class="context-menu-divider"></div>
     <div class="context-menu-item" id="showEventsMenuItem" data-i18n="menu.showEvents">显示事件</div>
@@ -129,6 +131,17 @@
     <div class="text-edit-panel">
       <h3 class="text-edit-title" data-i18n="dialog.editTitle">修改标签文本</h3>
       <input type="text" id="textEditInput" class="text-edit-input" placeholder="输入标签文本" data-i18n-placeholder="dialog.editPlaceholder">
+      <label class="event-field is-hidden" id="tagDescriptionField">
+        <span data-i18n="tags.description">描述</span>
+        <textarea id="tagDescriptionInput" class="event-textarea" rows="3" placeholder="描述" data-i18n-placeholder="tags.description"></textarea>
+      </label>
+      <label class="event-field is-hidden" id="stationSubtypeField">
+        <span data-i18n="tags.stationSubtype">Station 类型</span>
+        <select id="stationSubtypeSelect" class="text-edit-input">
+          <option value="normal" data-i18n="tags.stationSubtypeNormal">普通 Station</option>
+          <option value="ddl" data-i18n="tags.stationSubtypeDdl">DDL Station</option>
+        </select>
+      </label>
       <label class="event-field location-edit-field is-hidden" id="locationEditCategoryField">
         <span data-i18n="tags.locationCategory">Location 分类</span>
         <select id="locationEditCategorySelect" class="text-edit-input">
@@ -184,6 +197,7 @@
                 <th data-i18n="event.module">Module</th>
                 <th data-i18n="event.command">Command</th>
                 <th data-i18n="event.commandTemplateName">Command template name</th>
+                <th data-i18n="event.stepFunction">Function</th>
                 <th></th>
               </tr>
             </thead>
@@ -195,6 +209,105 @@
       <div class="text-edit-actions">
         <button class="btn" id="eventEditCancel" data-i18n="common.cancel">取消</button>
         <button class="btn btn-primary" id="eventEditConfirm" data-i18n="common.confirm">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="locationEditDialog" class="text-edit-dialog" style="display:none;">
+    <div class="text-edit-panel location-edit-panel">
+      <h3 class="text-edit-title" data-i18n="dialog.locationEditTitle">Location 详情</h3>
+      <div class="event-path-preview" id="locationPathPreview"></div>
+      <div class="location-edit-top">
+        <label class="event-field">
+          <span data-i18n="tags.locationName">Location 名称</span>
+          <input type="text" id="locationDialogNameInput" class="text-edit-input" placeholder="Location" data-i18n-placeholder="tags.locationName">
+        </label>
+        <label class="event-field">
+          <span data-i18n="tags.locationCategory">Location 分类</span>
+          <select id="locationDialogCategorySelect" class="text-edit-input">
+            <option value="process" data-i18n="tags.locationProcess">工序</option>
+            <option value="equipment" data-i18n="tags.locationEquipment">设备</option>
+          </select>
+        </label>
+        <label class="event-field location-edit-description">
+          <span data-i18n="tags.description">描述</span>
+          <textarea id="locationDialogDescriptionInput" class="event-textarea" rows="3" placeholder="描述" data-i18n-placeholder="tags.description"></textarea>
+        </label>
+        <label class="event-field">
+          <span data-i18n="tags.usageStatus">使用状态</span>
+          <select id="locationUsageStatusSelect" class="text-edit-input">
+            <option value="normal" data-i18n="tags.usageStatusNormal">正常</option>
+            <option value="suspicious-unused" data-i18n="tags.usageStatusUnused">疑似未使用</option>
+            <option value="suspicious-invalid" data-i18n="tags.usageStatusInvalid">疑似无效</option>
+            <option value="unknown" data-i18n="tags.usageStatusUnknown">待确认</option>
+          </select>
+        </label>
+        <label class="event-field location-edit-description">
+          <span data-i18n="tags.usageNote">使用说明</span>
+          <textarea id="locationUsageNoteInput" class="event-textarea" rows="3" placeholder="记录人工判断依据" data-i18n-placeholder="tags.usageNotePlaceholder"></textarea>
+        </label>
+      </div>
+      <div class="location-edit-bottom">
+        <section class="location-edit-events-browser">
+          <div class="location-edit-events-header">
+            <span data-i18n="event.listTitle">关联事件</span>
+            <input type="search" id="locationEventSearchInput" class="tag-search-input location-event-search-input" placeholder="搜索事件" data-i18n-placeholder="event.searchPlaceholder">
+          </div>
+          <div class="location-edit-event-list" id="locationEventList"></div>
+        </section>
+        <section class="location-edit-event-editor">
+          <div class="location-edit-current-event" id="locationCurrentEventLabel"></div>
+          <label class="event-field">
+            <span data-i18n="event.name">Event</span>
+            <input type="text" id="locationEventNameInput" class="text-edit-input" placeholder="Event" data-i18n-placeholder="event.name">
+          </label>
+          <div class="event-field-row">
+            <label class="event-field">
+              <span data-i18n="event.switch">Event switch</span>
+              <input type="text" id="locationEventSwitchInput" class="text-edit-input event-switch-input" placeholder="es" data-i18n-placeholder="event.switchShort">
+            </label>
+            <label class="event-field">
+              <span data-i18n="event.replyRequired">需要回复报文</span>
+              <select id="locationEventSwitchReplyRequiredInput" class="text-edit-input">
+                <option value="" data-i18n="event.replyUnknown">未设置</option>
+                <option value="true" data-i18n="common.true">是</option>
+                <option value="false" data-i18n="common.false">否</option>
+              </select>
+            </label>
+          </div>
+          <label class="event-field">
+            <span data-i18n="event.switchFunction">Event switch function</span>
+            <textarea id="locationEventSwitchFunctionInput" class="event-textarea" rows="4" placeholder="Event switch function" data-i18n-placeholder="event.switchFunction"></textarea>
+          </label>
+          <div class="event-steps-section">
+            <div class="event-steps-header">
+              <span data-i18n="event.processSteps">Process steps</span>
+              <button class="btn btn-sm" id="locationAddEventStepBtn" type="button" data-i18n="event.addStep">+ Add step</button>
+            </div>
+            <div class="event-steps-table-wrap">
+              <table class="event-steps-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="event.processStep">Process step</th>
+                    <th data-i18n="event.processStepName">Process step name</th>
+                    <th data-i18n="event.constraint">Constraint</th>
+                    <th data-i18n="event.module">Module</th>
+                    <th data-i18n="event.command">Command</th>
+                    <th data-i18n="event.commandTemplateName">Command template name</th>
+                    <th data-i18n="event.stepFunction">Function</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="locationEventStepsBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="event-path-preview" id="locationEventPathPreview"></div>
+        </section>
+      </div>
+      <div class="text-edit-actions">
+        <button class="btn" id="locationEditCancel" data-i18n="common.cancel">取消</button>
+        <button class="btn btn-primary" id="locationEditConfirm" data-i18n="common.confirm">确认</button>
       </div>
     </div>
   </div>
@@ -275,7 +388,7 @@
             </div>
             <div class="tag-mode-row">
               <button class="tag-mode-btn active" id="tagTreeModeBtn" type="button" data-i18n="panel.treeMode">树状结构</button>
-              <button class="tag-mode-btn" id="tagTypeModeBtn" type="button" data-i18n="panel.typeMode">按类型</button>
+              <button class="tag-mode-btn" id="tagTypeModeBtn" type="button" data-i18n="panel.inactiveMode">Inactive 管理</button>
               <button class="tag-mode-btn" id="tagGroupModeBtn" type="button" data-i18n="groups.title">Location Group</button>
               <button class="tag-mode-btn tag-collapse-all-btn" id="collapseAllTagsBtn" type="button" data-i18n="panel.collapseAll">全部折叠</button>
             </div>

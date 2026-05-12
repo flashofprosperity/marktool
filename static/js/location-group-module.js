@@ -6,7 +6,7 @@
   const canvas = api.getAnnotationCanvas && api.getAnnotationCanvas();
   if (!panel || !canvas) return;
 
-  let groupViewEnabled = true;
+  let groupViewEnabled = api.isLocationGroupRenderEnabled ? api.isLocationGroupRenderEnabled() : true;
   let editingGroupId = null;
   let dragState = null;
   let resizeState = null;
@@ -14,6 +14,8 @@
   let activeEventLocationId = null;
   let activeGroupId = null;
   let overlayRenderPending = false;
+  let groupListScrollTop = 0;
+  let groupEditorScrollTop = 0;
 
   function t(key, params = {}) {
     return api.t ? api.t(key, params) : key;
@@ -33,6 +35,14 @@
     return Math.max(min, Math.min(max, value));
   }
 
+  function withPreservedPanelScroll(renderFn, selector = '.location-group-list') {
+    const list = panel.querySelector(selector);
+    const previousScrollTop = list ? list.scrollTop : 0;
+    renderFn();
+    const nextList = panel.querySelector(selector);
+    if (nextList) nextList.scrollTop = previousScrollTop;
+  }
+
   function getTypeName(tag) {
     const type = api.getTagTypes()[tag.typeIndex];
     return type && type.name ? type.name : '';
@@ -44,6 +54,24 @@
 
   function isLocation(tag) {
     return getTypeName(tag).includes('Location');
+  }
+
+  function isTagInactive(tag) {
+    return api.isTagInactive ? api.isTagInactive(tag) : !!(tag && tag.inactive);
+  }
+
+  function isTagInactiveSelfOrAncestor(tag) {
+    return api.isTagInactiveSelfOrAncestor ? api.isTagInactiveSelfOrAncestor(tag) : isTagInactive(tag);
+  }
+
+  function isGroupInactive(group) {
+    const station = api.findTagById(Number(group.stationId));
+    if (group && group.inactive) return true;
+    if (station && isTagInactiveSelfOrAncestor(station)) return true;
+    const locations = group.locationIds
+      .map(id => api.findTagById(Number(id)))
+      .filter(Boolean);
+    return locations.length > 0 && locations.every(location => isTagInactiveSelfOrAncestor(location));
   }
 
   function getDisplayName(tag) {
@@ -94,13 +122,95 @@
     return api.getLocationGroups();
   }
 
+  function syncRenderEnabledState() {
+    if (api.isLocationGroupRenderEnabled) {
+      groupViewEnabled = !!api.isLocationGroupRenderEnabled();
+    }
+  }
+
+  function getLocationOwnerMap(groups = getGroups().map(normalizeGroup)) {
+    const ownerMap = new Map();
+    groups.forEach(group => {
+      group.locationIds.forEach(locationId => {
+        const normalizedLocationId = Number(locationId);
+        if (!Number.isFinite(normalizedLocationId)) return;
+        if (!ownerMap.has(normalizedLocationId)) ownerMap.set(normalizedLocationId, []);
+        ownerMap.get(normalizedLocationId).push(group);
+      });
+    });
+    return ownerMap;
+  }
+
+  function getConflictingOwners(group, locationId, ownerMap = getLocationOwnerMap()) {
+    const owners = ownerMap.get(Number(locationId)) || [];
+    return owners.filter(owner => owner.id !== group.id);
+  }
+
+  function formatOwnerGroupNames(groups) {
+    return groups
+      .map(owner => getGroupDisplayName(owner, api.findTagById(Number(owner.stationId))))
+      .join(', ');
+  }
+
+  function getLinkedMaterialsForLocation(locationId) {
+    return api.getLinkedMaterialsForLocation ? api.getLinkedMaterialsForLocation(Number(locationId)) : [];
+  }
+
+  function renderMaterialMarkers(materials, className = 'location-group-material-markers') {
+    if (!Array.isArray(materials) || materials.length === 0) return '';
+    const preview = materials.slice(0, 4);
+    const overflow = materials.length - preview.length;
+    const title = materials.map(item => item.label).join(', ');
+    return `
+      <div class="${className}" title="${escapeHtml(title)}">
+        ${preview.map(item => `<span class="location-group-material-dot" style="--material-dot-color:${escapeHtml(item.color)}"></span>`).join('')}
+        ${overflow > 0 ? `<span class="location-group-material-more">+${overflow}</span>` : ''}
+      </div>
+    `;
+  }
+
+  function validateGroupLocationSelection(group, locationIds, ownerMap = getLocationOwnerMap()) {
+    return locationIds
+      .map(locationId => {
+        const location = api.findTagById(Number(locationId));
+        const conflictingOwners = getConflictingOwners(group, locationId, ownerMap);
+        if (!location || conflictingOwners.length === 0) return null;
+        return {
+          id: Number(locationId),
+          name: getDisplayName(location),
+          conflictingOwners
+        };
+      })
+      .filter(Boolean);
+  }
+
   function groupHasSearchHit(group) {
     const search = api.getTagSearchQuery ? api.getTagSearchQuery() : '';
     if (!search) return false;
-    return group.locationIds
+    const station = api.findTagById(Number(group.stationId));
+    const locations = group.locationIds
       .map(id => api.findTagById(Number(id)))
-      .filter(Boolean)
-      .some(location => getDisplayName(location).toLowerCase().includes(search));
+      .filter(Boolean);
+    const events = locations.flatMap(location => getEventChildren(location));
+    const searchableParts = [
+      getGroupName(group),
+      getGroupDisplayName(group, station),
+      station ? getDisplayName(station) : '',
+      ...locations.map(location => getDisplayName(location)),
+      ...events.map(eventTag => {
+        const record = api.getEventRecordForTag ? api.getEventRecordForTag(eventTag) : null;
+        return [
+          getDisplayName(eventTag),
+          record ? record.event : '',
+          record ? record.eventSwitchFunction : '',
+          record ? record.eventSwitchReplyRequired : '',
+          record ? record.eventSwitch : ''
+        ].join(' ');
+      })
+    ];
+    return api.matchesSearchText
+      ? api.matchesSearchText(searchableParts, search)
+      : searchableParts.join(' ').toLowerCase().includes(search);
   }
 
   function getEventChildren(location) {
@@ -108,32 +218,25 @@
   }
 
   function locateTag(tagId) {
-    if (api.highlightTagInList) api.highlightTagInList(tagId);
+    if (api.focusTagOnCanvas && api.focusTagOnCanvas(Number(tagId), { preserveListState: true, highlightList: false })) return;
+    if (api.highlightTagInList) api.highlightTagInList(Number(tagId), { preserveListState: false, revealInList: true });
+  }
+
+  function revealGroupInPanel(groupId) {
+    const escapedId = escapeHtml(groupId);
+    const target = panel.querySelector(`.location-group-summary-card[data-group-id="${escapedId}"], .location-group-detail[data-group-id="${escapedId}"]`);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 
   function toggleEventList(locationId) {
+    const editorBody = panel.querySelector('.location-group-detail-scroll');
+    if (editorBody) groupEditorScrollTop = editorBody.scrollTop;
     const id = Number(locationId);
     activeEventLocationId = activeEventLocationId === id ? null : id;
     renderPanel();
     scheduleOverlayRender();
-  }
-
-  function renderEventList(location) {
-    const events = getEventChildren(location);
-    if (events.length === 0 || activeEventLocationId !== Number(location.id)) return '';
-    return `
-      <div class="location-group-event-list">
-        ${events.map(eventTag => {
-          const record = api.getEventRecordForTag ? api.getEventRecordForTag(eventTag) : null;
-          const label = record && record.event ? record.event : getDisplayName(eventTag);
-          const meta = record ? `es: ${record.eventSwitch || ''}` : '';
-          return `<button class="location-group-event-item" type="button" data-event-id="${eventTag.id}">
-            <span>${escapeHtml(label)}</span>
-            <small>${escapeHtml(meta)}</small>
-          </button>`;
-        }).join('')}
-      </div>
-    `;
   }
 
   function renderPanelEventPopout(locations) {
@@ -166,7 +269,11 @@
     root.querySelectorAll('.location-group-event-item').forEach(button => {
       button.addEventListener('click', event => {
         event.stopPropagation();
-        if (api.highlightTagInList) api.highlightTagInList(Number(button.dataset.eventId));
+        const eventId = Number(button.dataset.eventId);
+        const focused = api.focusTagOnCanvas
+          ? api.focusTagOnCanvas(eventId, { preserveListState: true, highlightList: false })
+          : false;
+        if (!focused && api.showEventEditDialog) api.showEventEditDialog(eventId);
       });
       button.addEventListener('dblclick', event => {
         event.stopPropagation();
@@ -206,6 +313,7 @@
     };
     group.iconSize = Math.max(26, Math.min(64, Number(group.iconSize) || 34));
     group.collapsed = !!group.collapsed;
+    group.inactive = !!group.inactive;
     return group;
   }
 
@@ -221,7 +329,8 @@
       stationId: station.id,
       locationIds: [],
       iconSize: 34,
-      collapsed: true
+      collapsed: true,
+      inactive: false
     });
     getGroups().push(group);
     editingGroupId = group.id;
@@ -241,6 +350,8 @@
 
   function editGroup(group) {
     activeGroupId = group.id;
+    const list = panel.querySelector('.location-group-list');
+    if (list) groupListScrollTop = list.scrollTop;
     editingGroupId = group.id;
     renderPanel();
     scheduleOverlayRender();
@@ -248,7 +359,11 @@
 
   function focusGroup(group) {
     activeGroupId = group.id;
-    if (api.highlightTagInList && group.stationId) api.highlightTagInList(Number(group.stationId));
+    revealGroupInPanel(group.id);
+    if (!isGroupInactive(group)) {
+      const target = group.collapsed ? group.anchor : group.panel;
+      if (api.focusCanvasPoint) api.focusCanvasPoint(target.x, target.y);
+    }
     renderPanel();
     scheduleOverlayRender();
   }
@@ -259,41 +374,66 @@
   }
 
   function renderPanel() {
+    syncRenderEnabledState();
     const stations = getStations();
     const groups = getGroups().map(normalizeGroup);
+    const ownerMap = getLocationOwnerMap(groups);
     const stationOptions = stations.map(station => `<option value="${station.id}">${escapeHtml(getDisplayName(station))}</option>`).join('');
-    const groupedEditors = renderGroupEditorSections(groups, stationOptions);
+    if (editingGroupId) {
+      const editingGroup = groups.find(group => group.id === editingGroupId);
+      if (!editingGroup) {
+        editingGroupId = null;
+        renderPanel();
+        return;
+      }
+      const detailHtml = renderGroupEditorView(editingGroup, stationOptions, ownerMap);
+      panel.innerHTML = `
+        <div class="location-group-toolbar location-group-toolbar-detail">
+          <button class="btn btn-sm location-group-back-btn" id="locationGroupBackBtn" type="button">${escapeHtml(t('groups.cancel'))}</button>
+          <div class="location-group-toolbar-title">
+            <strong>${escapeHtml(t('groups.edit'))}</strong>
+            <span>${escapeHtml(getGroupDisplayName(editingGroup, api.findTagById(Number(editingGroup.stationId))))}</span>
+          </div>
+        </div>
+        ${detailHtml}
+      `;
+      const backBtn = panel.querySelector('#locationGroupBackBtn');
+      backBtn.addEventListener('click', () => {
+        const editorBody = panel.querySelector('.location-group-detail-scroll');
+        if (editorBody) groupEditorScrollTop = editorBody.scrollTop;
+        editingGroupId = null;
+        activeEventLocationId = null;
+        renderPanel();
+      });
+      const detailScroll = panel.querySelector('.location-group-detail-scroll');
+      if (detailScroll) detailScroll.scrollTop = groupEditorScrollTop;
+      const editor = panel.querySelector('.location-group-detail');
+      if (editor) bindGroupEditor(editor);
+      return;
+    }
 
+    const groupedSummaries = renderGroupSummarySections(groups);
     panel.innerHTML = `
       <div class="location-group-toolbar">
-        <label class="location-group-toggle">
-          <input type="checkbox" id="locationGroupViewToggle" ${groupViewEnabled ? 'checked' : ''}>
-          <span>${escapeHtml(t('groups.toggle'))}</span>
-        </label>
         <button class="btn btn-primary btn-full" id="createLocationGroupBtn" type="button">${escapeHtml(t('groups.create'))}</button>
       </div>
       <div class="location-group-list">
         ${groups.length === 0 ? `<div class="location-group-empty">${escapeHtml(t('groups.empty'))}</div>` : ''}
-        ${groupedEditors}
+        ${groupedSummaries}
       </div>
     `;
-
-    const toggle = panel.querySelector('#locationGroupViewToggle');
-    toggle.addEventListener('change', () => {
-      groupViewEnabled = toggle.checked;
-      if (api.setLocationGroupRenderEnabled) api.setLocationGroupRenderEnabled(groupViewEnabled);
-      renderOverlay();
-    });
 
     const createBtn = panel.querySelector('#createLocationGroupBtn');
     createBtn.disabled = stations.length === 0;
     createBtn.title = stations.length === 0 ? t('groups.noStations') : '';
     createBtn.addEventListener('click', createGroup);
 
-    panel.querySelectorAll('.location-group-editor').forEach(editor => bindGroupEditor(editor));
+    const list = panel.querySelector('.location-group-list');
+    if (list) list.scrollTop = groupListScrollTop;
+    panel.querySelectorAll('.location-group-summary-card').forEach(card => bindGroupSummaryCard(card));
   }
 
-  function renderGroupEditorSections(groups, stationOptions) {
+  function renderGroupSummarySections(groups) {
     const buckets = new Map();
     groups.forEach(group => {
       const key = Number.isFinite(Number(group.stationId)) ? String(Number(group.stationId)) : 'unassigned';
@@ -307,7 +447,7 @@
       return `
         <section class="location-group-category-section">
           <h4 class="location-group-category-title">${escapeHtml(t('groups.byStation'))}: ${escapeHtml(stationLabel)}</h4>
-          ${bucket.map(group => renderGroupEditor(group, stationOptions)).join('')}
+          ${bucket.map(group => renderGroupSummaryCard(group)).join('')}
         </section>
       `;
     });
@@ -315,48 +455,68 @@
     return sections.join('');
   }
 
-  function renderGroupEditor(group, stationOptions) {
-    const isEditing = editingGroupId === group.id;
-    const station = api.findTagById(Number(group.stationId));
-    const locations = getLocationsForStation(group.stationId);
-    const selected = new Set(group.locationIds.map(Number));
-    const locationRows = locations.length === 0
-      ? `<div class="location-group-empty small">${escapeHtml(t('groups.noLocations'))}</div>`
-      : renderLocationRowsByCategory(locations, selected);
-
-    function renderLocationRowsByCategory(items, selectedIds) {
-      const buckets = new Map([
-        ['equipment', []],
-        ['process', []]
-      ]);
-      items.forEach(location => buckets.get(getLocationCategoryKey(location)).push(location));
-      return Array.from(buckets.entries()).filter(([, bucket]) => bucket.length > 0).map(([category, bucket]) => `
-        <div class="location-group-location-category">${escapeHtml(getLocationCategoryLabel(category))}</div>
-        ${bucket.map(location => {
-          const events = getEventChildren(location);
-          return `
-          <div class="location-group-location-row">
-            <input type="checkbox" value="${location.id}" ${selectedIds.has(Number(location.id)) ? 'checked' : ''}>
-            <span>${escapeHtml(getDisplayName(location))}</span>
-            <button class="location-group-row-action locate-location-btn" type="button" data-location-id="${location.id}">${escapeHtml(t('groups.locate'))}</button>
-            ${events.length > 0 ? `<button class="location-group-row-action event-location-btn" type="button" data-location-id="${location.id}">${escapeHtml(t('groups.events'))} ${events.length}</button>` : ''}
-            ${renderEventList(location)}
+  function renderLocationRowsByCategory(group, locations, selectedIds, ownerMap) {
+    const buckets = new Map([
+      ['equipment', []],
+      ['process', []]
+    ]);
+    locations.forEach(location => buckets.get(getLocationCategoryKey(location)).push(location));
+    return Array.from(buckets.entries()).filter(([, bucket]) => bucket.length > 0).map(([category, bucket]) => `
+      <div class="location-group-location-category">${escapeHtml(getLocationCategoryLabel(category))}</div>
+      ${bucket.map(location => {
+        const conflictingOwners = getConflictingOwners(group, location.id, ownerMap);
+        const isSelected = selectedIds.has(Number(location.id));
+        const isDisabled = conflictingOwners.length > 0 && !isSelected;
+        const ownerNames = formatOwnerGroupNames(conflictingOwners);
+        const occupancyTitle = conflictingOwners.length > 0
+          ? escapeHtml(t('groups.occupiedBy', { name: ownerNames }))
+          : '';
+        return `
+        <div class="location-group-location-row ${isDisabled ? 'occupied' : ''} ${conflictingOwners.length > 0 && isSelected ? 'conflict' : ''} ${location.usageStatus && location.usageStatus !== 'normal' ? `location-usage-${location.usageStatus}` : ''} ${isTagInactiveSelfOrAncestor(location) ? 'inactive' : ''}">
+          <input type="checkbox" value="${location.id}" ${isSelected ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+          <div class="location-group-location-content" ${occupancyTitle ? `title="${occupancyTitle}"` : ''}>
+            <span class="location-group-location-name">${escapeHtml(getDisplayName(location))}</span>
           </div>
-        `;
-        }).join('')}
-      `).join('');
-    }
+          <button class="location-group-row-action locate-location-btn" type="button" data-location-id="${location.id}">${escapeHtml(t('groups.locate'))}</button>
+        </div>
+      `;
+      }).join('')}
+    `).join('');
+  }
 
+  function renderGroupSummaryCard(group) {
+    const station = api.findTagById(Number(group.stationId));
+    const inactive = isGroupInactive(group);
     return `
-      <section class="location-group-editor ${isEditing ? 'editing' : ''} ${activeGroupId === group.id ? 'active' : ''}" data-group-id="${escapeHtml(group.id)}">
+      <section class="location-group-summary-card ${activeGroupId === group.id ? 'active' : ''} ${groupHasSearchHit(group) ? 'search-hit' : ''} ${inactive ? 'inactive' : ''}" data-group-id="${escapeHtml(group.id)}">
         <div class="location-group-summary">
           <button class="location-group-summary-main" type="button">
             <strong>${escapeHtml(getGroupDisplayName(group, station))}</strong>
-            <span>${escapeHtml(station ? getDisplayName(station) : t('groups.noStations'))} · ${escapeHtml(t('groups.count', { count: group.locationIds.length }))}</span>
+            <span>${escapeHtml(station ? getDisplayName(station) : t('groups.noStations'))} · ${escapeHtml(t('groups.count', { count: group.locationIds.length }))}${inactive ? ` · ${escapeHtml(t('groups.inactive'))}` : ''}</span>
           </button>
-          <button class="btn btn-sm location-group-edit-btn" type="button">${escapeHtml(isEditing ? t('groups.cancel') : t('groups.edit'))}</button>
+          <button class="btn btn-sm location-group-edit-btn" type="button">${escapeHtml(t('groups.edit'))}</button>
         </div>
-        <div class="location-group-fields">
+      </section>
+    `;
+  }
+
+  function renderGroupEditorView(group, stationOptions, ownerMap) {
+    const station = api.findTagById(Number(group.stationId));
+    const locations = getLocationsForStation(group.stationId);
+    const selected = new Set(group.locationIds.map(Number));
+    const inactive = isGroupInactive(group);
+    const locationRows = locations.length === 0
+      ? `<div class="location-group-empty small">${escapeHtml(t('groups.noLocations'))}</div>`
+      : renderLocationRowsByCategory(group, locations, selected, ownerMap);
+
+    return `
+      <section class="location-group-detail ${activeGroupId === group.id ? 'active' : ''} ${inactive ? 'inactive' : ''}" data-group-id="${escapeHtml(group.id)}">
+        <div class="location-group-detail-scroll">
+          <div class="location-group-detail-summary">
+            <strong>${escapeHtml(getGroupDisplayName(group, station))}</strong>
+            <span>${escapeHtml(station ? getDisplayName(station) : t('groups.noStations'))} · ${escapeHtml(t('groups.count', { count: group.locationIds.length }))}${inactive ? ` · ${escapeHtml(t('groups.inactive'))}` : ''}</span>
+          </div>
+          <div class="location-group-fields location-group-fields-open">
           <label>
             <span>${escapeHtml(t('groups.name'))}</span>
             <input class="location-group-name-input" type="text" value="${escapeHtml(group.name || '')}">
@@ -373,11 +533,25 @@
           <div class="location-group-location-list">${locationRows}</div>
           <div class="location-group-actions">
             <button class="btn btn-primary location-group-save-btn" type="button">${escapeHtml(t('groups.save'))}</button>
+            <button class="btn location-group-inactive-btn" type="button">${escapeHtml(group.inactive ? t('menu.setActive') : t('menu.setInactive'))}</button>
             <button class="btn btn-danger location-group-delete-btn" type="button">${escapeHtml(t('groups.delete'))}</button>
+          </div>
           </div>
         </div>
       </section>
     `;
+  }
+
+  function bindGroupSummaryCard(card) {
+    const group = getGroups().find(item => item.id === card.dataset.groupId);
+    if (!group) return;
+    card.querySelector('.location-group-summary-main').addEventListener('click', () => {
+      focusGroup(group);
+    });
+    card.querySelector('.location-group-edit-btn').addEventListener('click', event => {
+      event.stopPropagation();
+      editGroup(group);
+    });
   }
 
   function bindGroupEditor(editor) {
@@ -403,29 +577,44 @@
         }
         editingGroupId = group.id;
         api.markProjectDirty();
+        const editorBody = panel.querySelector('.location-group-detail-scroll');
+        if (editorBody) groupEditorScrollTop = editorBody.scrollTop;
         renderPanel();
         renderOverlay();
       });
     }
 
-    editor.querySelector('.location-group-summary-main').addEventListener('click', () => {
-      focusGroup(group);
-    });
-
-    editor.querySelector('.location-group-edit-btn').addEventListener('click', () => {
-      editingGroupId = editingGroupId === group.id ? null : group.id;
-      renderPanel();
-    });
-
     editor.querySelector('.location-group-save-btn').addEventListener('click', () => {
       const name = editor.querySelector('.location-group-name-input').value.trim();
       const nextStationId = Number(editor.querySelector('.location-group-station-select').value);
+      const selectedLocationIds = Array.from(editor.querySelectorAll('.location-group-location-row input:checked')).map(input => Number(input.value));
+      const ownerMap = getLocationOwnerMap();
+      const conflicts = validateGroupLocationSelection(group, selectedLocationIds, ownerMap);
+      if (conflicts.length > 0) {
+        const conflictText = conflicts
+          .map(item => `${item.name} -> ${formatOwnerGroupNames(item.conflictingOwners)}`)
+          .join('; ');
+        alert(t('groups.selectionConflict', { names: conflictText }));
+        return;
+      }
       group.name = name || 'Location Group';
       group.stationId = nextStationId;
       group.iconSize = Number(editor.querySelector('.location-group-size-input').value) || 34;
-      group.locationIds = Array.from(editor.querySelectorAll('.location-group-location-row input:checked')).map(input => Number(input.value));
+      group.locationIds = selectedLocationIds;
+      const editorBody = panel.querySelector('.location-group-detail-scroll');
+      if (editorBody) groupEditorScrollTop = editorBody.scrollTop;
       editingGroupId = null;
+      activeEventLocationId = null;
       commit();
+    });
+
+    editor.querySelector('.location-group-inactive-btn').addEventListener('click', () => {
+      group.inactive = !group.inactive;
+      const editorBody = panel.querySelector('.location-group-detail-scroll');
+      if (editorBody) groupEditorScrollTop = editorBody.scrollTop;
+      renderPanel();
+      renderOverlay();
+      api.markProjectDirty();
     });
 
     editor.querySelector('.location-group-delete-btn').addEventListener('click', () => deleteGroup(group));
@@ -435,22 +624,18 @@
         locateTag(button.dataset.locationId);
       });
     });
-    editor.querySelectorAll('.event-location-btn').forEach(button => {
-      button.addEventListener('click', event => {
-        event.stopPropagation();
-        toggleEventList(button.dataset.locationId);
-      });
-    });
-    bindEventItems(editor);
   }
 
   function renderOverlay() {
+    syncRenderEnabledState();
     canvas.querySelectorAll('.location-group-layer, .location-group-line-layer, .location-group-ui-layer').forEach(el => el.remove());
     document.querySelectorAll('.location-group-context-menu').forEach(el => el.remove());
     if (!groupViewEnabled || !api.hasOpenProject()) return;
 
     const groups = getGroups().map(normalizeGroup);
     if (groups.length === 0) return;
+    const visibleGroups = groups.filter(group => !isGroupInactive(group));
+    if (visibleGroups.length === 0) return;
 
     const lineLayer = document.createElement('div');
     lineLayer.className = 'location-group-line-layer';
@@ -465,15 +650,16 @@
     });
     canvas.appendChild(lineLayer);
     canvas.appendChild(uiLayer);
-    lineLayer.appendChild(createGroupLines(groups));
+    lineLayer.appendChild(createGroupLines(visibleGroups));
 
-    groups.forEach(group => {
+    visibleGroups.forEach(group => {
       if (group.collapsed) {
         uiLayer.appendChild(createAnchor(group));
       } else {
         uiLayer.appendChild(createPanel(group));
       }
     });
+    if (api.refreshMaterialLinkLines) api.refreshMaterialLinkLines();
   }
 
   function createGroupLines(groups) {
@@ -499,8 +685,14 @@
   }
 
   function createAnchor(group) {
+    const linkedMaterials = Array.from(new Map(
+      group.locationIds
+        .flatMap(locationId => getLinkedMaterialsForLocation(locationId))
+        .map(item => [item.index, item])
+    ).values());
     const anchor = document.createElement('button');
     anchor.className = 'location-group-anchor';
+    anchor.dataset.groupId = String(group.id);
     if (groupHasSearchHit(group)) anchor.classList.add('search-hit');
     if (activeGroupId === group.id) anchor.classList.add('active');
     anchor.type = 'button';
@@ -511,6 +703,7 @@
     anchor.title = t('groups.clickToExpand');
     anchor.innerHTML = `
       <span class="location-group-anchor-count">${escapeHtml(String(group.locationIds.length))}</span>
+      ${renderMaterialMarkers(linkedMaterials, 'location-group-anchor-materials')}
       <span class="location-group-anchor-name">${escapeHtml(getGroupName(group))}</span>
     `;
     anchor.addEventListener('click', event => {
@@ -525,6 +718,10 @@
     });
     anchor.addEventListener('mousedown', event => startAnchorDrag(event, group));
     anchor.addEventListener('contextmenu', event => showGroupContextMenu(event, group));
+    anchor.addEventListener('dblclick', event => {
+      event.stopPropagation();
+      focusGroup(group);
+    });
     return anchor;
   }
 
@@ -532,11 +729,13 @@
     const locations = group.locationIds
       .map(id => api.findTagById(Number(id)))
       .filter(Boolean);
+    const visibleLocations = locations.filter(location => !isTagInactiveSelfOrAncestor(location));
     const search = api.getTagSearchQuery ? api.getTagSearchQuery() : '';
 
     const panelEl = document.createElement('div');
     panelEl.className = 'location-group-canvas-panel';
-    if (locations.length === 0) panelEl.classList.add('empty');
+    panelEl.dataset.groupId = String(group.id);
+    if (visibleLocations.length === 0) panelEl.classList.add('empty');
     if (groupHasSearchHit(group)) panelEl.classList.add('search-hit');
     if (activeGroupId === group.id) panelEl.classList.add('active');
     panelEl.style.left = `${group.panel.x * 100}%`;
@@ -547,28 +746,37 @@
     panelEl.innerHTML = `
       <div class="location-group-canvas-panel-header">
         <strong title="${escapeHtml(groupDisplayName)}">${escapeHtml(groupDisplayName)}</strong>
-        <span>${escapeHtml(String(locations.length))}</span>
+        <span>${escapeHtml(String(visibleLocations.length))}</span>
         <button class="location-group-panel-collapse" type="button">${escapeHtml(t('groups.collapse'))}</button>
       </div>
       <div class="location-group-canvas-body">
         <div class="location-group-canvas-grid">
-          ${locations.map(location => {
+          ${visibleLocations.map(location => {
           const hit = search && getDisplayName(location).toLowerCase().includes(search);
           const events = getEventChildren(location);
           const isActive = Number(activeEventLocationId) === Number(location.id);
-          return `<div class="location-group-chip ${hit ? 'search-hit' : ''} ${isActive ? 'active' : ''}" data-location-id="${location.id}">
-            <button class="location-group-chip-main" type="button" data-location-id="${location.id}">${escapeHtml(getDisplayName(location))}</button>
+          const linkedMaterials = getLinkedMaterialsForLocation(location.id);
+          const usageClass = location.usageStatus && location.usageStatus !== 'normal' ? ` location-usage-${location.usageStatus}` : '';
+          return `<div class="location-group-chip ${hit ? 'search-hit' : ''} ${isActive ? 'active' : ''}${usageClass}" data-location-id="${location.id}">
+            <button class="location-group-chip-main" type="button" data-location-id="${location.id}">
+              <span class="location-group-chip-title">${escapeHtml(getDisplayName(location))}</span>
+              ${renderMaterialMarkers(linkedMaterials, 'location-group-chip-materials')}
+            </button>
             ${events.length > 0 ? `<button class="location-group-chip-event" type="button" data-location-id="${location.id}">${events.length}</button>` : `<span class="location-group-chip-event empty">0</span>`}
           </div>`;
         }).join('')}
         </div>
       </div>
-      ${renderPanelEventPopout(locations)}
+      ${renderPanelEventPopout(visibleLocations)}
       <button class="location-group-resize-handle" type="button" aria-label="${escapeHtml(t('groups.resize'))}" title="${escapeHtml(t('groups.resize'))}"></button>
     `;
     panelEl.querySelector('.location-group-canvas-panel-header').addEventListener('mousedown', event => {
       if (event.target.closest('.location-group-panel-collapse')) return;
       startPanelDrag(event, group);
+    });
+    panelEl.querySelector('.location-group-canvas-panel-header').addEventListener('dblclick', event => {
+      event.stopPropagation();
+      focusGroup(group);
     });
     panelEl.querySelector('.location-group-panel-collapse').addEventListener('click', event => {
       event.stopPropagation();
@@ -705,8 +913,41 @@
   }
 
   function render(reason = 'all') {
+    syncRenderEnabledState();
     if (reason !== 'transform' && reason !== 'overlay') renderPanel();
     renderOverlay();
+  }
+
+  function getCanvasRelativeCenter(element) {
+    if (!element) return null;
+    const canvasRect = canvas.getBoundingClientRect();
+    const rect = element.getBoundingClientRect();
+    return {
+      x: rect.left - canvasRect.left + (rect.width / 2),
+      y: rect.top - canvasRect.top + (rect.height / 2)
+    };
+  }
+
+  function getLocationGroupLinkTarget(locationId) {
+    syncRenderEnabledState();
+    if (!groupViewEnabled) return null;
+    const normalizedLocationId = Number(locationId);
+    const groups = getGroups()
+      .map(normalizeGroup)
+      .filter(group => !isGroupInactive(group))
+      .filter(group => group.locationIds.some(id => Number(id) === normalizedLocationId));
+    if (groups.length === 0) return null;
+
+    const expandedGroup = groups.find(group => !group.collapsed);
+    if (expandedGroup) {
+      const chip = canvas.querySelector(`.location-group-canvas-panel[data-group-id="${escapeHtml(expandedGroup.id)}"] .location-group-chip[data-location-id="${escapeHtml(normalizedLocationId)}"]`);
+      const chipCenter = getCanvasRelativeCenter(chip);
+      if (chipCenter) return chipCenter;
+    }
+
+    const collapsedGroup = groups.find(group => group.collapsed) || groups[0];
+    const anchor = canvas.querySelector(`.location-group-anchor[data-group-id="${escapeHtml(collapsedGroup.id)}"]`);
+    return getCanvasRelativeCenter(anchor);
   }
 
   function showGroupContextMenu(event, group) {
@@ -721,6 +962,7 @@
     menu.innerHTML = `
       <button type="button" data-action="edit">${escapeHtml(t('groups.edit'))}</button>
       <button type="button" data-action="toggle">${escapeHtml(group.collapsed ? t('groups.expand') : t('groups.collapse'))}</button>
+      <button type="button" data-action="inactive">${escapeHtml(group.inactive ? t('menu.setActive') : t('menu.setInactive'))}</button>
       <button type="button" data-action="delete" class="danger">${escapeHtml(t('groups.delete'))}</button>
     `;
     document.body.appendChild(menu);
@@ -754,6 +996,10 @@
         group.collapsed = !group.collapsed;
         activeGroupId = group.id;
         commit();
+      } else if (action === 'inactive') {
+        group.inactive = !group.inactive;
+        activeGroupId = group.id;
+        commit();
       } else if (action === 'delete') {
         deleteGroup(group);
       }
@@ -765,6 +1011,6 @@
   }
 
   api.registerRenderHook(render);
-  if (api.setLocationGroupRenderEnabled) api.setLocationGroupRenderEnabled(groupViewEnabled);
+  api.getLocationGroupLinkTarget = getLocationGroupLinkTarget;
   render();
 })();
